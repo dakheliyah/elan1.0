@@ -16,6 +16,8 @@ import {
   File
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { useEvents } from '@/hooks/useEvents';
 import { useLocations } from '@/hooks/useLocations';
 import { usePublicationsByLocation, usePublication } from '@/hooks/usePublications';
@@ -122,194 +124,199 @@ const ExportModule = () => {
   const isExporting = exportHTMLMutation.isPending || exportPDFMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header with Navigation */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            <Link to="/dashboard" className="flex items-center gap-1 hover:text-gray-700">
-              <ArrowLeft className="w-4 h-4" />
-              Dashboard
-            </Link>
-            <ChevronRight className="w-4 h-4" />
-            <span>Export Module</span>
-          </div>
-          
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Export Module</h1>
-          <p className="text-gray-600">
-            Export featured publications with global content blocks from host locations.
-          </p>
-        </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <DashboardSidebar />
+        <SidebarInset className="flex-1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Header with Navigation */}
+            <div className="mb-8">
+              <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                <Link to="/dashboard" className="flex items-center gap-1 hover:text-gray-700">
+                  <ArrowLeft className="w-4 h-4" />
+                  Dashboard
+                </Link>
+                <ChevronRight className="w-4 h-4" />
+                <span>Export Module</span>
+              </div>
+              
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Export Module</h1>
+              <p className="text-gray-600">
+                Export featured publications with global content blocks from host locations.
+              </p>
+            </div>
 
-        {/* Selection Process */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Step 1: Select Event */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Step 1: Select Event
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {eventsLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {events?.map((event) => (
-                    <Button
-                      key={event.id}
-                      variant={selectedEventId === event.id ? "default" : "outline"}
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setSelectedEventId(event.id);
-                        setSelectedLocationId(null);
-                        setFeaturedPublicationId(null);
-                      }}
-                    >
-                      {event.name}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            {/* Selection Process */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Step 1: Select Event */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5" />
+                    Step 1: Select Event
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {eventsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {events?.map((event) => (
+                        <Button
+                          key={event.id}
+                          variant={selectedEventId === event.id ? "default" : "outline"}
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setSelectedEventId(event.id);
+                            setSelectedLocationId(null);
+                            setFeaturedPublicationId(null);
+                          }}
+                        >
+                          {event.name}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          {/* Step 2: Select Location */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Step 2: Select Location
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedEventId ? (
-                <ExportLocationSelector
-                  eventId={selectedEventId}
-                  selectedLocationId={selectedLocationId}
-                  onLocationSelect={setSelectedLocationId}
-                  hostLocation={hostLocation}
-                />
-              ) : (
-                <p className="text-gray-500 text-sm">Select an event first</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              {/* Step 2: Select Location */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    Step 2: Select Location
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedEventId ? (
+                    <ExportLocationSelector
+                      eventId={selectedEventId}
+                      selectedLocationId={selectedLocationId}
+                      onLocationSelect={setSelectedLocationId}
+                      hostLocation={hostLocation}
+                    />
+                  ) : (
+                    <p className="text-gray-500 text-sm">Select an event first</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Featured Publication Info */}
-        {selectedLocationId && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Featured Publication
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {featuredPublication ? (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {featuredPublication.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      <span>Created: {new Date(featuredPublication.created_at || '').toLocaleDateString()}</span>
-                      <Badge variant="secondary" className="ml-2">Featured</Badge>
+            {/* Featured Publication Info */}
+            {selectedLocationId && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Featured Publication
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {featuredPublication ? (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-1">
+                          {featuredPublication.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Calendar className="w-4 h-4" />
+                          <span>Created: {new Date(featuredPublication.created_at || '').toLocaleDateString()}</span>
+                          <Badge variant="secondary" className="ml-2">Featured</Badge>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={handleExport} 
+                        className="ml-4"
+                        disabled={isExporting}
+                      >
+                        {isExporting ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4 mr-2" />
+                        )}
+                        {isExporting ? 'Exporting...' : 'Export Publication'}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-gray-600 mb-2">No featured publication found</p>
+                      <p className="text-sm text-gray-500">
+                        This location doesn't have a featured publication to export.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Global Content Info */}
+            {hostLocation && selectedLocationId && selectedLocationId !== hostLocation.id && featuredPublication && (
+              <Card className="mb-8 border-blue-200 bg-blue-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <Globe className="w-6 h-6 text-blue-600 mt-1" />
+                    <div>
+                      <h3 className="font-semibold text-blue-900 mb-2">
+                        Global Content Integration
+                      </h3>
+                      <p className="text-blue-800 text-sm mb-3">
+                        Global content blocks from <strong>{hostLocation.name}</strong> (host location) 
+                        will be automatically included at the top of the exported publication.
+                      </p>
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        <Globe className="w-3 h-3 mr-1" />
+                        Host: {hostLocation.name}
+                      </Badge>
                     </div>
                   </div>
-                  <Button 
-                    onClick={handleExport} 
-                    className="ml-4"
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Download className="w-4 h-4 mr-2" />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Current Selection Summary */}
+            {(selectedEvent || selectedLocation) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Selection</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {selectedEvent && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm">Event: <strong>{selectedEvent.name}</strong></span>
+                      </div>
                     )}
-                    {isExporting ? 'Exporting...' : 'Export Publication'}
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p className="text-gray-600 mb-2">No featured publication found</p>
-                  <p className="text-sm text-gray-500">
-                    This location doesn't have a featured publication to export.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Global Content Info */}
-        {hostLocation && selectedLocationId && selectedLocationId !== hostLocation.id && featuredPublication && (
-          <Card className="mb-8 border-blue-200 bg-blue-50">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <Globe className="w-6 h-6 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="font-semibold text-blue-900 mb-2">
-                    Global Content Integration
-                  </h3>
-                  <p className="text-blue-800 text-sm mb-3">
-                    Global content blocks from <strong>{hostLocation.name}</strong> (host location) 
-                    will be automatically included at the top of the exported publication.
-                  </p>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    <Globe className="w-3 h-3 mr-1" />
-                    Host: {hostLocation.name}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Current Selection Summary */}
-        {(selectedEvent || selectedLocation) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Current Selection</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {selectedEvent && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">Event: <strong>{selectedEvent.name}</strong></span>
+                    {selectedLocation && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm">
+                          Location: <strong>{selectedLocation.name}</strong>
+                          {selectedLocation.is_host && (
+                            <Badge variant="secondary" className="ml-2">Host</Badge>
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    {featuredPublication && (
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm">
+                          Publication: <strong>{featuredPublication.title}</strong>
+                          <Badge variant="secondary" className="ml-2">Featured</Badge>
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-                {selectedLocation && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">
-                      Location: <strong>{selectedLocation.name}</strong>
-                      {selectedLocation.is_host && (
-                        <Badge variant="secondary" className="ml-2">Host</Badge>
-                      )}
-                    </span>
-                  </div>
-                )}
-                {featuredPublication && (
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">
-                      Publication: <strong>{featuredPublication.title}</strong>
-                      <Badge variant="secondary" className="ml-2">Featured</Badge>
-                    </span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </SidebarInset>
       </div>
 
       {/* Export Format Selection Modal */}
@@ -369,7 +376,7 @@ const ExportModule = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </SidebarProvider>
   );
 };
 

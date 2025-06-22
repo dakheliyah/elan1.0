@@ -1,6 +1,7 @@
 
-import { Calendar, Home, Settings, Package, Download, Users } from "lucide-react";
+import { Calendar, Home, Settings, Package, Download, Users, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -8,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -45,13 +47,21 @@ const menuItems = [
 
 export function DashboardSidebar() {
   const location = useLocation();
+  const { signOut } = useAuth();
+
+  const handleLogout = () => {
+    signOut();
+  };
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-6">
-        <h1 className="text-2xl font-bold text-primary">Elan</h1>
+    <Sidebar className="bg-white border-r border-gray-200">
+      <SidebarHeader className="p-6 bg-white">
+        <div className="flex gap-2 items-center">
+          <img src="/ideo.png" alt="" className="w-8" />
+          <h1 className="text-2xl font-bold text-primary">Elan</h1>
+        </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-white">
         <SidebarMenu className="px-3">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.title}>
@@ -68,6 +78,19 @@ export function DashboardSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter className="p-3 bg-white border-t border-gray-100">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="flex items-center gap-3 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

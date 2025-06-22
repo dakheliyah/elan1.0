@@ -280,7 +280,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             <Button
               type="submit"
               disabled={isLoading || !isValid}
-              className="w-full bg-slate-800 hover:bg-slate-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transform hover:scale-[1.02] active:scale-[0.98]"
               aria-describedby="button-description"
             >
               {isLoading ? (

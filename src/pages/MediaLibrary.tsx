@@ -150,6 +150,7 @@ const MediaLibrary: React.FC = () => {
   };
 
   const handleBackToEvent = () => {
+    console.log(eventId)
     navigate(`/events/${eventId}`);
   };
 

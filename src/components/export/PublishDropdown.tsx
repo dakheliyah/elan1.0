@@ -39,7 +39,7 @@ export const PublishDropdown: React.FC<PublishDropdownProps> = ({
       {/* Main Publish Button */}
       <Button
         onClick={onPublish}
-        className="bg-slate-800 hover:bg-slate-700 text-white rounded-r-none border-r-0"
+        className="bg-primary hover:bg-primary/90 text-white rounded-r-none border-r-0"
         disabled={disabled || isPublishing}
       >
         {isPublishing ? (
@@ -54,7 +54,7 @@ export const PublishDropdown: React.FC<PublishDropdownProps> = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="bg-slate-800 hover:bg-slate-700 text-white rounded-l-none px-2 border-l border-slate-600"
+            className="bg-primary hover:bg-primary/90 text-white rounded-l-none px-2 border-l border-slate-600"
             disabled={disabled || isPublishing}
           >
             <ChevronDown size={16} />

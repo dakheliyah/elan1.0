@@ -87,28 +87,19 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         {/* Brand Section */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Elan</h1>
-          <p className="mt-2 text-sm text-gray-600">Event Management Platform</p>
+          <img 
+            src="/public/logo.png" 
+            alt="Elan Logo" 
+            className="mx-auto h-32 w-auto mb-4"
+          />
         </div>
         
         {/* Auth Form */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 text-center">
-              {isLogin ? 'Sign In' : 'Create Account'}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 text-center">
-              {isLogin 
-                ? 'Welcome back to Elan' 
-                : 'Get started with your account'
-              }
-            </p>
-          </div>
-
+        <div className="p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
@@ -183,7 +174,7 @@ const Auth = () => {
             <Button
               type="submit"
               disabled={isLoading || !isValid}
-              className="w-full bg-slate-800 hover:bg-slate-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg"
+              className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
@@ -195,21 +186,6 @@ const Auth = () => {
               )}
             </Button>
           </form>
-
-          {/* Toggle Mode */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="ml-1 font-medium text-slate-800 hover:text-slate-700"
-                disabled={isLoading}
-              >
-                {isLogin ? 'Sign up' : 'Sign in'}
-              </button>
-            </p>
-          </div>
         </div>
       </div>
     </div>

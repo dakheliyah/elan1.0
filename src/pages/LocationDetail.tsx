@@ -264,7 +264,7 @@ const LocationDetail = () => {
                       {/* New Entry Button */}
                       <Button
                         onClick={handleNewEntry}
-                        className="bg-slate-800 hover:bg-slate-700 text-white flex items-center gap-2"
+                        className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
                         disabled={createPublicationMutation.isPending}
                       >
                         {createPublicationMutation.isPending ? (
@@ -330,7 +330,7 @@ const LocationDetail = () => {
                   <p className="text-gray-500 mb-6">Get started by creating your first publication.</p>
                   <Button
                     onClick={handleNewEntry}
-                    className="bg-slate-800 hover:bg-slate-700"
+                    className="bg-primary hover:bg-primary/90"
                     disabled={createPublicationMutation.isPending}
                   >
                     {createPublicationMutation.isPending ? (

@@ -493,7 +493,7 @@ const PublicationEditorPage = () => {
                 </div>
                 <Button 
                   onClick={() => setShowUmoorSelector(true)}
-                  className="bg-slate-800 hover:bg-slate-700"
+                  className="bg-primary hover:bg-primary/90"
                   disabled={isSaving || isPublishing}
                 >
                   <Plus size={16} className="mr-2" />

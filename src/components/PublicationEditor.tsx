@@ -139,7 +139,7 @@ const PublicationEditor = () => {
               </div>
               <Button 
                 onClick={() => setShowUmoorSelector(true)}
-                className="bg-slate-800 hover:bg-slate-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Plus size={16} className="mr-2" />
                 Select Umoor to Add Block

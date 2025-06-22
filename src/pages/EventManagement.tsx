@@ -99,7 +99,7 @@ const EventManagement = () => {
                     <Button 
                       onClick={handleNewEvent}
                       disabled={createEventMutation.isPending}
-                      className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 flex items-center gap-2"
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 flex items-center gap-2"
                     >
                       {createEventMutation.isPending ? (
                         <Loader2 size={16} className="animate-spin" />
@@ -228,7 +228,7 @@ const EventManagement = () => {
                   <Button 
                     onClick={handleNewEvent} 
                     disabled={createEventMutation.isPending}
-                    className="bg-slate-800 hover:bg-slate-700"
+                    className="bg-primary hover:bg-primary/90"
                   >
                     <Plus size={16} className="mr-2" />
                     Create Event

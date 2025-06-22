@@ -215,7 +215,7 @@ const NewEventModal: React.FC<NewEventModalProps> = ({ isOpen, onClose, onSubmit
           <Button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="bg-slate-800 hover:bg-slate-700"
+            className="bg-primary hover:bg-primary/90"
           >
             {isLoading ? (
               <>

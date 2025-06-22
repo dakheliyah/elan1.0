@@ -237,7 +237,7 @@ const EditLocationModal: React.FC<EditLocationModalProps> = ({
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-slate-800 hover:bg-slate-700"
+              className="flex-1 bg-primary hover:bg-primary/90"
               disabled={isLoading}
             >
               {isLoading ? (
