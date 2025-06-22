@@ -19,7 +19,7 @@ interface FileTypeStats {
   size: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#4E6F1F', '#ADBF97', '#BAD9A2', '#9DC4B5'];
 
 const StorageAnalyticsDashboard: React.FC<StorageAnalyticsDashboardProps> = ({ eventId }) => {
   const { data: quota, isLoading: quotaLoading } = useStorageQuota(eventId);
@@ -165,7 +165,7 @@ const StorageAnalyticsDashboard: React.FC<StorageAnalyticsDashboardProps> = ({ e
                   labelLine={false}
                   label={({ name, value }) => `${name}: ${value}`}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="#4E6F1F"
                   dataKey="value"
                 >
                   {fileTypeChartData.map((entry, index) => (
@@ -191,7 +191,7 @@ const StorageAnalyticsDashboard: React.FC<StorageAnalyticsDashboardProps> = ({ e
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip formatter={(value: number) => [`${value.toFixed(2)} GB`, 'Storage Used']} />
-                <Line type="monotone" dataKey="used_gb" stroke="#8884d8" strokeWidth={2} />
+                <Line type="monotone" dataKey="used_gb" stroke="#4E6F1F" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

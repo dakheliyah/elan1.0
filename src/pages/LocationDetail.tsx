@@ -375,8 +375,9 @@ const LocationDetail = () => {
                       {filteredPublications.map((publication, index) => (
                         <TableRow
                           key={publication.id}
-                          className={`hover:bg-gray-50 transition-colors ${index % 2 === 1 ? 'bg-gray-25' : 'bg-white'
+                          className={`hover:bg-gray-50 transition-colors cursor-pointer ${index % 2 === 1 ? 'bg-gray-25' : 'bg-white'
                             } ${publication.is_featured ? 'border-l-4 border-l-yellow-400' : ''}`}
+                          onClick={() => navigate(`/events/${eventId}/locations/${locationId}/publications/${publication.id}/view`)}
                         >
                           <TableCell className="font-medium text-gray-900">
                             <div className="flex items-center gap-2">
@@ -407,7 +408,10 @@ const LocationDetail = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleToggleFeatured(publication)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleFeatured(publication);
+                                }}
                                 className={`hover:bg-yellow-50 ${publication.is_featured
                                     ? 'text-yellow-600 hover:text-yellow-700'
                                     : 'text-gray-400 hover:text-yellow-600'
@@ -427,7 +431,10 @@ const LocationDetail = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleEdit(publication.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(publication.id);
+                                }}
                                 className="hover:bg-blue-50 hover:text-blue-600"
                               >
                                 <Edit size={14} />
@@ -435,7 +442,10 @@ const LocationDetail = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleDeleteClick(publication)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(publication);
+                                }}
                                 className="hover:bg-red-50 hover:text-red-600"
                                 disabled={deletePublicationMutation.isPending}
                               >

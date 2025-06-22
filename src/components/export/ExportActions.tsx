@@ -48,8 +48,8 @@ export const ExportActions: React.FC<ExportActionsProps> = ({
           imageQuality: 'high',
           includeMetadata: true,
           customBranding: exportFormat.template === 'branded' ? {
-            primaryColor: '#3b82f6',
-            secondaryColor: '#1e40af'
+            primaryColor: '#4E6F1F',
+      secondaryColor: '#ADBF97'
           } : undefined
         }
       });

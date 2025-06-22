@@ -42,7 +42,17 @@ export const publicationsService = {
     try {
       const { data, error } = await supabase
         .from('publications')
-        .select('*')
+        .select(`
+          *,
+          locations (
+            id,
+            name,
+            events (
+              id,
+              name
+            )
+          )
+        `)
         .eq('id', id)
         .maybeSingle();
 

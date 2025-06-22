@@ -44,8 +44,8 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
     imageQuality: 'high',
     includeMetadata: true,
     customBranding: {
-      primaryColor: '#3b82f6',
-      secondaryColor: '#1e40af',
+      primaryColor: '#4E6F1F',
+        secondaryColor: '#ADBF97',
       fontFamily: 'Arial, sans-serif'
     }
   });
@@ -190,7 +190,7 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
                 <Input
                   id="primaryColor"
                   type="color"
-                  value={exportOptions.customBranding?.primaryColor || '#3b82f6'}
+                  value={exportOptions.customBranding?.primaryColor || '#4E6F1F'}
                   onChange={(e) => updateCustomBranding('primaryColor', e.target.value)}
                 />
               </div>
@@ -200,7 +200,7 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
                 <Input
                   id="secondaryColor"
                   type="color"
-                  value={exportOptions.customBranding?.secondaryColor || '#1e40af'}
+                  value={exportOptions.customBranding?.secondaryColor || '#ADBF97'}
                   onChange={(e) => updateCustomBranding('secondaryColor', e.target.value)}
                 />
               </div>

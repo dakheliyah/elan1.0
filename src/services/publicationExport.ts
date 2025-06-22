@@ -519,8 +519,8 @@ export class PublicationExportService {
       }
       
       .language-badge.eng {
-        background: #dbeafe;
-        color: #1e40af;
+        background: #BAD9A2;
+        color: #4E6F1F;
       }
       
       .language-badge.lud {
@@ -683,21 +683,21 @@ export class PublicationExportService {
       const branding = options.customBranding;
       return baseStyles + `
         .publication-header {
-          border-bottom: 3px solid ${branding.primaryColor || '#3b82f6'};
+          border-bottom: 3px solid ${branding.primaryColor || '#4E6F1F'};
           padding-bottom: 30px;
         }
         
         .publication-title {
-          color: ${branding.primaryColor || '#1e40af'};
+          color: ${branding.primaryColor || '#4E6F1F'};
         }
         
         .umoor-title {
-          color: ${branding.secondaryColor || '#3b82f6'};
+          color: ${branding.secondaryColor || '#ADBF97'};
         }
         
         .language-badge.eng {
-          background: ${branding.primaryColor || '#dbeafe'}20;
-          color: ${branding.primaryColor || '#1e40af'};
+          background: ${branding.primaryColor || '#4E6F1F'}20;
+        color: ${branding.primaryColor || '#4E6F1F'};
         }
         
         .umoor-section {
@@ -790,7 +790,7 @@ export class PublicationExportService {
       .email-umoor-section {
         margin-bottom: 30px;
         padding: 15px;
-        border-left: 4px solid #3b82f6;
+        border-left: 4px solid #4E6F1F;
         background: #f8fafc;
       }
       
@@ -829,8 +829,8 @@ export class PublicationExportService {
       
       .email-umoor-name {
         display: inline-block;
-        background: #dbeafe;
-        color: #1e40af;
+        background: #BAD9A2;
+        color: #4E6F1F;
         padding: 4px 8px;
         border-radius: 4px;
         font-size: 11px;

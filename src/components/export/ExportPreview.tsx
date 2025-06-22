@@ -149,8 +149,8 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat): st
         margin-bottom: 12px; 
       }
       .language-badge.eng {
-        background: #dbeafe;
-        color: #1e40af;
+        background: #BAD9A2;
+        color: #4E6F1F;
       }
       .language-badge.lud {
         background: #fef3c7;
@@ -218,8 +218,8 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat): st
             box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
             border-bottom: none; 
           }
-          h1 { color: ${format.options?.primaryColor || '#1e40af'}; }
-          .umoor-title { color: ${format.options?.secondaryColor || '#3b82f6'}; }
+          h1 { color: ${format.options?.primaryColor || '#4E6F1F'}; }
+        .umoor-title { color: ${format.options?.secondaryColor || '#ADBF97'}; }
         `;
       default: // professional
         return baseStyles;

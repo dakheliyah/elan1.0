@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from './components/ProtectedRoute';
 import InviteAcceptance from './pages/InviteAcceptance';
 import PublicationEditorPage from './pages/PublicationEditor';
+import PublicationView from './pages/PublicationView';
 import ExportModule from "./pages/ExportModule";
 import UserManagement from "./pages/UserManagement";
 
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/events" element={<EventManagement />} />
                 <Route path="/events/:eventId" element={<EventDetail />} />
                 <Route path="/events/:eventId/locations/:locationId" element={<LocationDetail />} />
+                <Route path="/events/:eventId/locations/:locationId/publications/:publicationId/view" element={<PublicationView />} />
                 <Route path="/events/:eventId/locations/:locationId/publications/:publicationId/edit" element={<PublicationEditorPage />} />
                 <Route path="/umoor" element={<UmoorManagement />} />
                 <Route path="/users" element={<UserManagement />} />
