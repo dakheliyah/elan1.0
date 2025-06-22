@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -26,10 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  ArrowLeft, 
-  Plus, 
-  Edit, 
+import {
+  ArrowLeft,
+  Plus,
+  Edit,
   Trash2,
   Search,
   Filter,
@@ -37,8 +39,8 @@ import {
   Star
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  useLocation, 
+import {
+  useLocation,
   useEvent,
   usePublicationsByLocation,
   useCreatePublication,
@@ -47,6 +49,7 @@ import {
 } from '@/hooks/useSupabaseQuery';
 import { PublicationInsert } from '@/services/supabase';
 import { format } from 'date-fns';
+import UserMenu from '@/components/UserMenu';
 
 const LocationDetail = () => {
   const { eventId, locationId } = useParams();
@@ -73,7 +76,7 @@ const LocationDetail = () => {
 
   const handleNewEntry = async () => {
     if (!locationId || !event?.name || !location?.name) return;
-    
+
     try {
       // Create a new draft publication
       const newPublication: PublicationInsert = {
@@ -84,7 +87,7 @@ const LocationDetail = () => {
       };
 
       const createdPublication = await createPublicationMutation.mutateAsync(newPublication);
-      
+
       // Navigate to the editor with the new publication
       navigate(`/events/${eventId}/locations/${locationId}/publications/${createdPublication.id}/edit`);
     } catch (error) {
@@ -110,12 +113,12 @@ const LocationDetail = () => {
 
     try {
       await deletePublicationMutation.mutateAsync(publicationToDelete.id);
-      
+
       toast({
         title: "Publication Deleted",
         description: `"${publicationToDelete.title}" has been permanently deleted.`,
       });
-      
+
       setDeleteDialogOpen(false);
       setPublicationToDelete(null);
       refetch();
@@ -136,7 +139,7 @@ const LocationDetail = () => {
   const handleToggleFeatured = async (publication: any) => {
     try {
       const newFeaturedStatus = !publication.is_featured;
-      
+
       await updatePublicationMutation.mutateAsync({
         id: publication.id,
         updates: {
@@ -147,7 +150,7 @@ const LocationDetail = () => {
 
       toast({
         title: newFeaturedStatus ? "Marked as Featured" : "Removed Featured Status",
-        description: newFeaturedStatus 
+        description: newFeaturedStatus
           ? `"${publication.title}" has been marked as featured. Any previously featured publication has been unmarked.`
           : `"${publication.title}" has been unmarked as featured.`,
       });
@@ -171,8 +174,8 @@ const LocationDetail = () => {
     })
     .sort((a, b) => {
       // Sort by date modified (newest first) only
-      return new Date(b.updated_at || b.created_at || '').getTime() - 
-             new Date(a.updated_at || a.created_at || '').getTime();
+      return new Date(b.updated_at || b.created_at || '').getTime() -
+        new Date(a.updated_at || a.created_at || '').getTime();
     });
 
   const getStatusBadgeClass = (status: string) => {
@@ -227,252 +230,262 @@ const LocationDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            {/* Navigation and Title */}
-            <div className="flex items-center gap-4 mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBack}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-              >
-                <ArrowLeft size={16} />
-                Back to Event
-              </Button>
-            </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <DashboardSidebar />
+        <SidebarInset className="flex-1">
+          <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200">
+              <div className="mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="py-6">
+                  {/* Navigation and Title */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleBack}
+                      className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                    >
+                      <ArrowLeft size={16} />
+                      Back to Event
+                    </Button>
+                  </div>
 
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="text-sm text-gray-500 mb-1">
-                  {event.name} • {location.name}
-                </div>
-                <h1 className="text-3xl font-bold text-gray-900">Publications</h1>
-              </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="text-sm text-gray-500 mb-1">
+                        {event.name} • {location.name}
+                      </div>
+                      <h1 className="text-3xl font-bold text-gray-900">Publications</h1>
+                    </div>
 
-              {/* New Entry Button */}
-              <Button 
-                onClick={handleNewEntry}
-                className="bg-slate-800 hover:bg-slate-700 text-white flex items-center gap-2"
-                disabled={createPublicationMutation.isPending}
-              >
-                {createPublicationMutation.isPending ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <Plus size={16} />
-                )}
-                New Entry
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filter Bar */}
-        {publications.length > 0 && (
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search publications..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        {/* Loading State for Publications */}
-        {publicationsLoading && (
-          <div className="text-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Loading publications...</p>
-          </div>
-        )}
-
-        {!publicationsLoading && publications.length === 0 ? (
-          /* Empty State */
-          <div className="text-center py-12">
-            <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <Plus className="h-6 w-6 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No publications yet</h3>
-            <p className="text-gray-500 mb-6">Get started by creating your first publication.</p>
-            <Button 
-              onClick={handleNewEntry} 
-              className="bg-slate-800 hover:bg-slate-700"
-              disabled={createPublicationMutation.isPending}
-            >
-              {createPublicationMutation.isPending ? (
-                <Loader2 size={16} className="mr-2 animate-spin" />
-              ) : (
-                <Plus size={16} className="mr-2" />
-              )}
-              New Entry
-            </Button>
-          </div>
-        ) : !publicationsLoading && filteredPublications.length === 0 ? (
-          /* No Results State */
-          <div className="text-center py-12">
-            <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <Search className="h-6 w-6 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No publications found</h3>
-            <p className="text-gray-500 mb-6">Try adjusting your search or filter criteria.</p>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('all');
-              }}
-            >
-              Clear Filters
-            </Button>
-          </div>
-        ) : !publicationsLoading && (
-          /* Publications Table */
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="font-semibold text-gray-900">Name</TableHead>
-                  <TableHead className="font-semibold text-gray-900">Date Modified</TableHead>
-                  <TableHead className="font-semibold text-gray-900">Status</TableHead>
-                  <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPublications.map((publication, index) => (
-                  <TableRow 
-                    key={publication.id}
-                    className={`hover:bg-gray-50 transition-colors ${
-                      index % 2 === 1 ? 'bg-gray-25' : 'bg-white'
-                    } ${publication.is_featured ? 'border-l-4 border-l-yellow-400' : ''}`}
-                  >
-                    <TableCell className="font-medium text-gray-900">
-                      <div className="flex items-center gap-2">
-                        {publication.is_featured && (
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                    <div className='flex gap-2'>
+                      {/* New Entry Button */}
+                      <Button
+                        onClick={handleNewEntry}
+                        className="bg-slate-800 hover:bg-slate-700 text-white flex items-center gap-2"
+                        disabled={createPublicationMutation.isPending}
+                      >
+                        {createPublicationMutation.isPending ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Plus size={16} />
                         )}
-                        {publication.title}
+                        New Entry
+                      </Button>
+                      <div className="flex items-center gap-4">
+                        <UserMenu />
                       </div>
-                    </TableCell>
-                    <TableCell className="text-gray-600">
-                      {publication.updated_at 
-                        ? format(new Date(publication.updated_at), 'dd/MM/yyyy')
-                        : format(new Date(publication.created_at || ''), 'dd/MM/yyyy')
-                      }
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Badge 
-                          variant="secondary"
-                          className={getStatusBadgeClass(publication.status || 'draft')}
-                        >
-                          {formatStatus(publication.status || 'draft')}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleFeatured(publication)}
-                          className={`hover:bg-yellow-50 ${
-                            publication.is_featured 
-                              ? 'text-yellow-600 hover:text-yellow-700' 
-                              : 'text-gray-400 hover:text-yellow-600'
-                          }`}
-                          disabled={updatePublicationMutation.isPending}
-                          title={publication.is_featured ? 'Remove featured status' : 'Mark as featured'}
-                        >
-                          {updatePublicationMutation.isPending ? (
-                            <Loader2 size={14} className="animate-spin" />
-                          ) : (
-                            <Star 
-                              size={14} 
-                              className={publication.is_featured ? 'fill-current' : ''} 
-                            />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(publication.id)}
-                          className="hover:bg-blue-50 hover:text-blue-600"
-                        >
-                          <Edit size={14} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(publication)}
-                          className="hover:bg-red-50 hover:text-red-600"
-                          disabled={deletePublicationMutation.isPending}
-                        >
-                          {deletePublicationMutation.isPending ? (
-                            <Loader2 size={14} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={14} />
-                          )}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Publication</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{publicationToDelete?.title}"? This action cannot be undone and will permanently remove the publication.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleDeleteCancel}
-              disabled={deletePublicationMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-              disabled={deletePublicationMutation.isPending}
-            >
-              {deletePublicationMutation.isPending ? 'Deleting...' : 'Delete'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            {/* Content */}
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {/* Search and Filter Bar */}
+              {publications.length > 0 && (
+                <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search publications..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Loading State for Publications */}
+              {publicationsLoading && (
+                <div className="text-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">Loading publications...</p>
+                </div>
+              )}
+
+              {!publicationsLoading && publications.length === 0 ? (
+                /* Empty State */
+                <div className="text-center py-12">
+                  <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <Plus className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No publications yet</h3>
+                  <p className="text-gray-500 mb-6">Get started by creating your first publication.</p>
+                  <Button
+                    onClick={handleNewEntry}
+                    className="bg-slate-800 hover:bg-slate-700"
+                    disabled={createPublicationMutation.isPending}
+                  >
+                    {createPublicationMutation.isPending ? (
+                      <Loader2 size={16} className="mr-2 animate-spin" />
+                    ) : (
+                      <Plus size={16} className="mr-2" />
+                    )}
+                    New Entry
+                  </Button>
+                </div>
+              ) : !publicationsLoading && filteredPublications.length === 0 ? (
+                /* No Results State */
+                <div className="text-center py-12">
+                  <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <Search className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No publications found</h3>
+                  <p className="text-gray-500 mb-6">Try adjusting your search or filter criteria.</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setStatusFilter('all');
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              ) : !publicationsLoading && (
+                /* Publications Table */
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="font-semibold text-gray-900">Name</TableHead>
+                        <TableHead className="font-semibold text-gray-900">Date Modified</TableHead>
+                        <TableHead className="font-semibold text-gray-900">Status</TableHead>
+                        <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPublications.map((publication, index) => (
+                        <TableRow
+                          key={publication.id}
+                          className={`hover:bg-gray-50 transition-colors ${index % 2 === 1 ? 'bg-gray-25' : 'bg-white'
+                            } ${publication.is_featured ? 'border-l-4 border-l-yellow-400' : ''}`}
+                        >
+                          <TableCell className="font-medium text-gray-900">
+                            <div className="flex items-center gap-2">
+                              {publication.is_featured && (
+                                <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                              )}
+                              {publication.title}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {publication.updated_at
+                              ? format(new Date(publication.updated_at), 'dd/MM/yyyy')
+                              : format(new Date(publication.created_at || ''), 'dd/MM/yyyy')
+                            }
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="secondary"
+                                className={getStatusBadgeClass(publication.status || 'draft')}
+                              >
+                                {formatStatus(publication.status || 'draft')}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleToggleFeatured(publication)}
+                                className={`hover:bg-yellow-50 ${publication.is_featured
+                                    ? 'text-yellow-600 hover:text-yellow-700'
+                                    : 'text-gray-400 hover:text-yellow-600'
+                                  }`}
+                                disabled={updatePublicationMutation.isPending}
+                                title={publication.is_featured ? 'Remove featured status' : 'Mark as featured'}
+                              >
+                                {updatePublicationMutation.isPending ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  <Star
+                                    size={14}
+                                    className={publication.is_featured ? 'fill-current' : ''}
+                                  />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(publication.id)}
+                                className="hover:bg-blue-50 hover:text-blue-600"
+                              >
+                                <Edit size={14} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteClick(publication)}
+                                className="hover:bg-red-50 hover:text-red-600"
+                                disabled={deletePublicationMutation.isPending}
+                              >
+                                {deletePublicationMutation.isPending ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  <Trash2 size={14} />
+                                )}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Publication</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete "{publicationToDelete?.title}"? This action cannot be undone and will permanently remove the publication.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={handleDeleteCancel}
+                    disabled={deletePublicationMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeleteConfirm}
+                    disabled={deletePublicationMutation.isPending}
+                  >
+                    {deletePublicationMutation.isPending ? 'Deleting...' : 'Delete'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 
