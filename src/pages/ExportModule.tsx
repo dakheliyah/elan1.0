@@ -128,7 +128,7 @@ const ExportModule = () => {
       <div className="min-h-screen flex w-full">
         <DashboardSidebar />
         <SidebarInset className="flex-1">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="px-4 sm:px-6 lg:px-8 py-8">
             {/* Header with Navigation */}
             <div className="mb-8">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
