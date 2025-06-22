@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { locationsService } from '@/services/locationsService';
 
+export const useAllLocations = () => {
+  return useQuery({
+    queryKey: ['locations', 'all'],
+    queryFn: () => locationsService.getAll(),
+  });
+};
+
 export const useLocation = (locationId: string) => {
   return useQuery({
     queryKey: ['location', locationId],

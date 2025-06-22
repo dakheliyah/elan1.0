@@ -27,7 +27,7 @@ import type { Invitation } from '@/services/invitations';
 
 interface PendingInvitationsProps {
   invitations: Invitation[];
-  eventId: string;
+  eventId?: string;
 }
 
 const roleConfig = {

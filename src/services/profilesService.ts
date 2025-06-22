@@ -89,6 +89,32 @@ export const profilesService = {
       handleSupabaseError(error, 'update user role');
     }
   },
+
+  async delete(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      handleSupabaseError(error, 'delete profile');
+    }
+  },
+
+  async deleteMultiple(ids: string[]): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .in('id', ids);
+
+      if (error) throw error;
+    } catch (error) {
+      handleSupabaseError(error, 'delete multiple profiles');
+    }
+  },
 };
 
 export type { Profile, ProfileInsert, ProfileUpdate };

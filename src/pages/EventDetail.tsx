@@ -9,7 +9,6 @@ import {
   Plus, 
   Edit, 
   Trash2, 
-  Users, 
   Share2, 
   MoreVertical,
   MapPin,
@@ -24,10 +23,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import NewLocationModal, { LocationFormData } from '@/components/NewLocationModal';
 import EditLocationModal, { LocationEditData } from '@/components/EditLocationModal';
 import ShareModal from '@/components/ShareModal';
-import UserManagementModal from '@/components/UserManagementModal';
 import UserMenu from '@/components/UserMenu';
 import MediaLibrary from './MediaLibrary';
 import { 
@@ -46,7 +46,6 @@ const EventDetail = () => {
   const [isEditLocationModalOpen, setIsEditLocationModalOpen] = useState(false);
   const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isUserManagementModalOpen, setIsUserManagementModalOpen] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   
   // Fetch event and locations data from Supabase
@@ -114,10 +113,6 @@ const EventDetail = () => {
     navigate(`/events/${eventId}/locations/${locationId}`);
   };
 
-  const handleUserRoles = () => {
-    setIsUserManagementModalOpen(true);
-  };
-
   const handleShare = () => {
     setIsShareModalOpen(true);
   };
@@ -125,38 +120,59 @@ const EventDetail = () => {
   // Error states
   if (eventError || locationsError) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Event</h2>
-          <p className="text-gray-600 mb-4">There was an error loading the event details. Please try again.</p>
-          <Button onClick={() => window.location.reload()}>Retry</Button>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <DashboardSidebar />
+          <SidebarInset>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Event</h2>
+                <p className="text-gray-600 mb-4">There was an error loading the event details. Please try again.</p>
+                <Button onClick={() => window.location.reload()}>Retry</Button>
+              </div>
+            </div>
+          </SidebarInset>
         </div>
-      </div>
+      </SidebarProvider>
     );
   }
 
   // Loading state
   if (eventLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mr-2" />
-          <span className="text-gray-600">Loading event...</span>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <DashboardSidebar />
+          <SidebarInset>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="flex items-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400 mr-2" />
+                <span className="text-gray-600">Loading event...</span>
+              </div>
+            </div>
+          </SidebarInset>
         </div>
-      </div>
+      </SidebarProvider>
     );
   }
 
   // Event not found
   if (!event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Event Not Found</h2>
-          <p className="text-gray-600 mb-4">The event you're looking for doesn't exist.</p>
-          <Button onClick={handleBack}>Back to Events</Button>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <DashboardSidebar />
+          <SidebarInset>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Event Not Found</h2>
+                <p className="text-gray-600 mb-4">The event you're looking for doesn't exist.</p>
+                <Button onClick={handleBack}>Back to Events</Button>
+              </div>
+            </div>
+          </SidebarInset>
         </div>
-      </div>
+      </SidebarProvider>
     );
   }
 
@@ -166,23 +182,27 @@ const EventDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            {/* Navigation and Title */}
-            <div className="flex items-center gap-4 mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBack}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-              >
-                <ArrowLeft size={16} />
-                Back to Events
-              </Button>
-            </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <DashboardSidebar />
+        <SidebarInset>
+          <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200">
+              <div className="mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="py-6">
+                  {/* Navigation and Title */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleBack}
+                      className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                    >
+                      <ArrowLeft size={16} />
+                      Back to Events
+                    </Button>
+                  </div>
 
             <div className="flex justify-between items-start">
               <div className="flex-1">
@@ -195,8 +215,6 @@ const EventDetail = () => {
                     Active
                   </Badge>
                 </div>
-                
-                <p className="text-sm text-gray-500 mb-3">#{event.id.slice(0, 8)}</p>
                 
                 <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
                   {event.start_date && event.end_date && (
@@ -212,24 +230,11 @@ const EventDetail = () => {
                     <span>{locations.length} Locations</span>
                   </div>
                 </div>
-                
-                {event.description && (
-                  <p className="text-gray-700 max-w-3xl">{event.description}</p>
-                )}
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3">
                 <UserMenu />
-                
-                <Button
-                  variant="outline"
-                  onClick={handleUserRoles}
-                  className="flex items-center gap-2"
-                >
-                  <Users size={16} />
-                  User Roles
-                </Button>
                 
                 <Button
                   variant="outline"
@@ -240,7 +245,7 @@ const EventDetail = () => {
                   Share
                 </Button>
 
-                <DropdownMenu>
+                {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">
                       <MoreVertical size={16} />
@@ -252,7 +257,7 @@ const EventDetail = () => {
                     <DropdownMenuItem>Archive Event</DropdownMenuItem>
                     <DropdownMenuItem className="text-red-600">Delete Event</DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu> */}
               </div>
             </div>
           </div>
@@ -260,7 +265,7 @@ const EventDetail = () => {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Locations Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Event Locations</h2>
@@ -438,19 +443,10 @@ const EventDetail = () => {
           isFeatured: loc.is_host || false
         }))}
       />
-
-      <UserManagementModal
-        isOpen={isUserManagementModalOpen}
-        onClose={() => setIsUserManagementModalOpen(false)}
-        locations={locations.map(loc => ({
-          id: loc.id,
-          name: loc.name,
-          articlesCount: loc.publication_count || 0,
-          timezone: loc.timezone,
-          isFeatured: loc.is_host || false
-        }))}
-      />
-    </div>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 

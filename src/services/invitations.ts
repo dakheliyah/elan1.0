@@ -27,6 +27,21 @@ const handleSupabaseError = (error: any, operation: string) => {
 };
 
 export const invitationsService = {
+  // Get all invitations
+  async getAll(): Promise<Invitation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('invitations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'fetch all invitations');
+    }
+  },
+
   // Get all invitations for an event
   async getByEventId(eventId: string): Promise<Invitation[]> {
     try {

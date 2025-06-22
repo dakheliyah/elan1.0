@@ -2,6 +2,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { invitationsService } from '@/services/supabase';
 
+export const useAllInvitations = () => {
+  return useQuery({
+    queryKey: ['invitations', 'all'],
+    queryFn: () => invitationsService.getAll(),
+  });
+};
+
 export const useInvitations = (eventId: string) => {
   return useQuery({
     queryKey: ['invitations', eventId],

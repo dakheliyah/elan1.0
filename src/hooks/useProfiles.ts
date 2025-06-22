@@ -48,3 +48,28 @@ export const useUpdateUserRole = () => {
     },
   });
 };
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: profilesService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+    },
+  });
+};
+
+export const useBulkDeleteUsers = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: profilesService.deleteMultiple,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+    },
+  });
+};
+
+// Alias for useProfiles to match the import in UserManagement
+export const useUserProfiles = useProfiles;

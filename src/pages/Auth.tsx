@@ -38,7 +38,7 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      navigate('/events');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
@@ -62,7 +62,7 @@ const Auth = () => {
             title: "Welcome back!",
             description: "You have successfully signed in.",
           });
-          navigate('/events');
+          navigate('/dashboard');
         } else {
           toast({
             title: "Account Created",

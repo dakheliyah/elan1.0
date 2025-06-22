@@ -1,5 +1,5 @@
 
-import { Calendar, Home, Settings, Package, Download } from "lucide-react";
+import { Calendar, Home, Settings, Package, Download, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -17,7 +17,7 @@ const menuItems = [
     url: "/dashboard",
   },
   {
-    title: "Event Management",
+    title: "Events",
     icon: Calendar,
     url: "/events",
   },
@@ -27,15 +27,20 @@ const menuItems = [
     url: "/umoor",
   },
   {
-    title: "Export Module",
+    title: "User Roles",
+    icon: Users,
+    url: "/users",
+  },
+  {
+    title: "Export Publication",
     icon: Download,
     url: "/export",
   },
-  {
-    title: "Settings",
-    icon: Settings,
-    url: "/settings",
-  },
+  // {
+  //   title: "Settings",
+  //   icon: Settings,
+  //   url: "/settings",
+  // },
 ];
 
 export function DashboardSidebar() {

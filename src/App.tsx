@@ -23,6 +23,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import InviteAcceptance from './pages/InviteAcceptance';
 import PublicationEditorPage from './pages/PublicationEditor';
 import ExportModule from "./pages/ExportModule";
+import UserManagement from "./pages/UserManagement";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ function App() {
                 <Route path="/events/:eventId/locations/:locationId" element={<LocationDetail />} />
                 <Route path="/events/:eventId/locations/:locationId/publications/:publicationId/edit" element={<PublicationEditorPage />} />
                 <Route path="/umoor" element={<UmoorManagement />} />
+                <Route path="/users" element={<UserManagement />} />
                 <Route path="/export" element={<ExportModule />} />
                 <Route path="/media" element={<MediaLibrary />} />
                 <Route path="/media/optimization" element={<MediaOptimization />} />
