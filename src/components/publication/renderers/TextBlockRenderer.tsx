@@ -110,17 +110,7 @@ export const TextBlockRenderer: React.FC<TextBlockRendererProps> = ({
   };
 
   return (
-    <div className="mb-6">
-      <div className={`flex items-center gap-2 mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <span className={`inline-block px-2 py-1 text-xs font-medium uppercase rounded ${
-          block.language === 'eng' 
-            ? 'bg-blue-100 text-blue-800' 
-            : 'bg-green-100 text-green-800'
-        }`}>
-          {block.language === 'lud' ? 'Lisan ud-Dawat' : 'English'}
-        </span>
-      </div>
-      
+    <div className="mb-6">      
       <div 
         className={`prose prose-sm max-w-none ${
           isRTL ? 'text-right [direction:rtl]' : 'text-left [direction:ltr]'

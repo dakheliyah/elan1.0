@@ -6,14 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  GripVertical, 
-  Plus, 
-  Trash2, 
-  Type, 
+import {
+  GripVertical,
+  Plus,
+  Trash2,
+  Type,
   Image as ImageIcon,
   Globe,
-  Languages
+  Languages,
+  ChevronDown
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -57,50 +58,43 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
-        <div className="flex items-start gap-3">
-          <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing mt-2">
-            <GripVertical size={16} className="text-gray-400" />
+        <div className="flex items-start justify-between gap-3">
+
+          <div className='flex flex-col'>
+            <div className='flex gap-2'>
+              <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing mt-2">
+                <GripVertical size={16} className="text-gray-400" />
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <img src={parentBlock.umoorLogo} width={80} alt="" />
+              </div>
+            </div>
+
+            <div className="flex-1 pt-2">
+              {/* Main Heading */}
+              <Input
+                value={parentBlock.title || ''}
+                onChange={(e) => {
+                  console.log('Title changed to:', e.target.value);
+                  onUpdateParent({ title: e.target.value });
+                }}
+                placeholder="Enter section heading..."
+                className="border-none shadow-none p-0 !text-2xl font-bold focus-visible:ring-0 placeholder-gray-400"
+              />
+
+              {/* Subheading */}
+              <Input
+                value={parentBlock.subheading || ''}
+                onChange={(e) => {
+                  console.log('Subheading changed to:', e.target.value);
+                  onUpdateParent({ subheading: e.target.value });
+                }}
+                placeholder="Enter subheading (optional)..."
+                className="border-none shadow-none p-0 mt-0 text-lg font-semibold text-gray-700 focus-visible:ring-0 placeholder-gray-400"
+              />
+            </div>
           </div>
-          
-          <div className="flex items-center gap-2 mt-2">
-            <div className="text-lg">{parentBlock.umoorLogo}</div>
-          </div>
-          
-          <div className="flex-1 space-y-3">
-            {/* Main Heading */}
-            <Input
-              value={parentBlock.title || ''}
-              onChange={(e) => {
-                console.log('Title changed to:', e.target.value);
-                onUpdateParent({ title: e.target.value });
-              }}
-              placeholder="Enter section heading..."
-              className="border-none shadow-none p-0 text-2xl font-bold focus-visible:ring-0 placeholder-gray-400"
-            />
-            
-            {/* Subheading */}
-            <Input
-              value={parentBlock.subheading || ''}
-              onChange={(e) => {
-                console.log('Subheading changed to:', e.target.value);
-                onUpdateParent({ subheading: e.target.value });
-              }}
-              placeholder="Enter subheading (optional)..."
-              className="border-none shadow-none p-0 text-lg font-semibold text-gray-700 focus-visible:ring-0 placeholder-gray-400"
-            />
-            
-            {/* Description */}
-            <Textarea
-              value={parentBlock.description || ''}
-              onChange={(e) => {
-                console.log('Description changed to:', e.target.value);
-                onUpdateParent({ description: e.target.value });
-              }}
-              placeholder="Enter description (optional)..."
-              className="border-none shadow-none p-0 text-base text-gray-600 focus-visible:ring-0 placeholder-gray-400 resize-none min-h-[60px]"
-            />
-          </div>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -111,7 +105,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
           </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Child Blocks */}
         {parentBlock.children.map((child) => (
@@ -123,7 +117,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
             eventId={eventId}
           />
         ))}
-        
+
         {/* Add Content Buttons */}
         <div className="flex flex-wrap gap-2 pt-2">
           <DropdownMenu>
@@ -131,6 +125,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
               <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Type size={14} />
                 Add Text
+                <ChevronDown size={14} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -144,7 +139,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
+
           <Button
             variant="outline"
             size="sm"
