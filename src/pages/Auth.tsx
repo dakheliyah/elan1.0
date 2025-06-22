@@ -92,7 +92,7 @@ const Auth = () => {
         {/* Brand Section */}
         <div className="text-center">
           <img 
-            src="/public/logo.png" 
+            src="/logo.png" 
             alt="Elan Logo" 
             className="mx-auto h-32 w-auto mb-4"
           />
