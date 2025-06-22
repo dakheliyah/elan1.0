@@ -155,7 +155,7 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead>Usage Count</TableHead>
+              {/* <TableHead>Usage Count</TableHead> */}
               <TableHead className="w-16">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -196,11 +196,11 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
                     {umoor.slug}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Badge variant="outline">
-                    0 {/* TODO: Implement usage count */}
+                    0
                   </Badge>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

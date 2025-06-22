@@ -52,7 +52,11 @@ interface MediaItem {
   url: string;
 }
 
-const MediaLibrary: React.FC = () => {
+interface MediaLibraryProps {
+  onBack?: () => void;
+}
+
+const MediaLibrary = ({ onBack }: MediaLibraryProps) => {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -150,8 +154,11 @@ const MediaLibrary: React.FC = () => {
   };
 
   const handleBackToEvent = () => {
-    console.log(eventId)
-    navigate(`/events/${eventId}`);
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(`/events/${eventId}`);
+    }
   };
 
   if (error) {

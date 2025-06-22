@@ -69,7 +69,7 @@ const UmoorManagement = () => {
         <DashboardSidebar />
         <div className="flex flex-1">
           {/* Left Sidebar - Add New Umoor Form */}
-          <div className="w-80 border-r bg-gray-50/50 p-6">
+          <div className="w-100 border-r bg-gray-50/50 p-6">
             <Card>
               <CardHeader>
                 <CardTitle>Add new Umoor</CardTitle>

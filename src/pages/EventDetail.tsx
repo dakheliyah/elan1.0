@@ -178,7 +178,7 @@ const EventDetail = () => {
 
   // If we're showing the media library, render it
   if (showMediaLibrary) {
-    return <MediaLibrary />;
+    return <MediaLibrary onBack={() => setShowMediaLibrary(false)} />;
   }
 
   return (
