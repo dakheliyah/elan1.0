@@ -1,0 +1,76 @@
+import { locationsService, type LocationInsert } from '@/services/locationsService';
+import { supabase } from '@/integrations/supabase/client';
+
+// Enhanced location service with host location management
+export const locationServiceEnhanced = {
+  // Create location with host validation
+  async createWithHostValidation(locationData: LocationInsert): Promise<any> {
+    try {
+      // If this location should be host, first unset any existing host in the same event
+      if (locationData.is_host && locationData.event_id) {
+        await this.unsetExistingHost(locationData.event_id);
+      }
+      
+      // Create the new location
+      return await locationsService.create(locationData);
+    } catch (error) {
+      console.error('Error creating location with host validation:', error);
+      throw error;
+    }
+  },
+
+  // Update location with host validation
+  async updateWithHostValidation(locationId: string, updates: any): Promise<any> {
+    try {
+      // If updating to be host, first get the location to know its event_id
+      if (updates.is_host) {
+        const location = await locationsService.getById(locationId);
+        if (location?.event_id) {
+          // Unset any existing host in the same event (except this location)
+          await this.unsetExistingHost(location.event_id, locationId);
+        }
+      }
+      
+      // Update the location
+      return await locationsService.update(locationId, updates);
+    } catch (error) {
+      console.error('Error updating location with host validation:', error);
+      throw error;
+    }
+  },
+
+  // Helper function to unset existing host locations
+  async unsetExistingHost(eventId: string, excludeLocationId?: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('locations')
+        .update({ is_host: false })
+        .eq('event_id', eventId)
+        .eq('is_host', true)
+        .neq('id', excludeLocationId || '');
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error unsetting existing host:', error);
+      throw error;
+    }
+  },
+
+  // Get host location for an event
+  async getHostLocation(eventId: string): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('locations')
+        .select('*')
+        .eq('event_id', eventId)
+        .eq('is_host', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error getting host location:', error);
+      throw error;
+    }
+  },
+};

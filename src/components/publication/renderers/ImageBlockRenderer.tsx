@@ -1,0 +1,41 @@
+
+import React from 'react';
+import { ContentBlock } from '@/pages/PublicationEditor';
+
+interface ImageBlockRendererProps {
+  block: ContentBlock;
+  mode?: 'preview' | 'export';
+}
+
+export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ 
+  block, 
+  mode = 'preview' 
+}) => {
+  const imageClasses = mode === 'export' 
+    ? 'w-full rounded-lg shadow-sm border border-gray-200 max-h-96 object-cover'
+    : 'w-full rounded-lg shadow-sm border border-gray-200 max-h-80 object-cover';
+
+  return (
+    <div className="mb-6">
+      {block.data.imageUrl ? (
+        <figure className="mx-0">
+          <img
+            src={block.data.imageUrl}
+            alt={block.data.alt || 'Publication image'}
+            className={imageClasses}
+            loading="lazy"
+          />
+          {block.data.alt && (
+            <figcaption className="text-sm text-gray-600 mt-3 text-center italic font-medium">
+              {block.data.alt}
+            </figcaption>
+          )}
+        </figure>
+      ) : (
+        <div className="w-full h-48 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+          <span className="text-gray-400 text-sm">No image selected</span>
+        </div>
+      )}
+    </div>
+  );
+};
