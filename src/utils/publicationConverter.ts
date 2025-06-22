@@ -11,7 +11,7 @@ export const convertToPublication = (dbPublication: any): Publication => {
 
   // If the publication has content data, parse it
   if (dbPublication.content && typeof dbPublication.content === 'object') {
-    publication.parentBlocks = dbPublication.content.parentBlocks || [];
+    publication.parentBlocks = dbPublication.content || [];
   }
 
   return publication;

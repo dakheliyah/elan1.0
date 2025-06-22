@@ -13,6 +13,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
   publication, 
   mode = 'preview' 
 }) => {
+
   const PreviewContent = () => (
     <div className="max-w-4xl mx-auto px-8 py-8">
       <PublicationHeaderRenderer

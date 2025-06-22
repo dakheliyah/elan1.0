@@ -290,6 +290,18 @@ const EventDetail = () => {
                     )}
                     New Location
                   </Button>
+                  <Button
+                    onClick={handleNewLocation}
+                    disabled={createLocationMutation.isPending}
+                    className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
+                  >
+                    {createLocationMutation.isPending ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Plus size={16} />
+                    )}
+                    New Publication
+                  </Button>
                 </div>
               </div>
 
