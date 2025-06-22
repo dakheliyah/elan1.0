@@ -604,14 +604,61 @@ export type Database = {
         }
         Relationships: []
       }
+      publication_locations: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          location_id: string
+          publication_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          location_id: string
+          publication_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          location_id?: string
+          publication_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publication_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publication_locations_publication_id_fkey"
+            columns: ["publication_id"]
+            isOneToOne: false
+            referencedRelation: "publications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publications: {
         Row: {
           content: Json | null
           created_at: string | null
           created_by: string | null
+          event_id: string
           id: string
           is_featured: boolean
           location_id: string | null
+          publication_date: string
           status: Database["public"]["Enums"]["publication_status"] | null
           title: string
           updated_at: string | null
@@ -620,9 +667,11 @@ export type Database = {
           content?: Json | null
           created_at?: string | null
           created_by?: string | null
+          event_id: string
           id?: string
           is_featured?: boolean
           location_id?: string | null
+          publication_date: string
           status?: Database["public"]["Enums"]["publication_status"] | null
           title: string
           updated_at?: string | null
@@ -631,9 +680,11 @@ export type Database = {
           content?: Json | null
           created_at?: string | null
           created_by?: string | null
+          event_id?: string
           id?: string
           is_featured?: boolean
           location_id?: string | null
+          publication_date?: string
           status?: Database["public"]["Enums"]["publication_status"] | null
           title?: string
           updated_at?: string | null
@@ -644,6 +695,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -766,9 +824,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_publications_for_all_locations: {
+        Args: {
+          p_title: string
+          p_event_id: string
+          p_publication_date: string
+          p_status?: string
+          p_is_featured?: boolean
+          p_created_by?: string
+        }
+        Returns: {
+          publication_id: string
+          location_id: string
+          location_name: string
+        }[]
+      }
       detect_orphaned_files: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_publications_by_event_and_date: {
+        Args: {
+          p_event_id: string
+          p_publication_date: string
+        }
+        Returns: {
+          publication_id: string
+          title: string
+          content: Json
+          status: string
+          is_featured: boolean
+          location_id: string
+          location_name: string
+          location_is_host: boolean
+          created_at: string
+          updated_at: string
+        }[]
       }
       get_user_role: {
         Args: { user_id: string }

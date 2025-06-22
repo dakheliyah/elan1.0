@@ -23,7 +23,18 @@ export {
   usePublicationsByLocation, 
   useCreatePublication, 
   useUpdatePublication, 
-  useDeletePublication 
+  useDeletePublication,
+  usePublicationsByEvent,
+  usePublicationByEventAndDate,
+  useCreateEventPublication,
+  usePublicationLocations,
+  useUpdateLocationContent,
+  useUpdateLocationStatus,
+  useFeaturedPublicationByEvent,
+  usePublishedLocations,
+  usePublishAllLocations,
+  useArchiveAllLocations,
+  useToggleFeatured
 } from './usePublications';
 
 export { 

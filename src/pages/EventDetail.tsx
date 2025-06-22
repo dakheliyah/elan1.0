@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowLeft,
   Plus,
@@ -15,7 +16,9 @@ import {
   Clock,
   Star,
   Loader2,
-  Image
+  Image,
+  Calendar,
+  FileText
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -30,6 +33,7 @@ import EditLocationModal, { LocationEditData } from '@/components/EditLocationMo
 import ShareModal from '@/components/ShareModal';
 import UserMenu from '@/components/UserMenu';
 import MediaLibrary from './MediaLibrary';
+import { EventPublicationManager } from '@/components/publications/EventPublicationManager';
 import {
   useEvent,
   useLocationsWithPublicationCount,
@@ -266,159 +270,171 @@ const EventDetail = () => {
 
             {/* Content */}
             <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {/* Locations Header */}
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">Event Locations</h2>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={handleMediaLibrary}
-                    className="flex items-center gap-2"
-                  >
-                    <Image size={16} />
-                    Media Library
-                  </Button>
-                  <Button
-                    onClick={handleNewLocation}
-                    disabled={createLocationMutation.isPending}
-                    className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
-                  >
-                    {createLocationMutation.isPending ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Plus size={16} />
-                    )}
-                    New Location
-                  </Button>
-                  <Button
-                    onClick={handleNewLocation}
-                    disabled={createLocationMutation.isPending}
-                    className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
-                  >
-                    {createLocationMutation.isPending ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Plus size={16} />
-                    )}
-                    New Publication
-                  </Button>
-                </div>
-              </div>
-
-              {/* Loading State for Locations */}
-              {locationsLoading && (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                  <span className="ml-2 text-gray-600">Loading locations...</span>
-                </div>
-              )}
-
-              {/* Locations Grid */}
-              {!locationsLoading && locations.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {locations.map((location) => (
-                    <Card
-                      key={location.id}
-                      className="hover:shadow-lg transition-shadow duration-200 group cursor-pointer"
-                      onClick={() => handleLocationClick(location.id)}
+              {/* Main Content Tabs */}
+              <Tabs defaultValue="locations" className="w-full">
+                <div className="flex justify-between items-center mb-6">
+                  <TabsList className="grid w-auto grid-cols-2">
+                    <TabsTrigger value="locations" className="flex items-center gap-2">
+                      <MapPin size={16} />
+                      Locations
+                    </TabsTrigger>
+                    <TabsTrigger value="publications" className="flex items-center gap-2">
+                      <FileText size={16} />
+                      Publications
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={handleMediaLibrary}
+                      className="flex items-center gap-2"
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {location.name}
-                            </h3>
-                            {location.is_host && (
-                              <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                            )}
-                          </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditLocation(location.id);
-                              }}
-                              className="hover:bg-gray-50"
-                            >
-                              <Edit size={14} />
-                            </Button>
-
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteLocation(location.id);
-                              }}
-                              disabled={deleteLocationMutation.isPending}
-                              className="hover:bg-red-50 hover:text-red-600"
-                            >
-                              {deleteLocationMutation.isPending ? (
-                                <Loader2 size={14} className="animate-spin" />
-                              ) : (
-                                <Trash2 size={14} />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-
-                      <CardContent className="pt-0">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">
-                              <span className="font-medium">{location.publication_count || 0}</span> publications
-                            </span>
-                            {location.is_host && (
-                              <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-                                Host
-                              </Badge>
-                            )}
-                          </div>
-
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Clock size={14} className="mr-2" />
-                            <span>{location.timezone}</span>
-                          </div>
-
-                          {location.description && (
-                            <div className="text-sm text-gray-500 line-clamp-2">
-                              {location.description}
-                            </div>
-                          )}
-
-                          <div className="pt-3 border-t border-gray-100">
-                            <p className="text-sm text-gray-500">
-                              Click to view publications
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              {/* Empty State for when no locations */}
-              {!locationsLoading && locations.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                    <MapPin className="h-6 w-6 text-gray-400" />
+                      <Image size={16} />
+                      Media Library
+                    </Button>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No locations yet</h3>
-                  <p className="text-gray-500 mb-6">Get started by adding your first location.</p>
-                  <Button
-                    onClick={handleNewLocation}
-                    disabled={createLocationMutation.isPending}
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Add Location
-                  </Button>
                 </div>
-              )}
+
+                {/* Locations Tab */}
+                <TabsContent value="locations" className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold text-gray-900">Event Locations</h2>
+                    <Button
+                      onClick={handleNewLocation}
+                      disabled={createLocationMutation.isPending}
+                      className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
+                    >
+                      {createLocationMutation.isPending ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Plus size={16} />
+                      )}
+                      New Location
+                    </Button>
+                  </div>
+
+                  {/* Loading State for Locations */}
+                  {locationsLoading && (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                      <span className="ml-2 text-gray-600">Loading locations...</span>
+                    </div>
+                  )}
+
+                  {/* Locations Grid */}
+                  {!locationsLoading && locations.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {locations.map((location) => (
+                        <Card
+                          key={location.id}
+                          className="hover:shadow-lg transition-shadow duration-200 group cursor-pointer"
+                          onClick={() => handleLocationClick(location.id)}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                  {location.name}
+                                </h3>
+                                {location.is_host && (
+                                  <Star className="h-5 w-5 text-yellow-500 fill-current" />
+                                )}
+                              </div>
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditLocation(location.id);
+                                  }}
+                                  className="hover:bg-gray-50"
+                                >
+                                  <Edit size={14} />
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteLocation(location.id);
+                                  }}
+                                  disabled={deleteLocationMutation.isPending}
+                                  className="hover:bg-red-50 hover:text-red-600"
+                                >
+                                  {deleteLocationMutation.isPending ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Trash2 size={14} />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+
+                          <CardContent className="pt-0">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">
+                                  <span className="font-medium">{location.publication_count || 0}</span> publications
+                                </span>
+                                {location.is_host && (
+                                  <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                                    Host
+                                  </Badge>
+                                )}
+                              </div>
+
+                              <div className="flex items-center text-sm text-gray-600">
+                                <Clock size={14} className="mr-2" />
+                                <span>{location.timezone}</span>
+                              </div>
+
+                              {location.description && (
+                                <div className="text-sm text-gray-500 line-clamp-2">
+                                  {location.description}
+                                </div>
+                              )}
+
+                              <div className="pt-3 border-t border-gray-100">
+                                <p className="text-sm text-gray-500">
+                                  Click to view publications
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Empty State for when no locations */}
+                  {!locationsLoading && locations.length === 0 && (
+                    <div className="text-center py-12">
+                      <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                        <MapPin className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No locations yet</h3>
+                      <p className="text-gray-500 mb-6">Get started by adding your first location.</p>
+                      <Button
+                        onClick={handleNewLocation}
+                        disabled={createLocationMutation.isPending}
+                        className="bg-primary hover:bg-primary/90"
+                      >
+                        <Plus size={16} className="mr-2" />
+                        Add Location
+                      </Button>
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Publications Tab */}
+                <TabsContent value="publications" className="space-y-6">
+                  <EventPublicationManager eventId={eventId || ''} />
+                </TabsContent>
+              </Tabs>
             </div>
 
             {/* Modals */}
