@@ -41,6 +41,7 @@ import {
   useDeletePublication
 } from '@/hooks/usePublications';
 import { useEvent } from '@/hooks/useSupabaseQuery';
+import { useCurrentProfile } from '@/hooks/useProfiles';
 import type { CreateEventPublicationData } from '@/services/publicationsService';
 
 interface EventPublicationManagerProps {
@@ -64,6 +65,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
   // Data fetching
   const { data: event, isLoading: eventLoading } = useEvent(eventId);
   const { data: publications = [], isLoading: publicationsLoading } = usePublicationsByEvent(eventId);
+  const { data: currentProfile } = useCurrentProfile();
+  
+  // Role checking
+  const isAdmin = currentProfile?.role === 'admin';
   
   // Mutations
   const createPublicationMutation = useCreateEventPublication();
@@ -358,10 +363,12 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
             Manage publications for {event?.name}
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Publication
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Publication
+          </Button>
+        )}
       </div>
 
       {/* Date Selector */}
@@ -396,7 +403,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
             <CardTitle>
               Publications for {format(new Date(selectedDate), 'MMM dd, yyyy')}
             </CardTitle>
-            {publicationsForDate.length > 0 && (
+            {publicationsForDate.length > 0 && isAdmin && (
               <Button
                 variant="outline"
                 size="sm"
@@ -472,19 +479,21 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
                             <Eye className="h-4 w-4" />
                             Preview
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleIndividualExport(publication)}
-                            disabled={isExporting}
-                          >
-                            {isExporting ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Download className="h-4 w-4" />
-                            )}
-                            Export
-                          </Button>
+                          {isAdmin && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleIndividualExport(publication)}
+                              disabled={isExporting}
+                            >
+                              {isExporting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Download className="h-4 w-4" />
+                              )}
+                              Export
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"

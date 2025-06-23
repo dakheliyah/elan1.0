@@ -2,6 +2,7 @@
 import { Calendar, Home, Settings, Package, Download, Users, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrentProfile } from "@/hooks/useProfiles";
 import {
   Sidebar,
   SidebarContent,
@@ -48,6 +49,21 @@ const menuItems = [
 export function DashboardSidebar() {
   const location = useLocation();
   const { signOut } = useAuth();
+  const { data: currentProfile } = useCurrentProfile();
+
+  const userRole = currentProfile?.role;
+  const isAdmin = userRole === 'admin';
+  const isViewerOrEditor = userRole === 'viewer' || userRole === 'editor';
+
+  // Filter menu items based on user role
+  const filteredMenuItems = menuItems.filter(item => {
+    // For viewers and editors, only show Events (no Dashboard access)
+    if (isViewerOrEditor && !isAdmin) {
+      return item.title === 'Events';
+    }
+    // For admins, show all items
+    return true;
+  });
 
   const handleLogout = () => {
     signOut();
@@ -63,7 +79,7 @@ export function DashboardSidebar() {
       </SidebarHeader>
       <SidebarContent className="bg-white">
         <SidebarMenu className="px-3">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 asChild

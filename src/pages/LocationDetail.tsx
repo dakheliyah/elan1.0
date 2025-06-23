@@ -46,7 +46,8 @@ import {
   useEvent,
   usePublicationsByLocation,
   useDeletePublication,
-  useUpdatePublication
+  useUpdatePublication,
+  useCurrentProfile
 } from '@/hooks/useSupabaseQuery';
 import { publicationsService } from '@/services/publicationsService';
 import DebugPublications from '@/components/DebugPublications';
@@ -65,6 +66,10 @@ const LocationDetail = () => {
   const { data: location, isLoading: locationLoading } = useLocation(locationId || '');
   // Get publications for this location using the updated method
   const { data: publications = [], isLoading: publicationsLoading, refetch } = usePublicationsByLocation(locationId || '');
+  const { data: currentProfile } = useCurrentProfile();
+  
+  // Check if user is admin
+  const isAdmin = currentProfile?.role === 'admin';
   
 
   const deletePublicationMutation = useDeletePublication();
@@ -364,22 +369,24 @@ const LocationDetail = () => {
                               >
                                 <Edit size={14} />
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteClick(publication);
-                                }}
-                                className="hover:bg-red-50 hover:text-red-600"
-                                disabled={deletePublicationMutation.isPending}
-                              >
-                                {deletePublicationMutation.isPending ? (
-                                  <Loader2 size={14} className="animate-spin" />
-                                ) : (
-                                  <Trash2 size={14} />
-                                )}
-                              </Button>
+                              {isAdmin && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(publication);
+                                  }}
+                                  className="hover:bg-red-50 hover:text-red-600"
+                                  disabled={deletePublicationMutation.isPending}
+                                >
+                                  {deletePublicationMutation.isPending ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Trash2 size={14} />
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -417,15 +424,6 @@ const LocationDetail = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          </div>
-          
-          {/* Debug Publications Component */}
-          <div className="mt-8 border-t pt-4">
-            <h2 className="text-xl font-bold mb-4">Debug Information</h2>
-            <div className="space-y-6">
-              <TestCreatePublication eventId={eventId || ''} />
-              <DebugPublications />
-            </div>
           </div>
         </SidebarInset>
       </div>

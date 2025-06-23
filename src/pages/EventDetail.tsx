@@ -41,6 +41,7 @@ import {
   useLocation
 } from '@/hooks/useSupabaseQuery';
 import { useCreateLocationWithHost, useUpdateLocationWithHost } from '@/hooks/useHostLocation';
+import { useCurrentProfile } from '@/hooks/useProfiles';
 import { format } from 'date-fns';
 
 const EventDetail = () => {
@@ -56,9 +57,13 @@ const EventDetail = () => {
   const { data: event, isLoading: eventLoading, error: eventError } = useEvent(eventId || '');
   const { data: locations = [], isLoading: locationsLoading, error: locationsError } = useLocationsWithPublicationCount(eventId || '');
   const { data: editingLocation } = useLocation(editingLocationId || '');
+  const { data: currentProfile } = useCurrentProfile();
   const createLocationMutation = useCreateLocationWithHost();
   const updateLocationMutation = useUpdateLocationWithHost();
   const deleteLocationMutation = useDeleteLocation();
+
+  // Check if user is admin
+  const isAdmin = currentProfile?.role === 'admin';
 
   const handleBack = () => {
     navigate('/events');
@@ -240,14 +245,16 @@ const EventDetail = () => {
                     <div className="flex items-center gap-3">
                       <UserMenu />
 
-                      <Button
-                        variant="outline"
-                        onClick={handleShare}
-                        className="flex items-center gap-2"
-                      >
-                        <Share2 size={16} />
-                        Share
-                      </Button>
+                      {isAdmin && (
+                        <Button
+                          variant="outline"
+                          onClick={handleShare}
+                          className="flex items-center gap-2"
+                        >
+                          <Share2 size={16} />
+                          Share
+                        </Button>
+                      )}
 
                       {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -283,7 +290,7 @@ const EventDetail = () => {
                       Publications
                     </TabsTrigger>
                   </TabsList>
-                  
+
                   <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
@@ -300,18 +307,20 @@ const EventDetail = () => {
                 <TabsContent value="locations" className="space-y-6">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-900">Event Locations</h2>
-                    <Button
-                      onClick={handleNewLocation}
-                      disabled={createLocationMutation.isPending}
-                      className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
-                    >
-                      {createLocationMutation.isPending ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <Plus size={16} />
-                      )}
-                      New Location
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        onClick={handleNewLocation}
+                        disabled={createLocationMutation.isPending}
+                        className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
+                      >
+                        {createLocationMutation.isPending ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Plus size={16} />
+                        )}
+                        New Location
+                      </Button>
+                    )}
                   </div>
 
                   {/* Loading State for Locations */}
@@ -341,36 +350,38 @@ const EventDetail = () => {
                                   <Star className="h-5 w-5 text-yellow-500 fill-current" />
                                 )}
                               </div>
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditLocation(location.id);
-                                  }}
-                                  className="hover:bg-gray-50"
-                                >
-                                  <Edit size={14} />
-                                </Button>
+                              {isAdmin && (
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditLocation(location.id);
+                                    }}
+                                    className="hover:bg-gray-50"
+                                  >
+                                    <Edit size={14} />
+                                  </Button>
 
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteLocation(location.id);
-                                  }}
-                                  disabled={deleteLocationMutation.isPending}
-                                  className="hover:bg-red-50 hover:text-red-600"
-                                >
-                                  {deleteLocationMutation.isPending ? (
-                                    <Loader2 size={14} className="animate-spin" />
-                                  ) : (
-                                    <Trash2 size={14} />
-                                  )}
-                                </Button>
-                              </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteLocation(location.id);
+                                    }}
+                                    disabled={deleteLocationMutation.isPending}
+                                    className="hover:bg-red-50 hover:text-red-600"
+                                  >
+                                    {deleteLocationMutation.isPending ? (
+                                      <Loader2 size={14} className="animate-spin" />
+                                    ) : (
+                                      <Trash2 size={14} />
+                                    )}
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           </CardHeader>
 
