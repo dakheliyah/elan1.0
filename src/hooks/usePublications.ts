@@ -40,9 +40,6 @@ export const useUpdatePublication = () => {
   
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: PublicationUpdate & { location_id?: string } }) => {
-      if (updates.is_featured !== undefined && updates.location_id) {
-        return publicationsService.toggleFeatured(id, updates.is_featured, updates.location_id);
-      }
       return publicationsService.update(id, updates);
     },
     onSuccess: (data) => {
@@ -143,13 +140,7 @@ export const useUpdateLocationStatus = () => {
   });
 };
 
-export const useFeaturedPublicationByEvent = (eventId: string) => {
-  return useQuery({
-    queryKey: ['publication', 'featured', 'event', eventId],
-    queryFn: () => publicationsService.getFeaturedByEvent(eventId),
-    enabled: !!eventId,
-  });
-};
+
 
 export const usePublishedLocations = (publicationId: string) => {
   return useQuery({
@@ -179,30 +170,6 @@ export const useArchiveAllLocations = () => {
     onSuccess: (_, publicationId) => {
       queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'locations'] });
       queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'published-locations'] });
-    },
-  });
-};
-
-// Updated hook for toggling featured status with event support
-export const useToggleFeatured = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, is_featured, eventId }: {
-      id: string;
-      is_featured: boolean;
-      eventId?: string;
-    }) => publicationsService.toggleFeatured(id, is_featured, eventId),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['publication', data.id] });
-      if (data.event_id) {
-        queryClient.invalidateQueries({ queryKey: ['publications', 'event', data.event_id] });
-        queryClient.invalidateQueries({ queryKey: ['publication', 'featured', 'event', data.event_id] });
-      }
-      // Legacy support
-      if (data.location_id) {
-        queryClient.invalidateQueries({ queryKey: ['publications', 'location', data.location_id] });
-      }
     },
   });
 };

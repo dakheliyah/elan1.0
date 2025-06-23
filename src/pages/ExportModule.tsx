@@ -36,12 +36,12 @@ const ExportModule = () => {
   
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
-  const [featuredPublicationId, setFeaturedPublicationId] = useState<string | null>(null);
+  const [selectedPublicationId, setSelectedPublicationId] = useState<string | null>(null);
   const [showFormatSelection, setShowFormatSelection] = useState(false);
 
   const { data: locations } = useLocations(selectedEventId || '');
   const { data: publications } = usePublicationsByLocation(selectedLocationId || '');
-  const { data: featuredPublication } = usePublication(featuredPublicationId || '');
+  const { data: selectedPublication } = usePublication(selectedPublicationId || '');
 
   // Export hooks
   const exportHTMLMutation = useExportHTML();
@@ -50,21 +50,16 @@ const ExportModule = () => {
   // Find host location for the selected event
   const hostLocation = locations?.find(loc => loc.is_host);
 
-  // Auto-select featured publication when location changes
+  // Reset selected publication when location changes
   useEffect(() => {
-    if (publications && publications.length > 0) {
-      const featured = publications.find(pub => pub.is_featured);
-      setFeaturedPublicationId(featured?.id || null);
-    } else {
-      setFeaturedPublicationId(null);
-    }
-  }, [publications]);
+    setSelectedPublicationId(null);
+  }, [selectedLocationId]);
 
   const handleExport = () => {
-    if (!featuredPublicationId) {
+    if (!selectedPublicationId) {
       toast({
-        title: "No Featured Publication",
-        description: "This location doesn't have a featured publication to export.",
+        title: "No Publication Selected",
+        description: "Please select a publication to export.",
         variant: "destructive"
       });
       return;
@@ -75,7 +70,7 @@ const ExportModule = () => {
   const handleFormatSelect = async (format: 'html' | 'pdf') => {
     setShowFormatSelection(false);
     
-    if (!featuredPublicationId) {
+    if (!selectedPublicationId) {
       toast({
         title: "Export Error",
         description: "No publication selected for export.",
@@ -100,12 +95,12 @@ const ExportModule = () => {
     try {
       if (format === 'html') {
         await exportHTMLMutation.mutateAsync({ 
-          publicationId: featuredPublicationId,
+          publicationId: selectedPublicationId,
           options: exportOptions
         });
       } else {
         await exportPDFMutation.mutateAsync({ 
-          publicationId: featuredPublicationId,
+          publicationId: selectedPublicationId,
           options: exportOptions
         });
       }
@@ -171,7 +166,7 @@ const ExportModule = () => {
                           onClick={() => {
                             setSelectedEventId(event.id);
                             setSelectedLocationId(null);
-                            setFeaturedPublicationId(null);
+                            setSelectedPublicationId(null);
                           }}
                         >
                           {event.name}
@@ -205,47 +200,59 @@ const ExportModule = () => {
               </Card>
             </div>
 
-            {/* Featured Publication Info */}
+            {/* Publication Selection */}
             {selectedLocationId && (
               <Card className="mb-8">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    Featured Publication
+                    Step 3: Select Publication
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {featuredPublication ? (
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 mb-1">
-                          {featuredPublication.title}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar className="w-4 h-4" />
-                          <span>Created: {new Date(featuredPublication.created_at || '').toLocaleDateString()}</span>
-                          <Badge variant="secondary" className="ml-2">Featured</Badge>
-                        </div>
+                  {publications && publications.length > 0 ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        {publications.map((publication) => (
+                          <Button
+                            key={publication.id}
+                            variant={selectedPublicationId === publication.id ? "default" : "outline"}
+                            className="w-full justify-start h-auto p-4"
+                            onClick={() => setSelectedPublicationId(publication.id)}
+                          >
+                            <div className="text-left">
+                              <div className="font-semibold">{publication.title}</div>
+                              <div className="text-sm text-gray-500 mt-1">
+                                Created: {new Date(publication.created_at || '').toLocaleDateString()}
+                                <Badge variant="secondary" className="ml-2">
+                                  {publication.status || 'draft'}
+                                </Badge>
+                              </div>
+                            </div>
+                          </Button>
+                        ))}
                       </div>
-                      <Button 
-                        onClick={handleExport} 
-                        className="ml-4"
-                        disabled={isExporting}
-                      >
-                        {isExporting ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <Download className="w-4 h-4 mr-2" />
-                        )}
-                        {isExporting ? 'Exporting...' : 'Export Publication'}
-                      </Button>
+                      {selectedPublicationId && (
+                        <Button 
+                          onClick={handleExport} 
+                          className="w-full"
+                          disabled={isExporting}
+                        >
+                          {isExporting ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4 mr-2" />
+                          )}
+                          {isExporting ? 'Exporting...' : 'Export Selected Publication'}
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <div className="text-center py-8">
                       <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <p className="text-gray-600 mb-2">No featured publication found</p>
+                      <p className="text-gray-600 mb-2">No publications found</p>
                       <p className="text-sm text-gray-500">
-                        This location doesn't have a featured publication to export.
+                        This location doesn't have any publications to export.
                       </p>
                     </div>
                   )}
@@ -254,7 +261,7 @@ const ExportModule = () => {
             )}
 
             {/* Global Content Info */}
-            {hostLocation && selectedLocationId && selectedLocationId !== hostLocation.id && featuredPublication && (
+            {hostLocation && selectedLocationId && selectedLocationId !== hostLocation.id && selectedPublication && (
               <Card className="mb-8 border-blue-200 bg-blue-50">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
@@ -302,12 +309,11 @@ const ExportModule = () => {
                         </span>
                       </div>
                     )}
-                    {featuredPublication && (
+                    {selectedPublication && (
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-gray-500" />
                         <span className="text-sm">
-                          Publication: <strong>{featuredPublication.title}</strong>
-                          <Badge variant="secondary" className="ml-2">Featured</Badge>
+                          Publication: <strong>{selectedPublication.title}</strong>
                         </span>
                       </div>
                     )}

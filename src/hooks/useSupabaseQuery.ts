@@ -30,11 +30,9 @@ export {
   usePublicationLocations,
   useUpdateLocationContent,
   useUpdateLocationStatus,
-  useFeaturedPublicationByEvent,
   usePublishedLocations,
   usePublishAllLocations,
-  useArchiveAllLocations,
-  useToggleFeatured
+  useArchiveAllLocations
 } from './usePublications';
 
 export { 

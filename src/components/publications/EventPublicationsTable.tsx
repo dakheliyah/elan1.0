@@ -212,9 +212,7 @@ export const EventPublicationsTable: React.FC<EventPublicationsTableProps> = ({
                                 <Badge variant="outline" className={getStatusColor(publication.status)}>
                                   {publication.status}
                                 </Badge>
-                                {publication.is_featured && (
-                                  <Badge variant="secondary">Featured</Badge>
-                                )}
+
                               </div>
                               
                               <div className="flex items-center gap-4 text-sm text-gray-600">

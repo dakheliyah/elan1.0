@@ -30,24 +30,28 @@ import {
 } from '@/components/ui/select';
 import {
   ArrowLeft,
-  Plus,
   Edit,
   Trash2,
   Search,
   Filter,
   Loader2,
-  Star
+  FileText,
+  Calendar,
+  MapPin,
+  Users
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   useLocation,
   useEvent,
   usePublicationsByLocation,
-  useCreatePublication,
   useDeletePublication,
   useUpdatePublication
 } from '@/hooks/useSupabaseQuery';
-import { PublicationInsert } from '@/services/supabase';
+import { publicationsService } from '@/services/publicationsService';
+import DebugPublications from '@/components/DebugPublications';
+import TestCreatePublication from '@/components/TestCreatePublication';
+
 import { format } from 'date-fns';
 import UserMenu from '@/components/UserMenu';
 
@@ -59,8 +63,10 @@ const LocationDetail = () => {
   // Fetch data from Supabase
   const { data: event, isLoading: eventLoading } = useEvent(eventId || '');
   const { data: location, isLoading: locationLoading } = useLocation(locationId || '');
+  // Get publications for this location using the updated method
   const { data: publications = [], isLoading: publicationsLoading, refetch } = usePublicationsByLocation(locationId || '');
-  const createPublicationMutation = useCreatePublication();
+  
+
   const deletePublicationMutation = useDeletePublication();
   const updatePublicationMutation = useUpdatePublication();
 
@@ -74,30 +80,7 @@ const LocationDetail = () => {
     navigate(`/events/${eventId}`);
   };
 
-  const handleNewEntry = async () => {
-    if (!locationId || !event?.name || !location?.name) return;
-
-    try {
-      // Create a new draft publication
-      const newPublication: PublicationInsert = {
-        title: `New Publication ${new Date().toLocaleDateString()}`,
-        location_id: locationId,
-        status: 'draft',
-        content: []
-      };
-
-      const createdPublication = await createPublicationMutation.mutateAsync(newPublication);
-
-      // Navigate to the editor with the new publication
-      navigate(`/events/${eventId}/locations/${locationId}/publications/${createdPublication.id}/edit`);
-    } catch (error) {
-      toast({
-        title: "Failed to create publication",
-        description: "There was an error creating the new publication. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
+  // Removed handleNewEntry - publications are now created globally at event level
 
   const handleEdit = (publicationId: string) => {
     navigate(`/events/${eventId}/locations/${locationId}/publications/${publicationId}/edit`);
@@ -136,36 +119,9 @@ const LocationDetail = () => {
     setPublicationToDelete(null);
   };
 
-  const handleToggleFeatured = async (publication: any) => {
-    try {
-      const newFeaturedStatus = !publication.is_featured;
 
-      await updatePublicationMutation.mutateAsync({
-        id: publication.id,
-        updates: {
-          is_featured: newFeaturedStatus,
-          location_id: locationId || ''
-        }
-      });
 
-      toast({
-        title: newFeaturedStatus ? "Marked as Featured" : "Removed Featured Status",
-        description: newFeaturedStatus
-          ? `"${publication.title}" has been marked as featured. Any previously featured publication has been unmarked.`
-          : `"${publication.title}" has been unmarked as featured.`,
-      });
-
-      refetch();
-    } catch (error) {
-      toast({
-        title: "Update Failed",
-        description: "Failed to update featured status. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Filter and sort publications - remove featured sorting
+  // Filter and sort publications by publication date in ascending order
   const filteredPublications = publications
     .filter(pub => {
       const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -173,9 +129,10 @@ const LocationDetail = () => {
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      // Sort by date modified (newest first) only
-      return new Date(b.updated_at || b.created_at || '').getTime() -
-        new Date(a.updated_at || a.created_at || '').getTime();
+      // Sort by publication date (earliest first)
+      const dateA = new Date(a.publication_date || a.created_at || '').getTime();
+      const dateB = new Date(b.publication_date || b.created_at || '').getTime();
+      return dateA - dateB;
     });
 
   const getStatusBadgeClass = (status: string) => {
@@ -253,32 +210,30 @@ const LocationDetail = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-sm text-gray-500 mb-1">
-                        {event.name} • {location.name}
+                      <div>
+                        <div className="text-sm text-gray-500 mb-1">
+                          {event.name} • {location.name}
+                        </div>
+                        <h1 className="text-3xl font-bold text-gray-900">Publications</h1>
                       </div>
-                      <h1 className="text-3xl font-bold text-gray-900">Publications</h1>
-                    </div>
 
-                    <div className='flex gap-2'>
-                      {/* New Entry Button */}
-                      <Button
-                        onClick={handleNewEntry}
-                        className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
-                        disabled={createPublicationMutation.isPending}
-                      >
-                        {createPublicationMutation.isPending ? (
-                          <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                          <Plus size={16} />
-                        )}
-                        New Entry
-                      </Button>
-                      <div className="flex items-center gap-4">
-                        <UserMenu />
-                      </div>
+                      <div className='flex gap-2 items-center'>
+                         <div className="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+                           📝 Publications are now managed at the event level.
+                           <Button 
+                             variant="link" 
+                             size="sm" 
+                             onClick={() => navigate(`/events/${eventId}`)}
+                             className="p-0 h-auto ml-2 text-blue-600"
+                           >
+                             Manage Publications →
+                           </Button>
+                         </div>
+                         <div className="flex items-center gap-4">
+                           <UserMenu />
+                         </div>
+                       </div>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -312,7 +267,7 @@ const LocationDetail = () => {
                 </div>
               )}
 
-              {/* Loading State for Publications */}
+              {/* Loading State for Publications - Shows publications created at event level that are assigned to this location */}
               {publicationsLoading && (
                 <div className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
@@ -323,22 +278,21 @@ const LocationDetail = () => {
               {!publicationsLoading && publications.length === 0 ? (
                 /* Empty State */
                 <div className="text-center py-12">
-                  <div className="mx-auto h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                    <Plus className="h-6 w-6 text-gray-400" />
+                  <div className="mx-auto h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                    <FileText className="h-6 w-6 text-blue-500" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No publications yet</h3>
-                  <p className="text-gray-500 mb-6">Get started by creating your first publication.</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No publications for this location yet</h3>
+                  <p className="text-gray-500 mb-6">
+                    Publications are now created at the event level and distributed to locations.
+                    <br />
+                    Create a publication from the event page to see it here.
+                  </p>
                   <Button
-                    onClick={handleNewEntry}
-                    className="bg-primary hover:bg-primary/90"
-                    disabled={createPublicationMutation.isPending}
+                    onClick={() => navigate(`/events/${eventId}`)}
+                    className="bg-blue-600 hover:bg-blue-700"
                   >
-                    {createPublicationMutation.isPending ? (
-                      <Loader2 size={16} className="mr-2 animate-spin" />
-                    ) : (
-                      <Plus size={16} className="mr-2" />
-                    )}
-                    New Entry
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Go to Event Publications
                   </Button>
                 </div>
               ) : !publicationsLoading && filteredPublications.length === 0 ? (
@@ -366,7 +320,7 @@ const LocationDetail = () => {
                     <TableHeader>
                       <TableRow className="bg-gray-50">
                         <TableHead className="font-semibold text-gray-900">Name</TableHead>
-                        <TableHead className="font-semibold text-gray-900">Date Modified</TableHead>
+                        <TableHead className="font-semibold text-gray-900">Publication Date</TableHead>
                         <TableHead className="font-semibold text-gray-900">Status</TableHead>
                         <TableHead className="font-semibold text-gray-900 text-right">Actions</TableHead>
                       </TableRow>
@@ -375,21 +329,15 @@ const LocationDetail = () => {
                       {filteredPublications.map((publication, index) => (
                         <TableRow
                           key={publication.id}
-                          className={`hover:bg-gray-50 transition-colors cursor-pointer ${index % 2 === 1 ? 'bg-gray-25' : 'bg-white'
-                            } ${publication.is_featured ? 'border-l-4 border-l-yellow-400' : ''}`}
+                          className={`hover:bg-gray-50 transition-colors cursor-pointer ${index % 2 === 1 ? 'bg-gray-25' : 'bg-white'}`}
                           onClick={() => navigate(`/events/${eventId}/locations/${locationId}/publications/${publication.id}/view`)}
                         >
                           <TableCell className="font-medium text-gray-900">
-                            <div className="flex items-center gap-2">
-                              {publication.is_featured && (
-                                <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              )}
-                              {publication.title}
-                            </div>
+                            {publication.title}
                           </TableCell>
                           <TableCell className="text-gray-600">
-                            {publication.updated_at
-                              ? format(new Date(publication.updated_at), 'dd/MM/yyyy')
+                            {publication.publication_date
+                              ? format(new Date(publication.publication_date), 'dd/MM/yyyy')
                               : format(new Date(publication.created_at || ''), 'dd/MM/yyyy')
                             }
                           </TableCell>
@@ -405,29 +353,6 @@ const LocationDetail = () => {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleFeatured(publication);
-                                }}
-                                className={`hover:bg-yellow-50 ${publication.is_featured
-                                    ? 'text-yellow-600 hover:text-yellow-700'
-                                    : 'text-gray-400 hover:text-yellow-600'
-                                  }`}
-                                disabled={updatePublicationMutation.isPending}
-                                title={publication.is_featured ? 'Remove featured status' : 'Mark as featured'}
-                              >
-                                {updatePublicationMutation.isPending ? (
-                                  <Loader2 size={14} className="animate-spin" />
-                                ) : (
-                                  <Star
-                                    size={14}
-                                    className={publication.is_featured ? 'fill-current' : ''}
-                                  />
-                                )}
-                              </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -492,6 +417,15 @@ const LocationDetail = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+          </div>
+          
+          {/* Debug Publications Component */}
+          <div className="mt-8 border-t pt-4">
+            <h2 className="text-xl font-bold mb-4">Debug Information</h2>
+            <div className="space-y-6">
+              <TestCreatePublication eventId={eventId || ''} />
+              <DebugPublications />
+            </div>
           </div>
         </SidebarInset>
       </div>

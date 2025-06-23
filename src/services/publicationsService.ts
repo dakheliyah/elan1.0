@@ -36,7 +36,6 @@ interface CreateEventPublicationData {
   publication_date: string;
   location_ids: string[];
   status?: 'draft' | 'published' | 'archived';
-  is_featured?: boolean;
 }
 
 interface PublicationWithLocation extends Publication {
@@ -53,7 +52,6 @@ export const publicationsService = {
       const { data, error } = await supabase
         .from('publications')
         .select('*')
-        .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -116,7 +114,6 @@ export const publicationsService = {
           p_event_id: publicationData.event_id,
           p_publication_date: publicationData.publication_date,
           p_status: publicationData.status || 'draft',
-          p_is_featured: publicationData.is_featured || false,
           p_created_by: user.user?.id,
         });
 
@@ -227,21 +224,20 @@ export const publicationsService = {
     }
   },
 
-  // Legacy method: Get publications by location ID (for backward compatibility)
+  // Get publications by location ID (updated for new schema)
   async getByLocationId(locationId: string): Promise<Publication[]> {
     try {
       const { data, error } = await supabase
         .from('publications')
         .select(`
           *,
-          publication_locations!inner(
-            location_id
-          )
+          locations(*),
+          events(*)
         `)
-        .eq('publication_locations.location_id', locationId)
-        .order('is_featured', { ascending: false })
+        .eq('location_id', locationId)
+        .order('publication_date', { ascending: false })
         .order('created_at', { ascending: false });
-
+      
       if (error) throw error;
       return data || [];
     } catch (error) {
@@ -345,73 +341,9 @@ export const publicationsService = {
     }
   },
 
-  // Updated method: Toggle featured status for event-date publications
-  async toggleFeatured(id: string, is_featured: boolean, eventId?: string): Promise<Publication> {
-    try {
-      // If marking as featured, first unmark any currently featured publication in this event
-      if (is_featured && eventId) {
-        const { error: unfeaturedError } = await supabase
-          .from('publications')
-          .update({ 
-            is_featured: false, 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('event_id', eventId)
-          .eq('is_featured', true)
-          .neq('id', id);
 
-        if (unfeaturedError) throw unfeaturedError;
-      }
 
-      // Now update the target publication
-      const { data, error } = await supabase
-        .from('publications')
-        .update({ 
-          is_featured, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', id)
-        .select()
-        .single();
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      handleSupabaseError(error, 'toggle featured status');
-    }
-  },
-
-  // New method: Get featured publication for an event
-  async getFeaturedByEvent(eventId: string): Promise<PublicationWithLocations | null> {
-    try {
-      const { data, error } = await supabase
-        .from('publications')
-        .select(`
-          *,
-          publication_locations (
-            id,
-            location_id,
-            content,
-            status,
-            created_at,
-            updated_at,
-            locations (
-              id,
-              name,
-              is_host
-            )
-          )
-        `)
-        .eq('event_id', eventId)
-        .eq('is_featured', true)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      handleSupabaseError(error, 'fetch featured publication by event');
-    }
-  },
 
   // New method: Get published locations for a publication
   async getPublishedLocations(publicationId: string): Promise<PublicationLocation[]> {

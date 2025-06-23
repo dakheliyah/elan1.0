@@ -531,6 +531,7 @@ const PublicationEditorPage = () => {
                                   onUpdateChild={(childId, data) => updateChildBlock(parentBlock.id, childId, data)}
                                   onRemoveChild={(childId) => removeChildBlock(parentBlock.id, childId)}
                                   eventId={eventId} // Pass eventId to ParentBlock
+                                  isHost={location?.is_host || false} // Pass host status to ParentBlock
                                 />
                               </div>
                             )}

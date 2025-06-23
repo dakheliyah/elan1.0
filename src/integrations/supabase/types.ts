@@ -656,7 +656,6 @@ export type Database = {
           created_by: string | null
           event_id: string
           id: string
-          is_featured: boolean
           location_id: string | null
           publication_date: string
           status: Database["public"]["Enums"]["publication_status"] | null
@@ -669,7 +668,6 @@ export type Database = {
           created_by?: string | null
           event_id: string
           id?: string
-          is_featured?: boolean
           location_id?: string | null
           publication_date: string
           status?: Database["public"]["Enums"]["publication_status"] | null
@@ -682,7 +680,6 @@ export type Database = {
           created_by?: string | null
           event_id?: string
           id?: string
-          is_featured?: boolean
           location_id?: string | null
           publication_date?: string
           status?: Database["public"]["Enums"]["publication_status"] | null
@@ -830,7 +827,6 @@ export type Database = {
           p_event_id: string
           p_publication_date: string
           p_status?: string
-          p_is_featured?: boolean
           p_created_by?: string
         }
         Returns: {
@@ -853,7 +849,6 @@ export type Database = {
           title: string
           content: Json
           status: string
-          is_featured: boolean
           location_id: string
           location_name: string
           location_is_host: boolean

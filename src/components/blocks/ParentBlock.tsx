@@ -34,6 +34,7 @@ interface ParentBlockProps {
   onUpdateChild: (childId: string, data: any) => void;
   onRemoveChild: (childId: string) => void;
   eventId?: string;
+  isHost?: boolean;
 }
 
 const ParentBlock: React.FC<ParentBlockProps> = ({
@@ -45,6 +46,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
   onUpdateChild,
   onRemoveChild,
   eventId,
+  isHost = false,
 }) => {
   // Debug logging
   console.log('ParentBlock rendering with data:', {
@@ -151,23 +153,25 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
           </Button>
         </div>
 
-        {/* Global Toggle */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-2">
-            <Globe size={16} className="text-gray-500" />
-            <span className="text-sm text-gray-700">Mark as Global</span>
-            <span className="text-xs text-gray-500">
-              (Available across all publications)
-            </span>
+        {/* Global Toggle - Only show for host locations */}
+        {isHost && (
+          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+            <div className="flex items-center gap-2">
+              <Globe size={16} className="text-gray-500" />
+              <span className="text-sm text-gray-700">Mark as Global</span>
+              <span className="text-xs text-gray-500">
+                (Available across all publications)
+              </span>
+            </div>
+            <Switch
+              checked={parentBlock.isGlobal || false}
+              onCheckedChange={(checked) => {
+                console.log('Global toggle changed to:', checked);
+                onUpdateParent({ isGlobal: checked });
+              }}
+            />
           </div>
-          <Switch
-            checked={parentBlock.isGlobal || false}
-            onCheckedChange={(checked) => {
-              console.log('Global toggle changed to:', checked);
-              onUpdateParent({ isGlobal: checked });
-            }}
-          />
-        </div>
+        )}
       </CardContent>
     </Card>
   );

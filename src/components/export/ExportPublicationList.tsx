@@ -8,7 +8,6 @@ interface Publication {
   id: string;
   title: string;
   status: string;
-  is_featured: boolean;
   created_at: string;
 }
 
@@ -41,11 +40,6 @@ export const ExportPublicationList: React.FC<ExportPublicationListProps> = ({
                 >
                   {publication.status}
                 </Badge>
-                {publication.is_featured && (
-                  <Badge variant="outline" className="text-xs">
-                    Featured
-                  </Badge>
-                )}
               </div>
             </div>
           </div>

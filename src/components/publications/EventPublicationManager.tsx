@@ -75,13 +75,12 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
       acc[key] = {
         title: pub.title,
         publications: [],
-        created_at: pub.created_at,
-        is_featured: pub.is_featured
+        created_at: pub.created_at
       };
     }
     acc[key].publications.push(pub);
     return acc;
-  }, {} as Record<string, { title: string; publications: any[]; created_at: string; is_featured: boolean }>);
+  }, {} as Record<string, { title: string; publications: any[]; created_at: string }>);
 
   const handleCreatePublication = async () => {
     if (!newPublicationTitle.trim()) {
@@ -242,9 +241,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
                           <Clock className="h-4 w-4" />
                           {format(new Date(group.created_at), 'MMM dd, yyyy HH:mm')}
                         </div>
-                        {group.is_featured && (
-                          <Badge variant="secondary">Featured</Badge>
-                        )}
+
                       </div>
                     </div>
                   </div>
