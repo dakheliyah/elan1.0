@@ -52,6 +52,7 @@ export interface ParentBlockData {
   description?: string;
   children: ContentBlock[];
   isGlobal?: boolean;
+  locationId?: string;
 }
 
 export interface Publication {
@@ -272,7 +273,8 @@ const PublicationEditorPage = () => {
       subheading: '',
       description: '',
       children: [],
-      isGlobal: false
+      isGlobal: false,
+      locationId: locationId || ''
     };
 
     setPublication(prev => ({
@@ -286,7 +288,7 @@ const PublicationEditorPage = () => {
     setPublication(prev => ({
       ...prev,
       parentBlocks: prev.parentBlocks.map(parent =>
-        parent.id === parentId ? { ...parent, ...updates } : parent
+        parent.id === parentId ? { ...parent, ...updates, locationId: locationId || '' } : parent
       )
     }));
   };

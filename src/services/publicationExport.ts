@@ -1,5 +1,4 @@
-
-import { Publication } from '@/pages/PublicationEditor';
+import { ParentBlockData, Publication } from '@/pages/PublicationEditor';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ExportOptions {
@@ -18,6 +17,9 @@ export interface ExportOptions {
     height: number;
     unit: 'mm' | 'in' | 'px';
   };
+  locationId?: string;  
+  includeGlobalContent?: boolean;
+  hostLocationId?: string;
 }
 
 export interface OptimizedImage {
@@ -49,6 +51,7 @@ export class PublicationExportService {
   async exportAsHTML(publicationId: string, options: ExportOptions = {}): Promise<string> {
     try {
       const publication = await this.getPublicationData(publicationId);
+
       const optimizedImages = await this.optimizeImagesForExport(publication);
       
       const htmlContent = this.generateHTMLContent(publication, optimizedImages, options);
@@ -174,7 +177,7 @@ export class PublicationExportService {
     const includeMetadata = options.includeMetadata !== false;
     
     const styles = this.getTemplateStyles(template, options);
-    const content = this.generateContentHTML(publication, optimizedImages);
+    const content = this.generateContentHTML(publication, optimizedImages, options);
     const metadata = includeMetadata ? this.generateMetadataHTML(publication) : '';
     
     return `
@@ -216,21 +219,65 @@ export class PublicationExportService {
     `;
   }
 
-  private generateContentHTML(publication: Publication, optimizedImages: OptimizedImage[]): string {
+  private generateContentHTML(publication: Publication, optimizedImages: OptimizedImage[], options: ExportOptions): string {
     if (publication.parentBlocks.length === 0) {
       return '<div class="empty-publication">No content blocks added yet</div>';
     }
 
-    return publication.parentBlocks.map((parentBlock, index) => {
+    const umoorMap = new Map<string, number>();
+
+    const finalParentBlocks = publication.parentBlocks.filter((parentBlock) => {
+      if (!umoorMap.has(parentBlock.umoorId)) {
+        umoorMap.set(parentBlock.umoorId, 1);
+      } else {
+        // if we have seen it before, set the umoor name and logo to null
+        parentBlock.umoorName = '';
+        parentBlock.umoorLogo = '';
+      }
+
+      return parentBlock.locationId === options.locationId || parentBlock.isGlobal === true
+    });
+
+    if (options.hostLocationId !== options.locationId) {
+      // Group blocks by umoorId, with global blocks first within each group
+      const groupedBlocks = new Map<string, ParentBlockData[]>();
+      
+      // First, group all blocks by umoorId
+      finalParentBlocks.forEach(block => {
+        if (!groupedBlocks.has(block.umoorId)) {
+          groupedBlocks.set(block.umoorId, []);
+        }
+        groupedBlocks.get(block.umoorId)!.push(block);
+      });
+      
+      // Sort each group: global blocks first, then non-global
+      groupedBlocks.forEach(blocks => {
+        blocks.sort((a, b) => {
+          if (a.isGlobal && !b.isGlobal) return -1;
+          if (!a.isGlobal && b.isGlobal) return 1;
+          return 0;
+        });
+      });
+      
+      // Flatten back to array, maintaining group order
+      finalParentBlocks.length = 0;
+      groupedBlocks.forEach(blocks => {
+        finalParentBlocks.push(...blocks);
+      });
+    }
+
+    return finalParentBlocks.map((parentBlock, index) => {
       const umoorHeader = this.generateUmoorHeaderHTML(parentBlock);
       const childrenHTML = parentBlock.children.map(child => 
         this.generateChildBlockHTML(child, optimizedImages)
       ).join('');
       
-      const isLast = index === publication.parentBlocks.length - 1;
+      const isLast = index === finalParentBlocks.length - 1;
+      const nextBlock = finalParentBlocks[index + 1];
+      const hasSameUmoorId = nextBlock && nextBlock.umoorId === parentBlock.umoorId;
       
       return `
-        <section class="umoor-section${isLast ? ' last-section' : ''}">
+        <section class="umoor-section${isLast ? ' last-section' : ''}${hasSameUmoorId ? ' no-divider' : ''}">
           ${umoorHeader}
           <div class="umoor-content">
             ${childrenHTML || '<div class="no-content">No content blocks added yet</div>'}
@@ -251,7 +298,7 @@ export class PublicationExportService {
         <div class="umoor-title-area">
           <h2 class="umoor-title">${parentBlock.title || parentBlock.umoorName}</h2>
           ${parentBlock.title && parentBlock.title !== parentBlock.umoorName ? 
-            `<p class="umoor-subtitle">(${parentBlock.umoorName})</p>` : ''}
+            (parentBlock.umoorName && `<p class="umoor-subtitle">(${parentBlock.umoorName})</p>`) : ''}
         </div>
       </div>
     `;
@@ -260,11 +307,9 @@ export class PublicationExportService {
   private generateChildBlockHTML(block: any, optimizedImages: OptimizedImage[]): string {
     if (block.type === 'text') {
       const isRTL = block.language === 'lud';
-      const languageClass = block.language || 'eng';
       
       return `
         <div class="content-block text-block ${isRTL ? 'rtl' : 'ltr'}">
-          <div class="language-badge ${languageClass}">${languageClass.toUpperCase()}</div>
           <div class="text-content ${isRTL ? 'lud-text' : ''}" ${isRTL ? 'dir="rtl"' : ''}>
             ${this.formatTextContent(block.data.content || 'No content added yet...')}
           </div>
@@ -288,7 +333,6 @@ export class PublicationExportService {
         <div class="content-block image-block">
           <figure>
             <img src="${imageUrl}" alt="${block.data.alt || 'Publication image'}" class="publication-image">
-            ${block.data.alt ? `<figcaption class="image-caption">${block.data.alt}</figcaption>` : ''}
           </figure>
         </div>
       `;
@@ -366,7 +410,7 @@ export class PublicationExportService {
     if (parentBlock.umoorLogo && (parentBlock.umoorLogo.startsWith('http') || parentBlock.umoorLogo.startsWith('data:'))) {
       return `<img src="${parentBlock.umoorLogo}" alt="${parentBlock.umoorName}" class="umoor-logo-image">`;
     }
-    return `<span class="umoor-logo-emoji">${parentBlock.umoorLogo || '📋'}</span>`;
+    return `${parentBlock.id && parentBlock.umoorLogo && '<div class="email-umoor-logo-emoji"></div>'}`;
   }
 
   private generateMetadataHTML(publication: Publication): string {
@@ -444,7 +488,17 @@ export class PublicationExportService {
       }
       
       .umoor-section:not(.last-section) {
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid #d1d5db;
+      }
+      
+      .umoor-section.no-divider {
+        border-bottom: none;
+        background-image: linear-gradient(to right, #d1d5db 50%, transparent 50%);
+        background-size: 20px 1px;
+        background-repeat: repeat-x;
+        background-position: bottom;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
       }
       
       .umoor-header {
@@ -1013,10 +1067,8 @@ export class PublicationExportService {
       const childrenHTML = parentBlock.children.map(child => {
         if (child.type === 'text') {
           const isRTL = child.language === 'lud';
-          const languageClass = child.language || 'eng';
           return `
             <div class="email-content-block">
-              <div class="email-language-badge ${languageClass}">${languageClass.toUpperCase()}</div>
               <div class="email-text-content ${isRTL ? 'rtl' : ''}">
                 ${this.formatTextContent(child.data.content || 'No content added yet...')}
               </div>
@@ -1047,7 +1099,7 @@ export class PublicationExportService {
                 <td class="email-umoor-info">
                   <div class="email-umoor-name">${parentBlock.umoorName}</div>
                   ${parentBlock.title ? `<h2 class="email-umoor-title">${parentBlock.title}</h2>` : ''}
-                  ${parentBlock.title && parentBlock.title !== parentBlock.umoorName ? 
+                  ${parentBlock.title && parentBlock.title !== parentBlock.umoorName && parentBlock.umoorName ? 
                     `<p class="email-umoor-subtitle">(${parentBlock.umoorName})</p>` : ''}
                 </td>
               </tr>
@@ -1071,7 +1123,7 @@ export class PublicationExportService {
     if (parentBlock.umoorLogo && (parentBlock.umoorLogo.startsWith('http') || parentBlock.umoorLogo.startsWith('data:'))) {
       return `<img src="${parentBlock.umoorLogo}" alt="${parentBlock.umoorName}" width="50" height="50">`;
     }
-    return `<div class="email-umoor-logo-emoji">${parentBlock.umoorLogo || '📋'}</div>`;
+    return `${parentBlock.id && parentBlock.umoorLogo && '<div class="email-umoor-logo-emoji"></div>'}`;
   }
 
   private async optimizeImage(imageUrl: string, alt: string): Promise<OptimizedImage> {
@@ -1087,12 +1139,101 @@ export class PublicationExportService {
   }
 
   private async generatePDFFromHTML(htmlContent: string, options: ExportOptions): Promise<Blob> {
-    // This is a placeholder implementation
-    // In production, you would use a library like puppeteer or react-pdf
-    // For now, we'll return a simple text blob as PDF simulation
+    // Import libraries dynamically
+    const { default: jsPDF } = await import('jspdf');
+    const html2canvas = await import('html2canvas');
     
-    const pdfContent = `PDF Export - ${new Date().toISOString()}\n\n${htmlContent.replace(/<[^>]*>/g, '')}`;
-    return new Blob([pdfContent], { type: 'application/pdf' });
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Create a temporary iframe to render the HTML properly
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
+        iframe.style.width = '800px';
+        iframe.style.height = '600px';
+        iframe.style.border = 'none';
+        
+        document.body.appendChild(iframe);
+        
+        // Wait for iframe to load
+        iframe.onload = async () => {
+          try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc) {
+              throw new Error('Could not access iframe document');
+            }
+            
+            // Set the HTML content
+            iframeDoc.open();
+            iframeDoc.write(htmlContent);
+            iframeDoc.close();
+            
+            // Wait a bit for content to render
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Get the body element
+            const body = iframeDoc.body;
+            if (!body) {
+              throw new Error('Could not find body element');
+            }
+            
+            // Convert to canvas
+            const canvas = await html2canvas.default(body, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: '#ffffff',
+              width: 800,
+              height: body.scrollHeight,
+              scrollX: 0,
+              scrollY: 0,
+              windowWidth: 800,
+              windowHeight: body.scrollHeight
+            });
+            
+            // Create PDF
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 210; // A4 width in mm
+            const pageHeight = 297; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+            
+            // Add first page
+            pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            
+            // Add additional pages if needed
+            while (heightLeft >= 0) {
+              position = heightLeft - imgHeight;
+              pdf.addPage();
+              pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
+            }
+            
+            // Clean up
+            document.body.removeChild(iframe);
+            
+            // Return PDF blob
+            resolve(pdf.output('blob'));
+            
+          } catch (error) {
+            // Clean up on error
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+            reject(error);
+          }
+        };
+        
+        // Set src to trigger onload
+        iframe.src = 'about:blank';
+        
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 }
 
@@ -1111,3 +1252,4 @@ export const generateEmailTemplate = (publicationData: Publication, templateStyl
 
 export const optimizeImagesForExport = (publication: Publication) => 
   publicationExportService.optimizeImagesForExport(publication);
+

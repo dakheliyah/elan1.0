@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -94,6 +93,7 @@ const ExportModule = () => {
       includeMetadata: true,
       includeGlobalContent: hostLocation && selectedLocationId !== hostLocation.id,
       hostLocationId: hostLocation?.id,
+      locationId: selectedLocationId,
       ...(format === 'pdf' && { pageSize: 'A4' as const })
     };
 
