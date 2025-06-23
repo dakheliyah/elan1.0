@@ -1,0 +1,160 @@
+publicationExport.ts:53 🚀 [Export Debug] Starting HTML export for publication: 6c45c6af-8fea-44c7-8870-232a9d49fd6d
+publicationExport.ts:54 ⚙️ [Export Debug] Export options: {locationId: '273b2d94-e417-4852-969a-73121bc6503f', hostLocationId: '273b2d94-e417-4852-969a-73121bc6503f', template: 'professional', includeMetadata: true}
+publicationExport.ts:144 🔍 [Export Debug] Fetching publication data for ID: 6c45c6af-8fea-44c7-8870-232a9d49fd6d
+publicationExport.ts:163 📊 [Export Debug] Raw publication data: {id: '6c45c6af-8fea-44c7-8870-232a9d49fd6d', location_id: '273b2d94-e417-4852-969a-73121bc6503f', title: 'Pehli Raat - Moharram', content: Array(1), status: 'published', …}
+publicationExport.ts:164 ❌ [Export Debug] Query error: null
+publicationExport.ts:171 📝 [Export Debug] Raw content field: [{…}]
+publicationExport.ts:172 🔢 [Export Debug] Content type: object
+publicationExport.ts:173 📏 [Export Debug] Content length/size: 1
+publicationExport.ts:177 🔄 [Export Debug] Parsing content: [{…}]
+publicationExport.ts:187 ✅ [Export Debug] Content is already an array with 1 items
+publicationExport.ts:188 📋 [Export Debug] Array content preview: [
+  {
+    "id": "1750670863645",
+    "title": "Test Global",
+    "umoorId": "974ea623-dfe7-492c-8f5e-5a9f7935d9b2",
+    "children": [
+      {
+        "id": "1750670875562",
+        "data": {
+          "content": "Txt here is optional",
+          "language": "eng"
+        },
+        "type": "text",
+        "language": "eng"
+      }
+    ],
+    "isGlobal": true,
+    "umoorLogo": "https://vqfbnrstjztofxnhwrkq.supabase.co/storage/v1/object/public/umoor-logos/974ea623-dfe7-492c-8f5e-5a9f7935d9b2-1750601091569.png",
+    "umoorName": "Elan App",
+    "locationId": "273b2d94-e417-4852-969a-73121bc6503f",
+    "subheading": "This is a test",
+    "description": ""
+  }
+]
+publicationExport.ts:210 🎯 [Export Debug] Final parsed content: [{…}]
+publicationExport.ts:211 📊 [Export Debug] Final content length: 1
+publicationExport.ts:219 🏁 [Export Debug] Final publication object: {title: 'Pehli Raat - Moharram', breadcrumb: 'Ashara Mubaraka 1447H • Chennai', parentBlocks: Array(1)}
+publicationExport.ts:57 📖 [Export Debug] Retrieved publication: {title: 'Pehli Raat - Moharram', breadcrumb: 'Ashara Mubaraka 1447H • Chennai', parentBlocksCount: 1}
+publicationExport.ts:64 🖼️ [Export Debug] Optimized images count: 0
+publicationExport.ts:271 🎨 [Export Debug] Generating content HTML
+publicationExport.ts:272 📚 [Export Debug] Publication parent blocks: [{…}]
+publicationExport.ts:273 📊 [Export Debug] Parent blocks count: 1
+publicationExport.ts:274 ⚙️ [Export Debug] Export options: {locationId: '273b2d94-e417-4852-969a-73121bc6503f', hostLocationId: '273b2d94-e417-4852-969a-73121bc6503f', template: 'professional', includeMetadata: true}
+publicationExport.ts:283 🔍 [Export Debug] Filtering parent blocks by location...
+publicationExport.ts:285 🔎 [Export Debug] Processing parent block: {umoorId: '974ea623-dfe7-492c-8f5e-5a9f7935d9b2', locationId: '273b2d94-e417-4852-969a-73121bc6503f', isGlobal: true, title: 'Test Global'}
+publicationExport.ts:301 ✅ [Export Debug] Block included: true (locationId match: true , isGlobal: true )
+publicationExport.ts:305 📋 [Export Debug] Final parent blocks after filtering: 1
+publicationExport.ts:306 🎯 [Export Debug] Final parent blocks details: [{…}]
+publicationExport.ts:342 🏗️ [Export Debug] Processing parent block 1/1: {umoorId: '974ea623-dfe7-492c-8f5e-5a9f7935d9b2', title: 'Test Global', childrenCount: 1}
+publicationExport.ts:350 👶 [Export Debug] Processing children blocks: [{…}]
+publicationExport.ts:352 🧩 [Export Debug] Processing child block 1: {type: 'text', hasData: true, dataKeys: Array(2)}
+publicationExport.ts:360 📝 [Export Debug] Generated children HTML length: 169
+publicationExport.ts:361 🎨 [Export Debug] Children HTML preview: 
+        <div class="content-block text-block ltr">
+          <div class="text-content " >
+            <p>Txt here is optional</p>
+          </div>
+        </div>
+      
+publicationExport.ts:376 🏁 [Export Debug] Generated section HTML length: 777
+publicationExport.ts:67 📄 [Export Debug] Generated HTML content length: 8169
+publicationExport.ts:68 🎯 [Export Debug] HTML content preview (first 500 chars): 
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pehli Raat - Moharram</title>
+        <style>
+          
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        line-height: 1.6;
+ 
+publicationExport.ts:53 🚀 [Export Debug] Starting HTML export for publication: a80bd552-2caf-4c6b-bd8f-58f70fdc07f0
+publicationExport.ts:54 ⚙️ [Export Debug] Export options: {locationId: 'dfa33e68-2d0a-4074-beb2-fb85d7747185', hostLocationId: 'dfa33e68-2d0a-4074-beb2-fb85d7747185', template: 'professional', includeMetadata: true}
+publicationExport.ts:144 🔍 [Export Debug] Fetching publication data for ID: a80bd552-2caf-4c6b-bd8f-58f70fdc07f0
+publicationExport.ts:163 📊 [Export Debug] Raw publication data: {id: 'a80bd552-2caf-4c6b-bd8f-58f70fdc07f0', location_id: 'dfa33e68-2d0a-4074-beb2-fb85d7747185', title: 'Pehli Raat - Moharram', content: Array(1), status: 'published', …}
+publicationExport.ts:164 ❌ [Export Debug] Query error: null
+publicationExport.ts:171 📝 [Export Debug] Raw content field: [{…}]
+publicationExport.ts:172 🔢 [Export Debug] Content type: object
+publicationExport.ts:173 📏 [Export Debug] Content length/size: 1
+publicationExport.ts:177 🔄 [Export Debug] Parsing content: [{…}]
+publicationExport.ts:187 ✅ [Export Debug] Content is already an array with 1 items
+publicationExport.ts:188 📋 [Export Debug] Array content preview: [
+  {
+    "id": "1750670903196",
+    "title": "Dakheliyah Local",
+    "umoorId": "cd93fd1d-4bfd-464b-acf7-b27c754aaa55",
+    "children": [
+      {
+        "id": "1750670912714",
+        "data": {
+          "content": "This is a local colombo block, not shown elsewhere",
+          "language": "eng"
+        },
+        "type": "text",
+        "language": "eng"
+      }
+    ],
+    "isGlobal": false,
+    "umoorLogo": "https://vqfbnrstjztofxnhwrkq.supabase.co/storage/v1/object/public/umoor-logos/cd93fd1d-4bfd-464b-acf7-b27c754aaa55-1750508325328.jpeg",
+    "umoorName": "Internal Affairs",
+    "locationId": "dfa33e68-2d0a-4074-beb2-fb85d7747185",
+    "subheading": "",
+    "description": ""
+  }
+]
+publicationExport.ts:210 🎯 [Export Debug] Final parsed content: [{…}]
+publicationExport.ts:211 📊 [Export Debug] Final content length: 1
+publicationExport.ts:219 🏁 [Export Debug] Final publication object: {title: 'Pehli Raat - Moharram', breadcrumb: 'Ashara Mubaraka 1447H • Colombo', parentBlocks: Array(1)}
+publicationExport.ts:57 📖 [Export Debug] Retrieved publication: {title: 'Pehli Raat - Moharram', breadcrumb: 'Ashara Mubaraka 1447H • Colombo', parentBlocksCount: 1}
+publicationExport.ts:64 🖼️ [Export Debug] Optimized images count: 0
+publicationExport.ts:271 🎨 [Export Debug] Generating content HTML
+publicationExport.ts:272 📚 [Export Debug] Publication parent blocks: [{…}]
+publicationExport.ts:273 📊 [Export Debug] Parent blocks count: 1
+publicationExport.ts:274 ⚙️ [Export Debug] Export options: {locationId: 'dfa33e68-2d0a-4074-beb2-fb85d7747185', hostLocationId: 'dfa33e68-2d0a-4074-beb2-fb85d7747185', template: 'professional', includeMetadata: true}
+publicationExport.ts:283 🔍 [Export Debug] Filtering parent blocks by location...
+publicationExport.ts:285 🔎 [Export Debug] Processing parent block: {umoorId: 'cd93fd1d-4bfd-464b-acf7-b27c754aaa55', locationId: 'dfa33e68-2d0a-4074-beb2-fb85d7747185', isGlobal: false, title: 'Dakheliyah Local'}
+publicationExport.ts:301 ✅ [Export Debug] Block included: true (locationId match: true , isGlobal: false )
+publicationExport.ts:305 📋 [Export Debug] Final parent blocks after filtering: 1
+publicationExport.ts:306 🎯 [Export Debug] Final parent blocks details: [{…}]
+publicationExport.ts:342 🏗️ [Export Debug] Processing parent block 1/1: {umoorId: 'cd93fd1d-4bfd-464b-acf7-b27c754aaa55', title: 'Dakheliyah Local', childrenCount: 1}
+publicationExport.ts:350 👶 [Export Debug] Processing children blocks: [{…}]
+publicationExport.ts:352 🧩 [Export Debug] Processing child block 1: {type: 'text', hasData: true, dataKeys: Array(2)}
+publicationExport.ts:360 📝 [Export Debug] Generated children HTML length: 199
+publicationExport.ts:361 🎨 [Export Debug] Children HTML preview: 
+        <div class="content-block text-block ltr">
+          <div class="text-content " >
+            <p>This is a local colombo block, not shown elsewhere</p>
+          </div>
+        </div>
+      
+publicationExport.ts:376 🏁 [Export Debug] Generated section HTML length: 829
+publicationExport.ts:67 📄 [Export Debug] Generated HTML content length: 8221
+publicationExport.ts:68 🎯 [Export Debug] HTML content preview (first 500 chars): 
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pehli Raat - Moharram</title>
+        <style>
+          
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        line-height: 1.6;
+ 

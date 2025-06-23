@@ -29,7 +29,8 @@ import {
   FileText,
   Clock,
   MapPin,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -56,6 +57,9 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
   const [newPublicationTitle, setNewPublicationTitle] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [publicationToDelete, setPublicationToDelete] = useState<any>(null);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'html' | 'pdf'>('html');
+  const [isExporting, setIsExporting] = useState(false);
 
   // Data fetching
   const { data: event, isLoading: eventLoading } = useEvent(eventId);
@@ -147,7 +151,181 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
     }
   };
 
+  const handleIndividualExport = async (publication: any) => {
+    setIsExporting(true);
+    try {
+      // Import the export service
+      const { publicationExportService } = await import('@/services/publicationExport');
 
+      const exportOptions = {
+        locationId: publication.location_id,
+        hostLocationId: publication.location_id,
+        template: 'professional' as const,
+        includeMetadata: true
+      };
+
+      console.log('📄 [Individual Export Debug] Exporting publication:', {
+        id: publication.id,
+        title: publication.title,
+        locationName: publication.location?.name,
+        exportOptions
+      });
+
+      let content: string | Blob;
+      let filename: string;
+      
+      if (exportFormat === 'html') {
+        content = await publicationExportService.exportAsHTML(publication.id, exportOptions);
+        filename = `${publication.location?.name || 'Unknown'}-${publication.title}.html`;
+      } else {
+        content = await publicationExportService.exportAsPDF(publication.id, exportOptions);
+        filename = `${publication.location?.name || 'Unknown'}-${publication.title}.pdf`;
+      }
+
+      // Create download link
+      const blob = content instanceof Blob ? content : new Blob([content], { 
+        type: exportFormat === 'html' ? 'text/html' : 'application/pdf' 
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export Successful",
+        description: `${publication.location?.name} publication exported successfully.`
+      });
+    } catch (error) {
+      console.error('Individual export failed:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export publication. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleBulkExport = async () => {
+    if (publicationsForDate.length === 0) {
+      toast({
+        title: "No Publications",
+        description: "No publications found for the selected date.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      // Import JSZip dynamically
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+
+      // Import the export service
+      const { publicationExportService } = await import('@/services/publicationExport');
+
+      // Group publications by location to create one export per location
+      const locationGroups = new Map<string, { locationId: string; locationName: string; publications: any[] }>();
+      
+      publicationsForDate.forEach(publication => {
+        const locationKey = publication.location_id;
+        if (!locationGroups.has(locationKey)) {
+          locationGroups.set(locationKey, {
+            locationId: publication.location_id,
+            locationName: publication.location?.name || 'Unknown',
+            publications: []
+          });
+        }
+        locationGroups.get(locationKey)!.publications.push(publication);
+      });
+
+      console.log('🏢 [Bulk Export Debug] Location groups:', Array.from(locationGroups.entries()).map(([key, group]) => ({
+        locationId: key,
+        locationName: group.locationName,
+        publicationCount: group.publications.length
+      })));
+
+      // Create one comprehensive export per location
+      for (const [locationId, locationGroup] of locationGroups) {
+        try {
+          // Use the first publication as the base, but set export options to include all content for this location
+          const basePublication = locationGroup.publications[0];
+          
+          let content: string | Blob;
+          let filename: string;
+          
+          if (exportFormat === 'html') {
+            // Export with location-specific filtering that includes global blocks
+            const exportOptions = {
+              locationId: locationGroup.locationId,
+              hostLocationId: locationGroup.locationId, // This location is the host for this export
+              template: 'professional' as const,
+              includeMetadata: true
+            };
+            
+            console.log('🔧 [Bulk Export Debug] Creating comprehensive export for location:', {
+              locationId: locationGroup.locationId,
+              locationName: locationGroup.locationName,
+              basePublicationId: basePublication.id,
+              exportOptions
+            });
+            
+            content = await publicationExportService.exportAsHTML(basePublication.id, exportOptions);
+            filename = `${locationGroup.locationName}-${basePublication.title}.html`;
+          } else {
+            const exportOptions = {
+              locationId: locationGroup.locationId,
+              hostLocationId: locationGroup.locationId,
+              template: 'professional' as const,
+              includeMetadata: true
+            };
+            content = await publicationExportService.exportAsPDF(basePublication.id, exportOptions);
+            filename = `${locationGroup.locationName}-${basePublication.title}.pdf`;
+          }
+          
+          // Add to zip with location-specific folder structure
+          zip.file(`${locationGroup.locationName}/${filename}`, content);
+          
+          console.log('✅ [Bulk Export Debug] Successfully created export for location:', locationGroup.locationName);
+        } catch (error) {
+          console.error(`Failed to export for location ${locationGroup.locationName}:`, error);
+          // Continue with other locations
+        }
+      }
+
+      // Generate and download zip
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `publications-${format(new Date(selectedDate), 'yyyy-MM-dd')}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export Complete",
+        description: `Successfully exported ${publicationsForDate.length} publications as ${exportFormat.toUpperCase()}.`
+      });
+      setShowExportDialog(false);
+    } catch (error) {
+      console.error('Bulk export failed:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export publications. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -214,9 +392,22 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
       {/* Publications for Selected Date */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Publications for {format(new Date(selectedDate), 'MMM dd, yyyy')}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              Publications for {format(new Date(selectedDate), 'MMM dd, yyyy')}
+            </CardTitle>
+            {publicationsForDate.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowExportDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export All
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {publicationsLoading ? (
@@ -268,7 +459,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/events/${eventId}/publications/${publication.id}/edit?date=${selectedDate}`)}
+                            onClick={() => navigate(`/events/${eventId}/locations/${publication.location?.id}/publications/${publication.id}/edit`)}
                           >
                             <Edit className="h-4 w-4" />
                             Edit
@@ -276,10 +467,23 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/events/${eventId}/publications/${publication.id}/preview`)}
+                            onClick={() => navigate(`/events/${eventId}/locations/${publication.location?.id}/publications/${publication.id}/view`)}
                           >
                             <Eye className="h-4 w-4" />
                             Preview
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleIndividualExport(publication)}
+                            disabled={isExporting}
+                          >
+                            {isExporting ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                            Export
                           </Button>
                           <Button
                             variant="outline"
@@ -351,6 +555,54 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
             </Button>
             <Button variant="destructive" onClick={handleDeletePublication}>
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export Publications</DialogTitle>
+            <DialogDescription>
+              Export all publications for {format(new Date(selectedDate), 'EEEE, MMM dd, yyyy')} ({publicationsForDate.length} publications)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select value={exportFormat} onValueChange={(value: 'html' | 'pdf') => setExportFormat(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="html">HTML (Email-ready)</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm text-gray-600">
+              <p>Publications will be organized by location in a ZIP file.</p>
+              <p>Format: [Location Name]/[Publication Title].{exportFormat}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)} disabled={isExporting}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkExport} disabled={isExporting}>
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export {publicationsForDate.length} Publications
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

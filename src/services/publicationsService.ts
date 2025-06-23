@@ -96,7 +96,15 @@ export const publicationsService = {
         .order('locations(name)');
 
       if (error) throw error;
-      return data || [];
+      
+      // Transform the data to match expected structure
+      // Supabase returns 'locations' but our interface expects 'location'
+      const transformedData = data?.map(item => ({
+        ...item,
+        location: item.locations
+      })) || [];
+      
+      return transformedData;
     } catch (error) {
       handleSupabaseError(error, 'fetch publications by event and date');
     }

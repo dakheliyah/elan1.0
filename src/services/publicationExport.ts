@@ -50,11 +50,23 @@ export class PublicationExportService {
 
   async exportAsHTML(publicationId: string, options: ExportOptions = {}): Promise<string> {
     try {
+      console.log('🚀 [Export Debug] Starting HTML export for publication:', publicationId);
+      console.log('⚙️ [Export Debug] Export options:', options);
+      
       const publication = await this.getPublicationData(publicationId);
+      console.log('📖 [Export Debug] Retrieved publication:', {
+        title: publication.title,
+        breadcrumb: publication.breadcrumb,
+        parentBlocksCount: publication.parentBlocks.length
+      });
 
       const optimizedImages = await this.optimizeImagesForExport(publication);
+      console.log('🖼️ [Export Debug] Optimized images count:', optimizedImages.length);
       
       const htmlContent = this.generateHTMLContent(publication, optimizedImages, options);
+      console.log('📄 [Export Debug] Generated HTML content length:', htmlContent.length);
+      console.log('🎯 [Export Debug] HTML content preview (first 500 chars):', htmlContent.substring(0, 500));
+      
       return htmlContent;
     } catch (error) {
       console.error('HTML export failed:', error);
@@ -129,47 +141,83 @@ export class PublicationExportService {
   }
 
   private async getPublicationData(publicationId: string): Promise<Publication> {
+    console.log('🔍 [Export Debug] Fetching publication data for ID:', publicationId);
+    
     const { data, error } = await supabase
       .from('publications')
       .select(`
         *,
-        location:locations(name, timezone),
-        event:locations(event:events(name))
+        locations!inner(
+          id,
+          name,
+          timezone,
+          events!inner(
+            id,
+            name
+          )
+        )
       `)
       .eq('id', publicationId)
       .single();
 
+    console.log('📊 [Export Debug] Raw publication data:', data);
+    console.log('❌ [Export Debug] Query error:', error);
+
     if (error || !data) {
+      console.error('💥 [Export Debug] Publication not found or error occurred');
       throw new Error('Publication not found');
     }
 
+    console.log('📝 [Export Debug] Raw content field:', data.content);
+    console.log('🔢 [Export Debug] Content type:', typeof data.content);
+    console.log('📏 [Export Debug] Content length/size:', Array.isArray(data.content) ? data.content.length : (typeof data.content === 'string' ? data.content.length : 'N/A'));
+
     // Safely parse the content with proper type casting
     const parseContent = (content: any): any[] => {
-      if (!content) return [];
+      console.log('🔄 [Export Debug] Parsing content:', content);
+      
+      if (!content) {
+        console.log('⚠️ [Export Debug] Content is null/undefined/empty');
+        return [];
+      }
       
       try {
         // If it's already an array, return it
         if (Array.isArray(content)) {
+          console.log('✅ [Export Debug] Content is already an array with', content.length, 'items');
+          console.log('📋 [Export Debug] Array content preview:', JSON.stringify(content, null, 2));
           return content;
         }
         
         // If it's a string, try to parse it
         if (typeof content === 'string') {
-          return JSON.parse(content);
+          console.log('🔤 [Export Debug] Content is string, attempting to parse JSON');
+          const parsed = JSON.parse(content);
+          console.log('✅ [Export Debug] Successfully parsed JSON:', parsed);
+          return parsed;
         }
         
+        console.log('⚠️ [Export Debug] Content is neither array nor string, returning empty array');
         return [];
       } catch (error) {
-        console.error('Error parsing publication content:', error);
+        console.error('💥 [Export Debug] Error parsing publication content:', error);
+        console.error('🔍 [Export Debug] Failed content value:', content);
         return [];
       }
     };
 
-    return {
+    const parsedContent = parseContent(data.content);
+    console.log('🎯 [Export Debug] Final parsed content:', parsedContent);
+    console.log('📊 [Export Debug] Final content length:', parsedContent.length);
+
+    const result = {
       title: data.title,
-      breadcrumb: `${data.event?.event?.name || 'Event'} • ${data.location?.name || 'Location'}`,
-      parentBlocks: parseContent(data.content)
+      breadcrumb: `${data.locations?.events?.name || 'Event'} • ${data.locations?.name || 'Location'}`,
+      parentBlocks: parsedContent
     };
+
+    console.log('🏁 [Export Debug] Final publication object:', result);
+    return result;
   }
 
   private generateHTMLContent(publication: Publication, optimizedImages: OptimizedImage[], options: ExportOptions): string {
@@ -220,13 +268,27 @@ export class PublicationExportService {
   }
 
   private generateContentHTML(publication: Publication, optimizedImages: OptimizedImage[], options: ExportOptions): string {
+    console.log('🎨 [Export Debug] Generating content HTML');
+    console.log('📚 [Export Debug] Publication parent blocks:', publication.parentBlocks);
+    console.log('📊 [Export Debug] Parent blocks count:', publication.parentBlocks.length);
+    console.log('⚙️ [Export Debug] Export options:', options);
+    
     if (publication.parentBlocks.length === 0) {
+      console.log('⚠️ [Export Debug] No parent blocks found, returning empty message');
       return '<div class="empty-publication">No content blocks added yet</div>';
     }
 
     const umoorMap = new Map<string, number>();
 
+    console.log('🔍 [Export Debug] Filtering parent blocks by location...');
     const finalParentBlocks = publication.parentBlocks.filter((parentBlock) => {
+      console.log('🔎 [Export Debug] Processing parent block:', {
+        umoorId: parentBlock.umoorId,
+        locationId: parentBlock.locationId,
+        isGlobal: parentBlock.isGlobal,
+        title: parentBlock.title || parentBlock.umoorName
+      });
+      
       if (!umoorMap.has(parentBlock.umoorId)) {
         umoorMap.set(parentBlock.umoorId, 1);
       } else {
@@ -235,8 +297,18 @@ export class PublicationExportService {
         parentBlock.umoorLogo = '';
       }
 
-      return parentBlock.locationId === options.locationId || parentBlock.isGlobal === true
+      const shouldInclude = parentBlock.locationId === options.locationId || parentBlock.isGlobal === true;
+      console.log('✅ [Export Debug] Block included:', shouldInclude, '(locationId match:', parentBlock.locationId === options.locationId, ', isGlobal:', parentBlock.isGlobal, ')');
+      return shouldInclude;
     });
+    
+    console.log('📋 [Export Debug] Final parent blocks after filtering:', finalParentBlocks.length);
+    console.log('🎯 [Export Debug] Final parent blocks details:', finalParentBlocks.map(block => ({
+      umoorId: block.umoorId,
+      locationId: block.locationId,
+      isGlobal: block.isGlobal,
+      childrenCount: block.children?.length || 0
+    })));
 
     if (options.hostLocationId !== options.locationId) {
       // Group blocks by umoorId, with global blocks first within each group
@@ -267,16 +339,32 @@ export class PublicationExportService {
     }
 
     return finalParentBlocks.map((parentBlock, index) => {
+      console.log(`🏗️ [Export Debug] Processing parent block ${index + 1}/${finalParentBlocks.length}:`, {
+        umoorId: parentBlock.umoorId,
+        title: parentBlock.title || parentBlock.umoorName,
+        childrenCount: parentBlock.children?.length || 0
+      });
+      
       const umoorHeader = this.generateUmoorHeaderHTML(parentBlock);
-      const childrenHTML = parentBlock.children.map(child => 
-        this.generateChildBlockHTML(child, optimizedImages)
-      ).join('');
+      
+      console.log('👶 [Export Debug] Processing children blocks:', parentBlock.children);
+      const childrenHTML = parentBlock.children.map((child, childIndex) => {
+        console.log(`🧩 [Export Debug] Processing child block ${childIndex + 1}:`, {
+          type: child.type,
+          hasData: !!child.data,
+          dataKeys: child.data ? Object.keys(child.data) : []
+        });
+        return this.generateChildBlockHTML(child, optimizedImages);
+      }).join('');
+      
+      console.log('📝 [Export Debug] Generated children HTML length:', childrenHTML.length);
+      console.log('🎨 [Export Debug] Children HTML preview:', childrenHTML.substring(0, 200) + (childrenHTML.length > 200 ? '...' : ''));
       
       const isLast = index === finalParentBlocks.length - 1;
       const nextBlock = finalParentBlocks[index + 1];
       const hasSameUmoorId = nextBlock && nextBlock.umoorId === parentBlock.umoorId;
       
-      return `
+      const sectionHTML = `
         <section class="umoor-section${isLast ? ' last-section' : ''}${hasSameUmoorId ? ' no-divider' : ''}">
           ${umoorHeader}
           <div class="umoor-content">
@@ -284,6 +372,9 @@ export class PublicationExportService {
           </div>
         </section>
       `;
+      
+      console.log('🏁 [Export Debug] Generated section HTML length:', sectionHTML.length);
+      return sectionHTML;
     }).join('');
   }
 
