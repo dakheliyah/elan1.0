@@ -108,7 +108,7 @@ const PublicationEditorPage = () => {
   });
 
   const [showUmoorSelector, setShowUmoorSelector] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);

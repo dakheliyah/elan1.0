@@ -221,23 +221,6 @@ const LocationDetail = () => {
                         </div>
                         <h1 className="text-3xl font-bold text-gray-900">Publications</h1>
                       </div>
-
-                      <div className='flex gap-2 items-center'>
-                         <div className="text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
-                           📝 Publications are now managed at the event level.
-                           <Button 
-                             variant="link" 
-                             size="sm" 
-                             onClick={() => navigate(`/events/${eventId}`)}
-                             className="p-0 h-auto ml-2 text-blue-600"
-                           >
-                             Manage Publications →
-                           </Button>
-                         </div>
-                         <div className="flex items-center gap-4">
-                           <UserMenu />
-                         </div>
-                       </div>
                     </div>
                 </div>
               </div>
