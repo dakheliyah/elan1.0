@@ -9,6 +9,7 @@ import NewEventModal, { EventFormData } from '@/components/NewEventModal';
 import { useToast } from '@/hooks/use-toast';
 import UserMenu from '@/components/UserMenu';
 import { useEventsWithLocationCount, useCreateEvent, useDeleteEvent } from '@/hooks/useSupabaseQuery';
+import { useCurrentProfile } from '@/hooks/useProfiles';
 import { format } from 'date-fns';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
@@ -20,8 +21,12 @@ const EventManagement = () => {
   
   // Use Supabase hooks for data fetching and mutations
   const { data: events = [], isLoading, error } = useEventsWithLocationCount();
+  const { data: currentProfile } = useCurrentProfile();
   const createEventMutation = useCreateEvent();
   const deleteEventMutation = useDeleteEvent();
+
+  // Check if user is admin
+  const isAdmin = currentProfile?.role === 'admin';
 
   const handleNewEvent = () => {
     setIsModalOpen(true);
@@ -96,18 +101,20 @@ const EventManagement = () => {
                     <p className="mt-1 text-sm text-gray-500">Manage and organize your events</p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Button 
-                      onClick={handleNewEvent}
-                      disabled={createEventMutation.isPending}
-                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 flex items-center gap-2"
-                    >
-                      {createEventMutation.isPending ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <Plus size={16} />
-                      )}
-                      New Event
-                    </Button>
+                    {isAdmin && (
+                      <Button 
+                        onClick={handleNewEvent}
+                        disabled={createEventMutation.isPending}
+                        className="bg-primary hover:bg-primary/90 text-white px-6 py-2 flex items-center gap-2"
+                      >
+                        {createEventMutation.isPending ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Plus size={16} />
+                        )}
+                        New Event
+                      </Button>
+                    )}
                     <UserMenu />
                   </div>
                 </div>
@@ -174,41 +181,45 @@ const EventManagement = () => {
                                 e.stopPropagation();
                                 handleViewEvent(event.id);
                               }}
-                              className="flex-1 hover:bg-gray-50"
+                              className={`${isAdmin ? 'flex-1' : 'w-full'} hover:bg-gray-50`}
                             >
                               <Eye size={14} className="mr-1" />
                               View
                             </Button>
                             
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditEvent(event.id);
-                              }}
-                              className="flex-1 hover:bg-gray-50"
-                            >
-                              <Edit size={14} className="mr-1" />
-                              Edit
-                            </Button>
+                            {isAdmin && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditEvent(event.id);
+                                }}
+                                className="flex-1 hover:bg-gray-50"
+                              >
+                                <Edit size={14} className="mr-1" />
+                                Edit
+                              </Button>
+                            )}
                             
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteEvent(event.id);
-                              }}
-                              disabled={deleteEventMutation.isPending}
-                              className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                            >
-                              {deleteEventMutation.isPending ? (
-                                <Loader2 size={14} className="animate-spin" />
-                              ) : (
-                                <Trash2 size={14} />
-                              )}
-                            </Button>
+                            {isAdmin && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteEvent(event.id);
+                                }}
+                                disabled={deleteEventMutation.isPending}
+                                className="hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                              >
+                                {deleteEventMutation.isPending ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  <Trash2 size={14} />
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -224,15 +235,19 @@ const EventManagement = () => {
                     <Calendar className="h-6 w-6 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No events yet</h3>
-                  <p className="text-gray-500 mb-6">Get started by creating your first event.</p>
-                  <Button 
-                    onClick={handleNewEvent} 
-                    disabled={createEventMutation.isPending}
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Create Event
-                  </Button>
+                  <p className="text-gray-500 mb-6">
+                    {isAdmin ? 'Get started by creating your first event.' : 'No events available at the moment.'}
+                  </p>
+                  {isAdmin && (
+                    <Button 
+                      onClick={handleNewEvent} 
+                      disabled={createEventMutation.isPending}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      <Plus size={16} className="mr-2" />
+                      Create Event
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

@@ -20,6 +20,7 @@ import MediaLibrary from "./pages/MediaLibrary";
 import MediaOptimization from "./pages/MediaOptimization";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleProtectedRoute from './components/RoleProtectedRoute';
 import InviteAcceptance from './pages/InviteAcceptance';
 import PublicationEditorPage from './pages/PublicationEditor';
 import PublicationView from './pages/PublicationView';
@@ -40,19 +41,23 @@ function App() {
               <Route path="/auth" element={<Auth />} />
               <Route path="/invite/:token" element={<InviteAcceptance />} />
               
-              {/* Protected Routes */}
+              {/* Protected Routes - General Access (All authenticated users) */}
               <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/events" element={<EventManagement />} />
                 <Route path="/events/:eventId" element={<EventDetail />} />
                 <Route path="/events/:eventId/locations/:locationId" element={<LocationDetail />} />
                 <Route path="/events/:eventId/locations/:locationId/publications/:publicationId/view" element={<PublicationView />} />
                 <Route path="/events/:eventId/locations/:locationId/publications/:publicationId/edit" element={<PublicationEditorPage />} />
+                <Route path="/media" element={<MediaLibrary />} />
+                <Route path="/media/optimization" element={<MediaOptimization />} />
+              </Route>
+              
+              {/* Admin-Only Routes */}
+              <Route element={<ProtectedRoute><RoleProtectedRoute allowedRoles={['admin']}><Outlet /></RoleProtectedRoute></ProtectedRoute>}>
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/umoor" element={<UmoorManagement />} />
                 <Route path="/users" element={<UserManagement />} />
                 <Route path="/export" element={<ExportModule />} />
-                <Route path="/media" element={<MediaLibrary />} />
-                <Route path="/media/optimization" element={<MediaOptimization />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />
