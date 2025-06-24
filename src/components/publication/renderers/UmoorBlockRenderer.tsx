@@ -40,7 +40,7 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
   };
 
   return (
-    <div className="relative mb-8">
+    <div className="relative mb-6">
       {/* Logo positioned in top right */}
       <div className="absolute top-0 right-0 z-10">
         {renderUmoorLogo()}

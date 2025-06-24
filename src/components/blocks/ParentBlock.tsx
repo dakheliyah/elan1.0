@@ -126,18 +126,18 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Type size={14} />
-                Add Text
+                Add Rich Text
                 <ChevronDown size={14} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => onAddChild('text', 'eng')}>
                 <Globe size={14} className="mr-2" />
-                English Text
+                English Rich Text
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onAddChild('text', 'lud')}>
                 <Languages size={14} className="mr-2" />
-                Lisan ud-Dawat Text
+                Lisan ud-Dawat Rich Text
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

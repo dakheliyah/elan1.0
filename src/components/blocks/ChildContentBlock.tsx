@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trash2 } from 'lucide-react';
-import TextBlock from './TextBlock';
+import RichTextBlock from './RichTextBlock';
 import ImageBlock from './ImageBlock';
 import { ContentBlock } from '../../pages/PublicationEditor';
 
@@ -41,7 +41,7 @@ const ChildContentBlock: React.FC<ChildContentBlockProps> = ({
 
       {/* Content */}
       {block.type === 'text' ? (
-        <TextBlock
+        <RichTextBlock
           data={block.data}
           onChange={onUpdate}
           language={block.language}

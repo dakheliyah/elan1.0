@@ -20,6 +20,7 @@ import {
   Calendar,
   FileText
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -342,13 +343,21 @@ const EventDetail = () => {
                         >
                           <CardHeader className="pb-3">
                             <div className="flex justify-between items-start">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                  {location.name}
-                                </h3>
-                                {location.is_host && (
-                                  <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                                )}
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage src={location.logo_url || undefined} alt={location.name} />
+                                  <AvatarFallback className="bg-blue-100">
+                                    <MapPin className="h-5 w-5 text-blue-600" />
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="text-lg font-semibold text-gray-900">
+                                    {location.name}
+                                  </h3>
+                                  {location.is_host && (
+                                    <Star className="h-5 w-5 text-yellow-500 fill-current" />
+                                  )}
+                                </div>
                               </div>
                               {isAdmin && (
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

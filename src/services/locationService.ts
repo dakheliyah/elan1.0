@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/database.types';
 import { locationsService } from './locationsService';
 
 type LocationInsert = Database['public']['Tables']['locations']['Insert'];

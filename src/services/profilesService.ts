@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/database.types';
 import { handleSupabaseError } from './serviceUtils';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];

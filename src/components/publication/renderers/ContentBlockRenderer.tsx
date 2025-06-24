@@ -7,17 +7,19 @@ import { ImageBlockRenderer } from './ImageBlockRenderer';
 interface ContentBlockRendererProps {
   block: ContentBlock;
   mode?: 'preview' | 'export';
+  isLast?: boolean;
 }
 
 export const ContentBlockRenderer: React.FC<ContentBlockRendererProps> = ({ 
   block, 
-  mode = 'preview' 
+  mode = 'preview',
+  isLast = false
 }) => {
   switch (block.type) {
     case 'text':
-      return <TextBlockRenderer block={block} mode={mode} />;
+      return <TextBlockRenderer block={block} mode={mode} isLast={isLast} />;
     case 'image':
-      return <ImageBlockRenderer block={block} mode={mode} />;
+      return <ImageBlockRenderer block={block} mode={mode} isLast={isLast} />;
     default:
       return null;
   }

@@ -19,12 +19,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2, Star } from 'lucide-react';
+import { LocationLogoUpload } from '@/components/location/LocationLogoUpload';
 
 export interface LocationEditData {
   name: string;
   timezone: string;
   description?: string;
   is_host?: boolean;
+  logo_url?: string;
 }
 
 interface EditLocationModalProps {
@@ -37,6 +39,7 @@ interface EditLocationModalProps {
     timezone: string;
     description?: string;
     is_host?: boolean;
+    logo_url?: string;
   } | null;
 }
 
@@ -71,7 +74,12 @@ const EditLocationModal: React.FC<EditLocationModalProps> = ({
     timezone: '',
     description: '',
     is_host: false,
+    logo_url: '',
   });
+
+  const handleLogoUpload = (logoUrl: string) => {
+    setFormData(prev => ({ ...prev, logo_url: logoUrl }));
+  };
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -82,6 +90,7 @@ const EditLocationModal: React.FC<EditLocationModalProps> = ({
         timezone: location.timezone,
         description: location.description || '',
         is_host: location.is_host || false,
+        logo_url: location.logo_url || '',
       });
     }
   }, [location, isOpen]);
@@ -182,6 +191,16 @@ const EditLocationModal: React.FC<EditLocationModalProps> = ({
             {errors.timezone && (
               <p className="text-sm text-red-500">{errors.timezone}</p>
             )}
+          </div>
+
+          {/* Logo Upload */}
+          <div className="space-y-2">
+            <Label>Location Logo (Optional)</Label>
+            <LocationLogoUpload
+              currentLogo={formData.logo_url}
+              onLogoUpload={handleLogoUpload}
+              locationId={location?.id || 'temp'}
+            />
           </div>
 
           {/* Host Location Toggle */}

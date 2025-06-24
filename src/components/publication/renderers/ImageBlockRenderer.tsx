@@ -5,18 +5,20 @@ import { ContentBlock } from '@/pages/PublicationEditor';
 interface ImageBlockRendererProps {
   block: ContentBlock;
   mode?: 'preview' | 'export';
+  isLast?: boolean;
 }
 
 export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ 
   block, 
-  mode = 'preview' 
+  mode = 'preview',
+  isLast = false
 }) => {
   const imageClasses = mode === 'export' 
     ? 'w-full rounded-lg shadow-sm border border-gray-200 max-h-96 object-cover'
     : 'w-full rounded-lg shadow-sm border border-gray-200 max-h-80 object-cover';
 
   return (
-    <div className="mb-6">
+    <div className={isLast ? "" : "mb-0"}>
       {block.data.imageUrl ? (
         <figure className="mx-0">
           <img

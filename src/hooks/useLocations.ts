@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import { locationsService } from '@/services/locationsService';
 
 export const useAllLocations = () => {
@@ -67,5 +68,29 @@ export const useLocationsWithPublicationCount = (eventId: string) => {
     queryKey: ['locations', 'publicationCount', eventId],
     queryFn: () => locationsService.getWithPublicationCount(eventId),
     enabled: !!eventId,
+  });
+};
+
+export const useUploadLocationLogo = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ file, locationId }: { file: File; locationId: string }) =>
+      locationsService.uploadLogo(file, locationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast({
+        title: "Success",
+        description: "Location logo uploaded successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload location logo",
+        variant: "destructive",
+      });
+    },
   });
 };

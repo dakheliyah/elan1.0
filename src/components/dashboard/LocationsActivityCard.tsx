@@ -3,6 +3,7 @@ import React from 'react';
 import { MapPin, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -23,6 +24,7 @@ export function LocationsActivityCard() {
       
       return (data || []).map(location => ({
         ...location,
+        logo_url: '', // Default empty string since column doesn't exist yet
         publicationCount: location.publications?.length || 0,
         lastActivity: location.publications?.length > 0 
           ? Math.max(...location.publications.map(p => new Date(p.updated_at).getTime()))
@@ -66,11 +68,19 @@ export function LocationsActivityCard() {
           {locations.slice(0, 6).map((location) => (
             <div key={location.id} className="space-y-2">
               <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-sm">{location.name}</h4>
-                  <p className="text-xs text-gray-600">
-                    {location.events?.name} • {location.publicationCount} publications
-                  </p>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={location.logo_url || undefined} alt={location.name} />
+                    <AvatarFallback>
+                      <MapPin className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-medium text-sm">{location.name}</h4>
+                    <p className="text-xs text-gray-600">
+                      {location.events?.name} • {location.publicationCount} publications
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Activity className={`h-4 w-4 ${

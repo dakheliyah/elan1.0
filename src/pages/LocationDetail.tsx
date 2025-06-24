@@ -40,6 +40,7 @@ import {
   MapPin,
   Users
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import {
   useLocation,
@@ -215,11 +216,28 @@ const LocationDetail = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">
-                          {event.name} • {location.name}
+                      <div className="flex items-center gap-4">
+                        {location.logo_url ? (
+                          <div className="relative h-20 w-20 rounded-md overflow-hidden border border-gray-200 flex-shrink-0">
+                            <img 
+                              src={location.logo_url} 
+                              alt={`${location.name} logo`} 
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <Avatar className="h-20 w-20">
+                            <AvatarFallback className="bg-blue-100">
+                              <MapPin className="h-10 w-10 text-blue-600" />
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">
+                            {event.name} • {location.name}
+                          </div>
+                          <h1 className="text-3xl font-bold text-gray-900">Publications</h1>
                         </div>
-                        <h1 className="text-3xl font-bold text-gray-900">Publications</h1>
                       </div>
                     </div>
                 </div>

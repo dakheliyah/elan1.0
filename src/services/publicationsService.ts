@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/database.types';
 import { handleSupabaseError } from './serviceUtils';
 
 type Publication = Database['public']['Tables']['publications']['Row'];
@@ -201,7 +201,7 @@ export const publicationsService = {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as PublicationLocation;
     } catch (error) {
       handleSupabaseError(error, 'update location content');
     }
@@ -226,7 +226,7 @@ export const publicationsService = {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as PublicationLocation;
     } catch (error) {
       handleSupabaseError(error, 'update location status');
     }
@@ -372,7 +372,7 @@ export const publicationsService = {
         .order('locations(name)');
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as PublicationLocation[];
     } catch (error) {
       handleSupabaseError(error, 'fetch published locations');
     }

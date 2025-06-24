@@ -16,18 +16,19 @@ export const PublicationSectionRenderer: React.FC<PublicationSectionRendererProp
   isLast = false
 }) => {
   return (
-    <div className="mb-12">
+    <div className="publication-section">
       {/* Umoor Section Header */}
       <UmoorBlockRenderer umoorBlock={parentBlock} mode={mode} />
 
       {/* Content Blocks */}
-      <div className="space-y-4 pl-0">
+      <div className="space-y-6 pl-0">
         {parentBlock.children.length > 0 ? (
-          parentBlock.children.map((child) => (
+          parentBlock.children.map((child, index) => (
             <ContentBlockRenderer
               key={child.id}
               block={child}
               mode={mode}
+              isLast={index === parentBlock.children.length - 1}
             />
           ))
         ) : (
@@ -39,7 +40,7 @@ export const PublicationSectionRenderer: React.FC<PublicationSectionRendererProp
       
       {/* Section separator - only if not the last section */}
       {!isLast && (
-        <div className="mt-12 pt-8 border-b border-gray-200"></div>
+        <div className="mt-8 pt-6 border-b border-gray-200"></div>
       )}
     </div>
   );

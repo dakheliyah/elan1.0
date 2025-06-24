@@ -29,7 +29,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
           <p className="text-lg">Add Umoor blocks to see the preview</p>
         </div>
       ) : (
-        <div className="space-y-0">
+        <div className="space-y-8">
           {publication.parentBlocks.map((parentBlock, index) => (
             <PublicationSectionRenderer
               key={parentBlock.id}

@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/database.types';
 
 // Type definitions
 type Umoor = Database['public']['Tables']['umoors']['Row'];
