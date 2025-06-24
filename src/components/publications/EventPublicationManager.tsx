@@ -42,6 +42,7 @@ import {
 } from '@/hooks/usePublications';
 import { useEvent } from '@/hooks/useSupabaseQuery';
 import { useCurrentProfile } from '@/hooks/useProfiles';
+import { useLocations } from '@/hooks/useLocations';
 import type { CreateEventPublicationData } from '@/services/publicationsService';
 
 interface EventPublicationManagerProps {
@@ -65,7 +66,11 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
   // Data fetching
   const { data: event, isLoading: eventLoading } = useEvent(eventId);
   const { data: publications = [], isLoading: publicationsLoading } = usePublicationsByEvent(eventId);
+  const { data: locations = [] } = useLocations(eventId);
   const { data: currentProfile } = useCurrentProfile();
+  
+  // Find host location for the event
+  const hostLocation = locations.find(loc => loc.is_host);
   
   // Role checking
   const isAdmin = currentProfile?.role === 'admin';
@@ -119,7 +124,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
       const hostPublication = createdPublications.find(pub => pub.location?.is_host);
       const targetPublication = hostPublication || createdPublications[0];
       if (targetPublication) {
-        navigate(`/events/${eventId}/publications/${targetPublication.id}/edit?date=${selectedDate}`);
+        navigate(`/events/${eventId}/locations/${targetPublication.location_id}/publications/${targetPublication.id}/edit`);
       }
       
       toast({
@@ -164,9 +169,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
 
       const exportOptions = {
         locationId: publication.location_id,
-        hostLocationId: publication.location_id,
+        hostLocationId: hostLocation?.id,
         template: 'professional' as const,
-        includeMetadata: true
+        includeMetadata: true,
+        includeGlobalContent: hostLocation && publication.location_id !== hostLocation.id
       };
 
       console.log('📄 [Individual Export Debug] Exporting publication:', {
@@ -269,9 +275,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
             // Export with location-specific filtering that includes global blocks
             const exportOptions = {
               locationId: locationGroup.locationId,
-              hostLocationId: locationGroup.locationId, // This location is the host for this export
+              hostLocationId: hostLocation?.id,
               template: 'professional' as const,
-              includeMetadata: true
+              includeMetadata: true,
+              includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id
             };
             
             console.log('🔧 [Bulk Export Debug] Creating comprehensive export for location:', {
@@ -286,9 +293,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
           } else {
             const exportOptions = {
               locationId: locationGroup.locationId,
-              hostLocationId: locationGroup.locationId,
+              hostLocationId: hostLocation?.id,
               template: 'professional' as const,
-              includeMetadata: true
+              includeMetadata: true,
+              includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id
             };
             content = await publicationExportService.exportAsPDF(basePublication.id, exportOptions);
             filename = `${locationGroup.locationName}-${basePublication.title}.pdf`;

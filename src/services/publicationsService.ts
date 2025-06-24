@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/types/database.types';
+import type { Database } from '@/integrations/supabase/types';
 import { handleSupabaseError } from './serviceUtils';
 
 type Publication = Database['public']['Tables']['publications']['Row'];

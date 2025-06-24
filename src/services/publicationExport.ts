@@ -1,5 +1,12 @@
-import { ParentBlockData, Publication } from '@/pages/PublicationEditor';
+import { ParentBlockData, Publication as BasePublication } from '@/pages/PublicationEditor';
 import { supabase } from '@/integrations/supabase/client';
+import { publicationsService } from './publicationsService';
+
+// Extended Publication interface for export functionality
+export interface Publication extends BasePublication {
+  locationName?: string;
+  locationLogo?: string;
+}
 
 export interface ExportOptions {
   template?: 'professional' | 'minimal' | 'branded';
@@ -140,33 +147,21 @@ export class PublicationExportService {
     return images;
   }
 
-  private async getPublicationData(publicationId: string): Promise<Publication> {
+  private async getPublicationData(publicationId: string, options: ExportOptions = {}): Promise<Publication> {
     console.log('🔍 [Export Debug] Fetching publication data for ID:', publicationId);
+    console.log('⚙️ [Export Debug] Export options for data fetch:', options);
     
-    const { data, error } = await supabase
-      .from('publications')
-      .select(`
-        *,
-        locations!inner(
-          id,
-          name,
-          timezone,
-          events!inner(
-            id,
-            name
-          )
-        )
-      `)
-      .eq('id', publicationId)
-      .single();
+    const rawData = await publicationsService.getById(publicationId);
 
-    console.log('📊 [Export Debug] Raw publication data:', data);
-    console.log('❌ [Export Debug] Query error:', error);
+    console.log('📊 [Export Debug] Raw publication data:', rawData);
 
-    if (error || !data) {
-      console.error('💥 [Export Debug] Publication not found or error occurred');
+    if (!rawData) {
+      console.error('💥 [Export Debug] Publication not found');
       throw new Error('Publication not found');
     }
+
+    // Type assertion since we know the actual query includes locations
+    const data = rawData as any;
 
     console.log('📝 [Export Debug] Raw content field:', data.content);
     console.log('🔢 [Export Debug] Content type:', typeof data.content);
@@ -206,14 +201,60 @@ export class PublicationExportService {
       }
     };
 
-    const parsedContent = parseContent(data.content);
-    console.log('🎯 [Export Debug] Final parsed content:', parsedContent);
-    console.log('📊 [Export Debug] Final content length:', parsedContent.length);
+    let parsedContent = parseContent(data.content);
+    console.log('🎯 [Export Debug] Initial parsed content:', parsedContent);
+    console.log('📊 [Export Debug] Initial content length:', parsedContent.length);
+
+    // If includeGlobalContent is true and we have a hostLocationId different from locationId,
+    // fetch and merge global blocks from the host location
+    if (options.includeGlobalContent && options.hostLocationId && options.hostLocationId !== options.locationId) {
+      console.log('🌍 [Export Debug] Fetching global blocks from host location:', options.hostLocationId);
+      
+      try {
+        const { data: hostPublications, error: hostError } = await supabase
+          .from('publications')
+          .select('content')
+          .eq('location_id', options.hostLocationId)
+          .eq('publication_date', data.publication_date); // Same date as current publication
+
+        if (hostError) {
+          console.error('❌ [Export Debug] Error fetching host publications:', hostError);
+        } else if (hostPublications && hostPublications.length > 0) {
+          console.log('📚 [Export Debug] Found host publications:', hostPublications.length);
+          
+          // Parse and merge global blocks from all host publications
+          const globalBlocks: any[] = [];
+          
+          for (const hostPub of hostPublications) {
+            const hostContent = parseContent(hostPub.content);
+            console.log('🔍 [Export Debug] Host publication content blocks:', hostContent.length);
+            
+            // Filter for global blocks only
+            const hostGlobalBlocks = hostContent.filter(block => block.isGlobal === true);
+            console.log('🌍 [Export Debug] Global blocks found in host publication:', hostGlobalBlocks.length);
+            
+            globalBlocks.push(...hostGlobalBlocks);
+          }
+          
+          console.log('🎯 [Export Debug] Total global blocks to merge:', globalBlocks.length);
+          
+          // Merge global blocks with publication content
+          parsedContent = [...parsedContent, ...globalBlocks];
+          console.log('📈 [Export Debug] Final content length after merging global blocks:', parsedContent.length);
+        } else {
+          console.log('⚠️ [Export Debug] No host publications found for the same date');
+        }
+      } catch (error) {
+        console.error('💥 [Export Debug] Error fetching global blocks:', error);
+      }
+    }
 
     const result = {
       title: data.title,
       breadcrumb: `${data.locations?.events?.name || 'Event'} • ${data.locations?.name || 'Location'}`,
-      parentBlocks: parsedContent
+      parentBlocks: parsedContent,
+      locationName: data.locations?.name,
+      locationLogo: data.locations?.logo_url
     };
 
     console.log('🏁 [Export Debug] Final publication object:', result);
@@ -255,14 +296,33 @@ export class PublicationExportService {
   private generateHeaderHTML(publication: Publication): string {
     return `
       <header class="publication-header">
-        <div class="decorative-separator">* * *</div>
-        <h1 class="publication-title">${publication.title}</h1>
-        <p class="publication-breadcrumb">${publication.breadcrumb}</p>
-        <p class="publication-date">${new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })}</p>
+        <div class="decorative-header text-center mb-10">
+          ${publication.locationLogo ? `
+            <div class="logo-container mb-6">
+              <img
+                src="${publication.locationLogo}"
+                alt="${publication.locationName || 'Location logo'}"
+                class="location-logo"
+                onerror="this.style.display='none'"
+              />
+            </div>
+          ` : ''}
+          <div class="decorative-separator">* * *</div>
+        </div>
+
+        <div class="publication-title-container text-center mb-12 pb-8">
+          <h1 class="publication-title">تمارو دن</h1>
+          <div class="publication-subtitle">
+            Ashara Mubaraka 1447H Chennai (Madras)
+          </div>
+          <div class="publication-info">
+            ${publication.title} • ${new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </div>
+        </div>
       </header>
     `;
   }
@@ -1235,7 +1295,11 @@ export class PublicationExportService {
     const { default: jsPDF } = await import('jspdf');
     const html2canvas = await import('html2canvas');
     
-    return new Promise(async (resolve, reject) => {
+    return this.createPDFFromHTML(htmlContent, jsPDF, html2canvas);
+  }
+
+  private createPDFFromHTML(htmlContent: string, jsPDF: any, html2canvas: any): Promise<Blob> {
+    return new Promise((resolve, reject) => {
       try {
         // Create a temporary iframe to render the HTML properly
         const iframe = document.createElement('iframe');
@@ -1249,74 +1313,8 @@ export class PublicationExportService {
         document.body.appendChild(iframe);
         
         // Wait for iframe to load
-        iframe.onload = async () => {
-          try {
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-            if (!iframeDoc) {
-              throw new Error('Could not access iframe document');
-            }
-            
-            // Set the HTML content
-            iframeDoc.open();
-            iframeDoc.write(htmlContent);
-            iframeDoc.close();
-            
-            // Wait a bit for content to render
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Get the body element
-            const body = iframeDoc.body;
-            if (!body) {
-              throw new Error('Could not find body element');
-            }
-            
-            // Convert to canvas
-            const canvas = await html2canvas.default(body, {
-              scale: 2,
-              useCORS: true,
-              allowTaint: true,
-              backgroundColor: '#ffffff',
-              width: 800,
-              height: body.scrollHeight,
-              scrollX: 0,
-              scrollY: 0,
-              windowWidth: 800,
-              windowHeight: body.scrollHeight
-            });
-            
-            // Create PDF
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgWidth = 210; // A4 width in mm
-            const pageHeight = 297; // A4 height in mm
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
-            
-            // Add first page
-            pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-            
-            // Add additional pages if needed
-            while (heightLeft >= 0) {
-              position = heightLeft - imgHeight;
-              pdf.addPage();
-              pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
-              heightLeft -= pageHeight;
-            }
-            
-            // Clean up
-            document.body.removeChild(iframe);
-            
-            // Return PDF blob
-            resolve(pdf.output('blob'));
-            
-          } catch (error) {
-            // Clean up on error
-            if (document.body.contains(iframe)) {
-              document.body.removeChild(iframe);
-            }
-            reject(error);
-          }
+        iframe.onload = () => {
+          this.processPDFGeneration(iframe, htmlContent, jsPDF, html2canvas, resolve, reject);
         };
         
         // Set src to trigger onload
@@ -1326,6 +1324,83 @@ export class PublicationExportService {
         reject(error);
       }
     });
+  }
+
+  private async processPDFGeneration(
+    iframe: HTMLIFrameElement,
+    htmlContent: string,
+    jsPDF: any,
+    html2canvas: any,
+    resolve: (value: Blob) => void,
+    reject: (reason?: any) => void
+  ): Promise<void> {
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error('Could not access iframe document');
+      }
+      
+      // Set the HTML content
+      iframeDoc.open();
+      iframeDoc.write(htmlContent);
+      iframeDoc.close();
+      
+      // Wait a bit for content to render
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Get the body element
+      const body = iframeDoc.body;
+      if (!body) {
+        throw new Error('Could not find body element');
+      }
+      
+      // Convert to canvas
+      const canvas = await html2canvas.default(body, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 800,
+        height: body.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 800,
+        windowHeight: body.scrollHeight
+      });
+      
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      // Add first page
+      pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      // Add additional pages if needed
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(canvas, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      // Clean up
+      document.body.removeChild(iframe);
+      
+      // Return PDF blob
+      resolve(pdf.output('blob'));
+      
+    } catch (error) {
+      // Clean up on error
+      if (document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+      reject(error);
+    }
   }
 }
 

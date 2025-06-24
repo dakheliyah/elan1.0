@@ -826,7 +826,7 @@ export type Database = {
           p_title: string
           p_event_id: string
           p_publication_date: string
-          p_status?: string
+          p_status?: Database["public"]["Enums"]["publication_status"]
           p_created_by?: string
         }
         Returns: {

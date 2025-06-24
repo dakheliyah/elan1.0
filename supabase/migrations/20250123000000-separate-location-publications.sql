@@ -65,52 +65,8 @@ CREATE POLICY "Users can delete publications"
     )
   );
 
--- Step 6: Add a function to create publications for all locations of an event
-CREATE OR REPLACE FUNCTION create_publications_for_all_locations(
-  p_title TEXT,
-  p_event_id UUID,
-  p_publication_date DATE,
-  p_status TEXT DEFAULT 'draft',
-  p_is_featured BOOLEAN DEFAULT false,
-  p_created_by UUID DEFAULT NULL
-)
-RETURNS TABLE (publication_id UUID, location_id UUID, location_name TEXT)
-AS $$
-DECLARE
-  location_record RECORD;
-  new_publication_id UUID;
-BEGIN
-  -- Loop through all locations for the event
-  FOR location_record IN 
-    SELECT id, name FROM public.locations WHERE event_id = p_event_id
-  LOOP
-    -- Create a publication for each location
-    INSERT INTO public.publications (
-      title,
-      event_id,
-      location_id,
-      publication_date,
-      status,
-      is_featured,
-      created_by
-    ) VALUES (
-      p_title,
-      p_event_id,
-      location_record.id,
-      p_publication_date,
-      p_status::publication_status,
-      p_is_featured,
-      p_created_by
-    ) RETURNING id INTO new_publication_id;
-    
-    -- Return the created publication info
-    publication_id := new_publication_id;
-    location_id := location_record.id;
-    location_name := location_record.name;
-    RETURN NEXT;
-  END LOOP;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- Step 6: Note: create_publications_for_all_locations function definition moved to 20250127000000-resolve-function-overloading-final.sql
+-- to resolve function overloading conflicts and remove deprecated p_is_featured parameter
 
 -- Step 7: Add a function to get publications by event and date with location info
 CREATE OR REPLACE FUNCTION get_publications_by_event_and_date(

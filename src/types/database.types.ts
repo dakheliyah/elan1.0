@@ -143,37 +143,37 @@ export type Database = {
       }
       locations: {
         Row: {
-          created_at: string
-          description: string
-          event_id: string
+          created_at: string | null
+          description: string | null
+          event_id: string | null
           id: string
-          is_host: boolean
-          logo_url: string
+          is_host: boolean | null
+          logo_url: string | null
           name: string
           timezone: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
-          description?: string
-          event_id: string
+          created_at?: string | null
+          description?: string | null
+          event_id?: string | null
           id?: string
-          is_host?: boolean
-          logo_url?: string
+          is_host?: boolean | null
+          logo_url?: string | null
           name: string
           timezone: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
-          description?: string
-          event_id?: string
+          created_at?: string | null
+          description?: string | null
+          event_id?: string | null
           id?: string
-          is_host?: boolean
-          logo_url?: string
+          is_host?: boolean | null
+          logo_url?: string | null
           name?: string
           timezone?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -609,30 +609,30 @@ export type Database = {
       }
       publication_locations: {
         Row: {
-          content: string
+          content: string | null
           created_at: string
           id: string
           location_id: string
           publication_id: string
-          status: "draft" | "published" | "archived"
+          status: string
           updated_at: string
         }
         Insert: {
-          content?: string
+          content?: string | null
           created_at?: string
           id?: string
           location_id: string
           publication_id: string
-          status?: "draft" | "published" | "archived"
+          status?: string
           updated_at?: string
         }
         Update: {
-          content?: string
+          content?: string | null
           created_at?: string
           id?: string
           location_id?: string
           publication_id?: string
-          status?: "draft" | "published" | "archived"
+          status?: string
           updated_at?: string
         }
         Relationships: [
@@ -654,42 +654,49 @@ export type Database = {
       }
       publications: {
         Row: {
-          content: Json
-          created_at: string
-          created_by: string
-          event_id: string
+          content: Json | null
+          created_at: string | null
+          created_by: string | null
+          event_id: string | null
           id: string
-          location_id: string
+          location_id: string | null
           publication_date: string
-          status: "draft" | "published" | "archived"
+          status: Database["public"]["Enums"]["publication_status"] | null
           title: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          content?: Json
-          created_at?: string
-          created_by: string
-          event_id: string
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          event_id?: string | null
           id?: string
-          location_id?: string
+          location_id?: string | null
           publication_date: string
-          status?: "draft" | "published" | "archived"
+          status?: Database["public"]["Enums"]["publication_status"] | null
           title: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          content?: Json
-          created_at?: string
-          created_by?: string
-          event_id?: string
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          event_id?: string | null
           id?: string
-          location_id?: string
+          location_id?: string | null
           publication_date?: string
-          status?: "draft" | "published" | "archived"
+          status?: Database["public"]["Enums"]["publication_status"] | null
           title?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "publications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "publications_event_id_fkey"
             columns: ["event_id"]
@@ -697,79 +704,75 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "publications_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      umoors: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string
-          id: string
-          logo_url: string
-          name: string
-          slug: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description?: string
-          id?: string
-          logo_url?: string
-          name: string
-          slug: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string
-          id?: string
-          logo_url?: string
-          name?: string
-          slug?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_events: {
+      storage_quotas: {
         Row: {
           created_at: string
           event_id: string
           id: string
-          role: Database["public"]["Enums"]["user_role"]
+          quota_bytes: number
           updated_at: string
-          user_id: string
+          used_bytes: number | null
         }
         Insert: {
           created_at?: string
           event_id: string
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          quota_bytes: number
           updated_at?: string
-          user_id: string
+          used_bytes?: number | null
         }
         Update: {
           created_at?: string
           event_id?: string
           id?: string
-          role?: Database["public"]["Enums"]["user_role"]
+          quota_bytes?: number
           updated_at?: string
-          user_id?: string
+          used_bytes?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "user_events_event_id_fkey"
+            foreignKeyName: "storage_quotas_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      storage_usage_history: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          usage_bytes: number
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          usage_bytes: number
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          usage_bytes?: number
+        }
+        Relationships: [
           {
-            foreignKeyName: "user_events_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "storage_usage_history_event_id_fkey"
+            columns: ["event_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
         ]
@@ -783,7 +786,6 @@ export type Database = {
     }
     Enums: {
       invitation_status: "pending" | "accepted" | "expired"
-      publication_format: "pdf" | "html" | "epub" | "docx"
       publication_status: "draft" | "published" | "archived"
       user_role: "admin" | "editor" | "viewer"
     }
