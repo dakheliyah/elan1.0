@@ -17,8 +17,7 @@ import {
   MapPin,
   Calendar
 } from 'lucide-react';
-import { usePublication } from '@/hooks/usePublications';
-import { usePublicationsByLocation } from '@/hooks/usePublications';
+import { usePublication, usePublicationByEventAndDate } from '@/hooks/usePublications';
 import { useEvent, useLocation } from '@/hooks/useSupabaseQuery';
 import { useToast } from '@/hooks/use-toast';
 import { ParentBlockData } from '@/pages/PublicationEditor';
@@ -47,7 +46,12 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
   const { data: publication } = usePublication(publicationId);
   const { data: event } = useEvent(eventId);
   const { data: location } = useLocation(locationId);
-  const { data: hostPublications } = usePublicationsByLocation(hostLocationId || '');
+  
+  // Get host publications for the same date as the current publication
+  const { data: hostPublications } = usePublicationByEventAndDate(
+    eventId, 
+    publication?.publication_date || ''
+  );
 
   useEffect(() => {
     if (publication && hostLocationId && locationId !== hostLocationId) {
@@ -55,7 +59,12 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
       const globalBlocks: ParentBlockData[] = [];
       
       if (hostPublications) {
-        hostPublications.forEach(hostPub => {
+        // Filter to only get publications from the host location
+        const hostLocationPublications = hostPublications.filter(
+          pub => pub.location_id === hostLocationId
+        );
+        
+        hostLocationPublications.forEach(hostPub => {
           if (hostPub.content) {
             const content = Array.isArray(hostPub.content) 
               ? hostPub.content 

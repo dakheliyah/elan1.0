@@ -614,7 +614,6 @@ export type Database = {
           id: string
           location_id: string
           publication_id: string
-          status: string
           updated_at: string
         }
         Insert: {
@@ -623,7 +622,6 @@ export type Database = {
           id?: string
           location_id: string
           publication_id: string
-          status?: string
           updated_at?: string
         }
         Update: {
@@ -632,7 +630,6 @@ export type Database = {
           id?: string
           location_id?: string
           publication_id?: string
-          status?: string
           updated_at?: string
         }
         Relationships: [
@@ -654,38 +651,35 @@ export type Database = {
       }
       publications: {
         Row: {
-          content: Json | null
+          content: string | null
           created_at: string | null
           created_by: string | null
           event_id: string | null
           id: string
           location_id: string | null
-          publication_date: string
-          status: Database["public"]["Enums"]["publication_status"] | null
+          status: Database["public"]["Enums"]["publication_status"]
           title: string
           updated_at: string | null
         }
         Insert: {
-          content?: Json | null
+          content?: string | null
           created_at?: string | null
           created_by?: string | null
           event_id?: string | null
           id?: string
           location_id?: string | null
-          publication_date: string
-          status?: Database["public"]["Enums"]["publication_status"] | null
+          status?: Database["public"]["Enums"]["publication_status"]
           title: string
           updated_at?: string | null
         }
         Update: {
-          content?: Json | null
+          content?: string | null
           created_at?: string | null
           created_by?: string | null
           event_id?: string | null
           id?: string
           location_id?: string | null
-          publication_date?: string
-          status?: Database["public"]["Enums"]["publication_status"] | null
+          status?: Database["public"]["Enums"]["publication_status"]
           title?: string
           updated_at?: string | null
         }
@@ -777,6 +771,47 @@ export type Database = {
           },
         ]
       }
+      umoors: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "umoors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -839,8 +874,8 @@ export type TablesInsert<
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Insert: infer I
       }
-      ? I
-      : never
+    ? I
+    : never
     : never
 
 export type TablesUpdate<
@@ -860,8 +895,8 @@ export type TablesUpdate<
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Update: infer U
       }
-      ? U
-      : never
+    ? U
+    : never
     : never
 
 export type Enums<
