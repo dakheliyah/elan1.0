@@ -7,11 +7,15 @@ import { PublicationSectionRenderer } from './publication/renderers/PublicationS
 interface PublicationPreviewProps {
   publication: Publication;
   mode?: 'preview' | 'export';
+  locationLogo?: string;
+  locationName?: string;
 }
 
 const PublicationPreview: React.FC<PublicationPreviewProps> = ({ 
   publication, 
-  mode = 'preview' 
+  mode = 'preview',
+  locationLogo,
+  locationName
 }) => {
 
   const PreviewContent = () => (
@@ -20,6 +24,8 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
         title={publication.title}
         breadcrumb={publication.breadcrumb}
         showDecorative={true}
+        locationLogo={locationLogo}
+        locationName={locationName}
       />
 
       {/* Publication Content */}

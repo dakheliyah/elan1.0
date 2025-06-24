@@ -20,10 +20,12 @@ import { PublicationSectionRenderer } from '@/components/publication/renderers/P
 interface ExportPreviewProps {
   publication: Publication;
   exportFormat: ExportFormat;
+  locationLogo?: string;
+  locationName?: string;
 }
 
 // Enhanced template generator with new layout structure using renderers
-const generatePreviewHTML = (publication: Publication, format: ExportFormat): string => {
+const generatePreviewHTML = (publication: Publication, format: ExportFormat, locationLogo?: string, locationName?: string): string => {
   const isHTML = format.type === 'html';
   const templateStyle = format.template;
 
@@ -38,6 +40,15 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat): st
         margin: 0 auto; 
         padding: 40px 20px; 
         background: #fff;
+      }
+      .location-logo {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .location-logo img {
+        max-width: 80px;
+        max-height: 80px;
+        object-fit: contain;
       }
       .decorative-separator { 
         text-align: center; 
@@ -134,8 +145,9 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat): st
       .lud-text { 
         direction: rtl; 
         text-align: right; 
-        font-family: "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif; 
+        font-family: "Kanz Al-Marjaan", "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif; 
         line-height: 1.8; 
+        font-size: 24px; 
       }
       .language-badge { 
         display: inline-block; 
@@ -347,6 +359,7 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat): st
       <style>${getTemplateStyles()}</style>
     </head>
     <body>
+      ${locationLogo ? `<div class="location-logo"><img src="${locationLogo}" alt="${locationName || 'Location'} Logo" /></div>` : ''}
       <div class="decorative-separator">* * *</div>
       
       <h1>${publication.title}</h1>
@@ -365,7 +378,9 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat): st
 
 export const ExportPreview: React.FC<ExportPreviewProps> = ({
   publication,
-  exportFormat
+  exportFormat,
+  locationLogo,
+  locationName
 }) => {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [zoomLevel, setZoomLevel] = useState(125);
@@ -379,7 +394,7 @@ export const ExportPreview: React.FC<ExportPreviewProps> = ({
   const generatePreview = async () => {
     setIsLoading(true);
     try {
-      const htmlContent = generatePreviewHTML(publication, exportFormat);
+      const htmlContent = generatePreviewHTML(publication, exportFormat, locationLogo, locationName);
       setPreviewContent(htmlContent);
     } catch (error) {
       console.error('Preview generation failed:', error);

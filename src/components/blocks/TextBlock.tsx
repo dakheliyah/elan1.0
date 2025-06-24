@@ -24,7 +24,7 @@ const TextBlock: React.FC<TextBlockProps> = ({ data, onChange, language }) => {
         value={data.content || ''}
         onChange={(e) => onChange({ content: e.target.value })}
         placeholder={`Enter your ${displayLanguage === 'lud' ? 'Lisan ud-Dawat' : 'English'} text here...`}
-        className="min-h-[100px] resize-vertical"
+        className={`min-h-[100px] resize-vertical ${displayLanguage === 'lud' ? 'font-kanz' : ''}`}
         dir={displayLanguage === 'lud' ? 'rtl' : 'ltr'}
       />
     </div>

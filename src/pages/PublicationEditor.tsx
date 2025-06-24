@@ -562,7 +562,11 @@ const PublicationEditorPage = () => {
         {/* Preview Panel */}
         {showPreview && (
           <div className="w-[40%] bg-gray-50">
-            <PublicationPreview publication={publication} />
+            <PublicationPreview 
+              publication={publication} 
+              locationLogo={location?.logo_url}
+              locationName={location?.name}
+            />
           </div>
         )}
       </div>
@@ -582,6 +586,8 @@ const PublicationEditorPage = () => {
           onClose={() => setShowExportModal(false)}
           publication={publication}
           publicationId={publicationId}
+          locationLogo={location?.logo_url}
+          locationName={location?.name}
         />
       )}
     </div>

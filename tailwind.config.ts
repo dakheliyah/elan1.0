@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'kanz': ['Kanz Al-Marjaan', 'Noto Sans Arabic', 'Amiri', 'Traditional Arabic', 'Arial', 'sans-serif'],
+				'arabic': ['Noto Sans Arabic', 'Amiri', 'Traditional Arabic', 'Arial', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

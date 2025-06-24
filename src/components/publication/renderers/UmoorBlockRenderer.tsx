@@ -40,14 +40,14 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
   };
 
   return (
-    <div className="relative mb-6">
-      {/* Logo positioned in top right */}
-      <div className="absolute top-0 right-0 z-10">
+    <div className="flex justify-between items-start mb-6">
+      {/* Logo positioned in top left */}
+      <div className="z-10">
         {renderUmoorLogo()}
       </div>
       
-      {/* Title and content area with margin for logo */}
-      <div className="pr-28">
+      {/* Title and content area with margin for logo and right alignment */}
+      <div className="text-right">
         {/* Main Heading */}
         {umoorBlock.title && (
           <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
@@ -60,13 +60,6 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
           <h3 className="text-lg font-semibold text-gray-700 leading-tight mb-3">
             {umoorBlock.subheading}
           </h3>
-        )}
-        
-        {/* Description */}
-        {umoorBlock.description && (
-          <p className="text-base text-gray-600 leading-relaxed mb-4">
-            {umoorBlock.description}
-          </p>
         )}
         
         {/* Fallback to umoor name if no title is set */}

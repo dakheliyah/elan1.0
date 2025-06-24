@@ -83,7 +83,7 @@ const RichTextBlock: React.FC<RichTextBlockProps> = ({ data, onChange, language 
         {displayLanguage === 'lud' ? 'Lisan ud-Dawat Text' : 'English Text'}
       </Label>
       <div 
-        className={`min-h-[200px] border border-gray-200 ${styles.richTextEditorWrapper}`}
+        className={`min-h-[200px] border border-gray-200 ${styles.richTextEditorWrapper} ${displayLanguage === 'lud' ? 'font-kanz' : ''}`}
         dir={displayLanguage === 'lud' ? 'rtl' : 'ltr'}
       >
         <RichTextEditor
@@ -92,7 +92,7 @@ const RichTextBlock: React.FC<RichTextBlockProps> = ({ data, onChange, language 
           onChangeContent={onChangeContent}
           extensions={extensions}
           minHeight="200px"
-          contentClass={displayLanguage === 'lud' ? 'text-right' : 'text-left'}
+          contentClass={displayLanguage === 'lud' ? 'text-right font-kanz' : 'text-left'}
           dark={false}
           hideToolbar={false}
           disableBubble={false}

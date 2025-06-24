@@ -680,9 +680,10 @@ export class PublicationExportService {
       }
       
       .text-content.lud-text {
-        font-family: "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif;
+        font-family: "Kanz Al-Marjaan", "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif;
         line-height: 1.8;
         text-align: right;
+        font-size: 24px;
       }
       
       .text-content p {

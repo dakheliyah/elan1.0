@@ -32,8 +32,9 @@ const ContentBlock: React.FC<ContentBlockProps> = ({ data, onChange }) => {
         value={data.content}
         onChange={(e) => onChange({ content: e.target.value })}
         placeholder={`Enter ${data.language.toUpperCase()} content...`}
-        className="min-h-[120px] resize-none"
+        className={`min-h-[120px] resize-none ${data.language === 'lud' ? 'font-kanz' : ''}`}
         rows={6}
+        dir={data.language === 'lud' ? 'rtl' : 'ltr'}
       />
       
       <div className="text-sm text-gray-500">

@@ -17,6 +17,8 @@ export interface ExportModalProps {
   onClose: () => void;
   publication: Publication;
   publicationId: string;
+  locationLogo?: string;
+  locationName?: string;
 }
 
 export interface ExportFormat {
@@ -29,7 +31,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   isOpen,
   onClose,
   publication,
-  publicationId
+  publicationId,
+  locationLogo,
+  locationName
 }) => {
   const [selectedFormat, setSelectedFormat] = useState<'html' | 'pdf'>('html');
   const [exportOptions, setExportOptions] = useState<ExportFormat>({
@@ -98,6 +102,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <ExportPreview
               publication={publication}
               exportFormat={exportOptions}
+              locationLogo={locationLogo}
+              locationName={locationName}
             />
           </div>
         </div>

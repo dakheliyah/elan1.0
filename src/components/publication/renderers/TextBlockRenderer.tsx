@@ -48,11 +48,11 @@ export const TextBlockRenderer: React.FC<TextBlockRendererProps> = ({
         dir={isRTL ? 'rtl' : 'ltr'}
         style={{
           fontFamily: isRTL 
-            ? '"Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif' 
+            ? '"Kanz Al-Marjaan", "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif' 
             : 'inherit',
           lineHeight: isRTL ? '1.8' : '1.6',
           unicodeBidi: 'plaintext',
-          fontSize: '15px'
+          fontSize: isRTL ? '24px' : '15px'
         }}
       >
         <div className="leading-relaxed text-gray-800">

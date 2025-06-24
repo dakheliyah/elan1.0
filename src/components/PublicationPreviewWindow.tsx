@@ -6,11 +6,15 @@ import PublicationPreview from './PublicationPreview';
 interface PublicationPreviewWindowProps {
   publication: Publication;
   onClose: () => void;
+  locationLogo?: string;
+  locationName?: string;
 }
 
 export const PublicationPreviewWindow: React.FC<PublicationPreviewWindowProps> = ({
   publication,
-  onClose
+  onClose,
+  locationLogo,
+  locationName
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -39,7 +43,11 @@ export const PublicationPreviewWindow: React.FC<PublicationPreviewWindowProps> =
           </button>
         </div>
         <div className="flex-1 overflow-hidden">
-          <PublicationPreview publication={publication} />
+          <PublicationPreview 
+            publication={publication} 
+            locationLogo={locationLogo}
+            locationName={locationName}
+          />
         </div>
       </div>
     </div>
