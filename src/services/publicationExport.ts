@@ -313,7 +313,7 @@ export class PublicationExportService {
         <div class="publication-title-container text-center mb-12 pb-8">
           <h1 class="publication-title">تمارو دن</h1>
           <div class="publication-subtitle">
-            Ashara Mubaraka 1447H Chennai (Madras)
+            Ashara Mubaraka 1447H
           </div>
           <div class="publication-info">
             ${publication.title} • ${new Date().toLocaleDateString('en-US', {

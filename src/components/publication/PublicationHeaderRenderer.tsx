@@ -49,7 +49,7 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
             تمارو دن
           </h1>
           <div className="text-lg text-gray-600 mb-2">
-            Ashara Mubaraka 1447H Chennai (Madras)
+            Ashara Mubaraka 1447H
           </div>
           <div className="text-sm text-gray-500">
             {title} • {new Date().toLocaleDateString('en-US', {

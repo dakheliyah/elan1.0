@@ -103,7 +103,13 @@ const EventDetail = () => {
 
     await updateLocationMutation.mutateAsync({
       id: editingLocationId,
-      updates: locationData,
+      updates: {
+        name: locationData.name,
+        timezone: locationData.timezone,
+        description: locationData.description,
+        is_host: locationData.is_host,
+        logo_url: locationData.logo_url,
+      },
     });
 
     setIsEditLocationModalOpen(false);
@@ -478,6 +484,7 @@ const EventDetail = () => {
                 timezone: editingLocation.timezone,
                 description: editingLocation.description,
                 is_host: editingLocation.is_host,
+                logo_url: editingLocation.logo_url,
               } : null}
             />
 
