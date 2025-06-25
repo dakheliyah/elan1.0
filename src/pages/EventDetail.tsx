@@ -87,6 +87,7 @@ const EventDetail = () => {
       description: locationData.description,
       event_id: eventId,
       is_host: locationData.is_host || false,
+      logo_url: locationData.logo_url,
     });
 
     setIsLocationModalOpen(false);

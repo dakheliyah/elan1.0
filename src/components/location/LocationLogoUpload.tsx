@@ -35,11 +35,12 @@ export const LocationLogoUpload: React.FC<LocationLogoUploadProps> = ({
     }
 
     try {
-      // For new locations, we'll handle this differently
+      // For new locations, upload to storage with a temporary ID
       if (locationId === 'temp') {
-        // Create a temporary URL for preview
-        const tempUrl = URL.createObjectURL(file);
-        onLogoUpload(tempUrl);
+        // Generate a temporary unique ID for the upload
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const logoUrl = await uploadLogo.mutateAsync({ file, locationId: tempId });
+        onLogoUpload(logoUrl);
         return;
       }
 
