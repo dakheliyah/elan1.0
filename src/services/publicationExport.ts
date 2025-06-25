@@ -489,6 +489,38 @@ export class PublicationExportService {
       `;
     }
 
+    if (block.type === 'menu') {
+      const menuData = block.data;
+      
+      if (!menuData?.items || menuData.items.length === 0) {
+        return `
+          <div class="content-block menu-block">
+            <div class="menu-placeholder">No menu items added yet</div>
+          </div>
+        `;
+      }
+
+      const menuItemsHTML = menuData.items.map(item => `
+        <div class="menu-item">
+          <div class="menu-item-header">
+            <h4 class="menu-item-name">${item.name}</h4>
+          </div>
+          <div class="menu-item-details">
+            ${item.calories ? `<span class="menu-nutrition">Calories: ${item.calories}</span>` : ''}
+          </div>
+          ${item.allergens ? `<div class="menu-item-allergens"><span class="menu-item-allergens-label">Allergens:</span><span class="menu-item-allergens-text">${item.allergens}</span></div>` : ''}
+        </div>
+      `).join('');
+
+      return `
+        <div class="content-block menu-block">
+          <div class="menu-items">
+            ${menuItemsHTML}
+          </div>
+        </div>
+      `;
+    }
+
     return '';
   }
 
@@ -785,6 +817,90 @@ export class PublicationExportService {
         justify-content: center;
         color: #9ca3af;
         font-size: 0.875rem;
+      }
+      
+      .menu-block {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 24px;
+      }
+      
+      .menu-title {
+        background: linear-gradient(to right, #eff6ff, #e0e7ff);
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #1f2937;
+        padding: 16px 24px;
+        text-align: center;
+        border-bottom: 1px solid #e5e7eb;
+        margin: 0;
+      }
+      
+      .menu-item {
+        padding: 20px 24px;
+        border-bottom: 1px dotted #d1d5db;
+        transition: background-color 0.15s ease;
+      }
+      
+      .menu-item:last-child {
+        border-bottom: none;
+      }
+      
+      .menu-item:hover {
+        background-color: #f9fafb;
+      }
+      
+      .menu-item-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+      
+      .menu-item-nutrition {
+        margin-bottom: 12px;
+      }
+      
+      .menu-item-nutrition span {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 10px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background-color: #dcfce7;
+        color: #166534;
+      }
+      
+      .menu-item-allergens {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.875rem;
+        color: #dc2626;
+      }
+      
+      .menu-item-allergens-label {
+        font-weight: 500;
+        flex-shrink: 0;
+      }
+      
+      .menu-item-allergens-text {
+        line-height: 1.5;
+      }
+      
+      .menu-empty {
+        text-align: center;
+        color: #6b7280;
+        font-style: italic;
+        padding: 24px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
       }
       
       .empty-publication, .no-content {
@@ -1126,6 +1242,100 @@ export class PublicationExportService {
         margin-top: 5px;
       }
       
+      .email-menu-block {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+      }
+      
+      .email-menu-title {
+        background: #eff6ff;
+        font-size: 20px;
+        font-weight: bold;
+        color: #1f2937;
+        padding: 16px 24px;
+        text-align: center;
+        border-bottom: 1px solid #e5e7eb;
+        margin: 0;
+      }
+      
+      .email-menu-item {
+        padding: 20px 24px;
+        border-bottom: 1px dotted #d1d5db;
+      }
+      
+      .email-menu-item:last-child {
+        border-bottom: none;
+      }
+      
+      .email-menu-item table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .email-menu-item-info {
+        vertical-align: top;
+        padding-right: 10px;
+      }
+      
+      .email-menu-item-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+      
+      .email-menu-item-description {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 6px;
+        line-height: 1.3;
+      }
+      
+      .email-menu-item-nutrition {
+        margin-bottom: 12px;
+      }
+      
+      .email-menu-item-nutrition span {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        background-color: #dcfce7;
+        color: #166534;
+      }
+      
+      .email-menu-item-allergens {
+        font-size: 14px;
+        color: #dc2626;
+      }
+      
+      .email-menu-item-allergens-label {
+        font-weight: 500;
+      }
+      
+      .email-menu-item-price {
+        font-size: 14px;
+        font-weight: bold;
+        color: #059669;
+        text-align: right;
+        vertical-align: top;
+        white-space: nowrap;
+      }
+      
+      .email-menu-empty {
+        text-align: center;
+        color: #6b7280;
+        font-style: italic;
+        padding: 24px;
+        background: #f9fafb;
+      }
+      
       .email-footer {
         text-align: center;
         margin-top: 30px;
@@ -1233,6 +1443,40 @@ export class PublicationExportService {
             <div class="email-content-block">
               <img src="${child.data.imageUrl}" alt="${child.data.alt || ''}" class="email-image">
               ${child.data.alt ? `<div class="email-image-caption">${child.data.alt}</div>` : ''}
+            </div>
+          `;
+        }
+        
+        if (child.type === 'menu') {
+          const menuData = child.data;
+          
+          if (!menuData?.items || menuData.items.length === 0) {
+            return `
+              <div class="email-content-block">
+                <div class="email-menu-empty">No menu items added yet</div>
+              </div>
+            `;
+          }
+
+          const emailMenuItemsHtml = menuData.items.map(item => `
+            <div class="email-menu-item">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td class="email-menu-item-info">
+                    <div class="email-menu-item-name">${item.name}</div>
+                    ${item.calories ? `<div class="email-menu-item-nutrition"><span>Calories: ${item.calories}</span></div>` : ''}
+                    ${item.allergens ? `<div class="email-menu-item-allergens"><span class="email-menu-item-allergens-label">Allergens:</span> ${item.allergens}</div>` : ''}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          `).join('');
+
+          return `
+            <div class="email-content-block">
+              <div class="email-menu-block">
+                ${emailMenuItemsHtml}
+              </div>
             </div>
           `;
         }

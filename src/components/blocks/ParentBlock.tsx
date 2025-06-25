@@ -14,7 +14,8 @@ import {
   Image as ImageIcon,
   Globe,
   Languages,
-  ChevronDown
+  ChevronDown,
+  Menu
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -30,7 +31,7 @@ interface ParentBlockProps {
   dragHandleProps?: any;
   onUpdateParent: (updates: Partial<ParentBlockData>) => void;
   onRemoveParent: () => void;
-  onAddChild: (type: 'text' | 'image', language?: 'eng' | 'lud') => void;
+  onAddChild: (type: 'text' | 'image' | 'menu', language?: 'eng' | 'lud') => void;
   onUpdateChild: (childId: string, data: any) => void;
   onRemoveChild: (childId: string) => void;
   eventId?: string;
@@ -150,6 +151,16 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
           >
             <ImageIcon size={14} />
             Add Image
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onAddChild('menu')}
+            className="flex items-center gap-2"
+          >
+            <Menu size={14} />
+            Add Menu
           </Button>
         </div>
 

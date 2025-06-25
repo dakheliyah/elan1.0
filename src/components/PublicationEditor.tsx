@@ -13,7 +13,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ParentBlock from './blocks/ParentBlock';
 import PublicationPreview from './PublicationPreview';
 import UmoorSelector from './blocks/UmoorSelector';
-import { ContentBlock, ParentBlockData, Publication } from '../pages/PublicationEditor';
+import { ContentBlock, ParentBlockData, Publication, MenuBlockData } from '../pages/PublicationEditor';
 
 const PublicationEditor = () => {
   const [publication, setPublication] = useState<Publication>({
@@ -57,14 +57,16 @@ const PublicationEditor = () => {
     }));
   };
 
-  const addChildBlock = (parentId: string, type: 'text' | 'image', language?: 'eng' | 'lud') => {
+  const addChildBlock = (parentId: string, type: 'text' | 'image' | 'menu', language?: 'eng' | 'lud') => {
     const newChild: ContentBlock = {
       id: Date.now().toString(),
       type,
       language: type === 'text' ? language : undefined,
       data: type === 'text' 
         ? { content: '', language: language || 'eng' }
-        : { imageUrl: '', alt: '' }
+        : type === 'image'
+        ? { imageUrl: '', alt: '' }
+        : { items: [], fileName: '' } as MenuBlockData
     };
 
     updateParentBlock(parentId, {

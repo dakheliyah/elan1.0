@@ -35,9 +35,20 @@ import {
 import { ExportModal } from '@/components/export/ExportModal';
 import { PublishDropdown } from '@/components/export/PublishDropdown';
 
+export interface MenuItemData {
+  name: string;
+  calories: string;
+  allergens: string;
+}
+
+export interface MenuBlockData {
+  items: MenuItemData[];
+  fileName?: string;
+}
+
 export interface ContentBlock {
   id: string;
-  type: 'text' | 'image';
+  type: 'text' | 'image' | 'menu';
   language?: 'eng' | 'lud';
   data: any;
 }
@@ -300,7 +311,7 @@ const PublicationEditorPage = () => {
     }));
   };
 
-  const addChildBlock = (parentId: string, type: 'text' | 'image', language?: 'eng' | 'lud') => {
+  const addChildBlock = (parentId: string, type: 'text' | 'image' | 'menu', language?: 'eng' | 'lud') => {
     const newChild: ContentBlock = {
       id: Date.now().toString(),
       type,

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2 } from 'lucide-react';
 import RichTextBlock from './RichTextBlock';
 import ImageBlock from './ImageBlock';
+import MenuBlock from './MenuBlock';
 import { ContentBlock } from '../../pages/PublicationEditor';
 
 interface ChildContentBlockProps {
@@ -26,7 +27,8 @@ const ChildContentBlock: React.FC<ChildContentBlockProps> = ({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
-            {block.type === 'text' ? `Text (${block.language === 'lud' ? 'Lisan ud-Dawat' : 'English'})` : 'Image'}
+            {block.type === 'text' ? `Text (${block.language === 'lud' ? 'Lisan ud-Dawat' : 'English'})` : 
+             block.type === 'image' ? 'Image' : 'Menu'}
           </Badge>
         </div>
         <Button
@@ -46,11 +48,16 @@ const ChildContentBlock: React.FC<ChildContentBlockProps> = ({
           onChange={onUpdate}
           language={block.language}
         />
-      ) : (
+      ) : block.type === 'image' ? (
         <ImageBlock
           data={block.data}
           onChange={onUpdate}
           eventId={eventId} // Pass eventId to ImageBlock
+        />
+      ) : (
+        <MenuBlock
+          data={block.data}
+          onChange={onUpdate}
         />
       )}
     </div>
