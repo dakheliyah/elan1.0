@@ -146,6 +146,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           event_id: string | null
+          host_location_id: string | null
           id: string
           is_host: boolean | null
           logo_url: string | null
@@ -157,6 +158,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           event_id?: string | null
+          host_location_id?: string | null
           id?: string
           is_host?: boolean | null
           logo_url?: string | null
@@ -168,6 +170,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           event_id?: string | null
+          host_location_id?: string | null
           id?: string
           is_host?: boolean | null
           logo_url?: string | null
@@ -181,6 +184,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "locations_host_location_id_fkey"
+            columns: ["host_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
             referencedColumns: ["id"]
           },
         ]

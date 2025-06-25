@@ -8,17 +8,19 @@ interface PublicationSectionRendererProps {
   parentBlock: ParentBlockData;
   mode?: 'preview' | 'export';
   isLast?: boolean;
+  showUmoorLogo?: boolean;
 }
 
 export const PublicationSectionRenderer: React.FC<PublicationSectionRendererProps> = ({ 
   parentBlock, 
   mode = 'preview',
-  isLast = false
+  isLast = false,
+  showUmoorLogo = true
 }) => {
   return (
     <div className="publication-section">
       {/* Umoor Section Header */}
-      <UmoorBlockRenderer umoorBlock={parentBlock} mode={mode} />
+      <UmoorBlockRenderer umoorBlock={parentBlock} mode={mode} showLogo={showUmoorLogo} />
 
       {/* Content Blocks */}
       <div className="space-y-6 pl-0">

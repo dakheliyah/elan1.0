@@ -27,7 +27,7 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
               <img
                 src={locationLogo}
                 alt={locationName || 'Location logo'}
-                className="w-16 h-16 mx-auto object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                className="w-32 h-auto mx-auto object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                 onError={(e) => {
                   // Hide image if it fails to load
                   const target = e.target as HTMLImageElement;

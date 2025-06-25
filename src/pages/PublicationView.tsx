@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePublication } from '@/hooks/usePublications';
 import { useLocation } from '@/hooks/useLocations';
+import { useHostPublication } from '@/hooks/useHostPublication';
 import { convertToPublication } from '@/utils/publicationConverter';
 import PublicationPreview from '@/components/PublicationPreview';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ const PublicationView = () => {
   const navigate = useNavigate();
   const { data: dbPublication, isLoading, error } = usePublication(publicationId!);
   const { data: location } = useLocation(locationId || '');
+  const { data: hostPublication } = useHostPublication(eventId!, location?.host_location_id);
 
   if (isLoading) {
     return (
@@ -87,6 +89,7 @@ const PublicationView = () => {
             mode="preview" 
             locationLogo={location?.logo_url}
             locationName={location?.name}
+            hostPublication={hostPublication}
           />
         </div>
       </SidebarInset>

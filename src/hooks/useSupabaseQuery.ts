@@ -58,3 +58,5 @@ export {
   useDeleteInvitation, 
   useResendInvitation 
 } from './useInvitations';
+
+export { useHostPublication } from './useHostPublication';

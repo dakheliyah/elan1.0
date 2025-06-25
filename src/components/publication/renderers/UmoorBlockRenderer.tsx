@@ -5,11 +5,13 @@ import { ParentBlockData } from '@/pages/PublicationEditor';
 interface UmoorBlockRendererProps {
   umoorBlock: ParentBlockData;
   mode?: 'preview' | 'export';
+  showLogo?: boolean;
 }
 
 export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({ 
   umoorBlock, 
-  mode = 'preview' 
+  mode = 'preview',
+  showLogo = true
 }) => {
   const logoSize = mode === 'export' ? 'w-24 h-24' : 'w-20 h-20';
   
@@ -40,11 +42,13 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-start mb-6">
-      {/* Logo positioned in top left */}
-      <div className="z-10">
-        {renderUmoorLogo()}
-      </div>
+    <div className={`flex ${showLogo ? 'justify-between' : 'justify-end'} items-start mb-6`}>
+      {/* Logo positioned in top left - only show if showLogo is true */}
+      {showLogo && (
+        <div className="z-10">
+          {renderUmoorLogo()}
+        </div>
+      )}
       
       {/* Title and content area with margin for logo and right alignment */}
       <div className="text-right">

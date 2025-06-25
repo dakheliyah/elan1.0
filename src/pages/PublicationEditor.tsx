@@ -30,7 +30,8 @@ import {
   useEvent, 
   useLocation, 
   usePublication,
-  useUpdatePublication
+  useUpdatePublication,
+  useHostPublication
 } from '@/hooks/useSupabaseQuery';
 import { ExportModal } from '@/components/export/ExportModal';
 import { PublishDropdown } from '@/components/export/PublishDropdown';
@@ -110,6 +111,7 @@ const PublicationEditorPage = () => {
   const { data: event, isLoading: eventLoading } = useEvent(eventId || '');
   const { data: location, isLoading: locationLoading } = useLocation(locationId || '');
   const { data: publicationData, isLoading: publicationLoading } = usePublication(publicationId || '');
+  const { data: hostPublication } = useHostPublication(eventId || '', location?.host_location_id || null);
   const updatePublicationMutation = useUpdatePublication();
 
   const [publication, setPublication] = useState<Publication>({
@@ -575,6 +577,7 @@ const PublicationEditorPage = () => {
           <div className="w-[40%] bg-gray-50">
             <PublicationPreview 
               publication={publication} 
+              hostPublication={hostPublication}
               locationLogo={location?.logo_url}
               locationName={location?.name}
             />
