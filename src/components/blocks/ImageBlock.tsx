@@ -5,6 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, X, Image as ImageIcon, Library, Link } from 'lucide-react';
 import MediaLibraryModal from '@/components/media/MediaLibraryModal';
+import { useUploadMediaFile } from '@/hooks/useMediaQuery';
+import { mediaHelpers } from '@/services/media';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ImageBlockProps {
   data: {
@@ -21,14 +25,116 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [urlInput, setUrlInput] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const uploadMediaFile = useUploadMediaFile();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // In a real app, you would upload to a server/cloud storage
-      // For now, we'll create a local URL
-      const imageUrl = URL.createObjectURL(file);
-      onChange({ imageUrl, mediaFileId: undefined }); // Clear media file ID for local uploads
+    if (!file || !eventId || !user) {
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to upload files",
+          variant: "destructive",
+        });
+      }
+      if (!eventId) {
+        toast({
+          title: "Event required",
+          description: "Event ID is required to upload files",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: `${file.name} exceeds 10MB limit`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      // Create a temporary local URL for immediate preview
+      const tempImageUrl = URL.createObjectURL(file);
+      onChange({ imageUrl: tempImageUrl, alt: data.alt || file.name });
+
+      // Generate thumbnail for images
+      let thumbnailUrl: string | null = null;
+      try {
+        thumbnailUrl = await mediaHelpers.generateThumbnail(file);
+      } catch (error) {
+        console.warn('Failed to generate thumbnail:', error);
+      }
+
+      // Prepare media data
+      const mediaData = {
+        name: file.name,
+        original_name: file.name,
+        file_type: mediaHelpers.getFileType(file.type),
+        format: mediaHelpers.getFileFormat(file.name, file.type),
+        size_bytes: file.size,
+        mime_type: file.type,
+        thumbnail_url: thumbnailUrl,
+        width: null,
+        height: null,
+        duration_seconds: null,
+        is_optimized: false,
+        compression_ratio: null,
+      };
+
+      // Upload file to media library
+      const uploadedMedia = await uploadMediaFile.mutateAsync({
+        file,
+        eventId,
+        mediaData
+      });
+
+      // Update with the actual uploaded URL and media file ID
+      onChange({ 
+        imageUrl: uploadedMedia.url, 
+        alt: data.alt || file.name,
+        mediaFileId: uploadedMedia.id 
+      });
+
+      // Clean up the temporary URL
+      URL.revokeObjectURL(tempImageUrl);
+
+      toast({
+        title: "Upload completed",
+        description: `${file.name} has been uploaded successfully`,
+      });
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: `Failed to upload ${file.name}`,
+        variant: "destructive",
+      });
+      // Revert to no image on error
+      onChange({ imageUrl: '', alt: '', mediaFileId: undefined });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -78,9 +184,10 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-2"
+                  disabled={isUploading}
                 >
                   <Upload size={16} />
-                  Upload New
+                  {isUploading ? 'Uploading...' : 'Upload New'}
                 </Button>
                 
                 <Button
@@ -187,9 +294,10 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
               size="sm"
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2"
+              disabled={isUploading}
             >
               <Upload size={14} />
-              Replace Image
+              {isUploading ? 'Uploading...' : 'Replace Image'}
             </Button>
             
             <Button
