@@ -13,7 +13,7 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
   mode = 'preview',
   showLogo = true
 }) => {
-  const logoSize = mode === 'export' ? 'w-24 h-24' : 'w-20 h-20';
+  const logoSize = mode === 'export' ? 'w-[75px] h-auto' : 'w-[75px] h-auto';
   
   const renderUmoorLogo = () => {
     // Check if umoorLogo is a URL (starts with http/https or is a data URL)
@@ -22,7 +22,7 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
         <img
           src={umoorBlock.umoorLogo}
           alt={umoorBlock.umoorName}
-          className={`${logoSize} object-cover rounded-xl border-2 border-gray-200 shadow-sm`}
+          className={`${logoSize} object-cover`}
           onError={(e) => {
             // Fallback to emoji if image fails to load
             const target = e.target as HTMLImageElement;
@@ -54,21 +54,21 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
       <div className="text-right">
         {/* Main Heading */}
         {umoorBlock.title && (
-          <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-2 font-kanz">
+          <h2 className="!text-[40px] !text-[#286741] leading-tight mb-2 font-kanz">
             {umoorBlock.title}
           </h2>
         )}
         
         {/* Subheading */}
         {umoorBlock.subheading && (
-          <h3 className="text-lg font-semibold text-gray-700 leading-tight mb-3 font-kanz">
+          <h3 className="text-lg text-[#B3443E] leading-tight mb-3 font-kanz">
             {umoorBlock.subheading}
           </h3>
         )}
         
         {/* Fallback to umoor name if no title is set */}
         {!umoorBlock.title && !umoorBlock.subheading && (
-          <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
+          <h2 className="!text-[40px] font-bold text-[#286741] leading-tight mb-2 font-kanz">
             {umoorBlock.umoorName}
           </h2>
         )}

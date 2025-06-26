@@ -21,37 +21,35 @@ const MenuBlockRenderer: React.FC<MenuBlockRendererProps> = ({ data, isPreview =
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Header Section */}
       {data.header && (
-        <div className="bg-primary text-white text-center py-4 px-6" style={{ fontFamily: 'kanz' }}>
-          <h2 className="text-xl font-semibold">{data.header}</h2>
+        <div className="bg-primary text-white text-center py-4 px-6 font-kanz">
+          <h2 className="text-2xl font-semibold">{data.header}</h2>
         </div>
       )}
-      
+
       <div className="">
         {data.items.map((item, index) => (
           <div key={index} className="px-6 py-5 hover:bg-gray-50 transition-colors duration-150">
             <div className="space-y-3">
               <div className="font-semibold text-lg text-gray-900">
                 {item.name}
-              </div>
-              
-              {item.calories && (
-                <div className="flex items-center space-x-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <br />
+                {item.calories && (
+                  <span className="inline-flex items-center pb-0.5 rounded-full text-xs font-medium text-gray-900">
                     {item.calories}
                   </span>
-                </div>
-              )}
-              
+                )}
+              </div>
+
               {item.allergens && (
-                <div className="flex items-start space-x-2">
-                  <span className="text-sm font-medium text-red-600">Allergens:</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-600">Allergens:</span>
                   <span className="text-sm text-red-600 leading-relaxed">
                     {item.allergens}
                   </span>
                 </div>
               )}
             </div>
-            
+
             {index < data.items.length - 1 && (
               <div className="mt-5 border-b border-dotted border-gray-300"></div>
             )}

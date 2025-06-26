@@ -92,7 +92,7 @@
 
 /* Style links in the rich text editor */
 .richTextEditorWrapper :global(.ProseMirror a) {
-  color: #22c55e !important; /* Green-500 */
+  color: #286741 !important; /* Green-500 */
   text-decoration: underline !important;
   cursor: pointer !important;
 }
@@ -104,7 +104,7 @@
 
 /* Global styles for rich text content in preview */
 :global(.rich-text-content a) {
-  color: #22c55e !important; /* Green-500 */
+  color: #286741 !important; /* Green-500 */
   text-decoration: underline !important;
   cursor: pointer !important;
 }
