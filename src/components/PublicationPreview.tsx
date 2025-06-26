@@ -141,7 +141,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
 
       {/* Footer */}
       <div className="mt-12 pt-8 border-t border-gray-200">
-        <div className="bg-[#DFCCAE] rounded-lg p-6 text-center">
+        <div className="bg-[#DFCCAE] rounded-lg p-6 md:text-center text-left">
           <div className="text-gray-800 text-sm leading-relaxed">
             <p className="mb-2 font-semibold">
               Ashara Mubaraka 1447H - ITS Helpline
@@ -152,7 +152,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
               <br />
                ane Telephone helpline:{' '}
               <a href='tel:918065915253' className="text-[#286741] underline font-medium">+918065915253</a>{' '}
-              from 3PM - 6PM (PST)
+              from 3PM - 6PM (IST)
             </p>
             <p className="mb-2 italic">
               Note: General suwalo na jawabo Whatsapp Menu ma AI Assistant si haasil kari sakaai che

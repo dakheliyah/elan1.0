@@ -47,7 +47,7 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
       {/* Publication Title */}
       {title && (
         <div className="text-center mb-12 pb-8 flex flex-col items-center">
-          <h1 className="!text-[120px] text-[#859069] leading-tight font-kanz flex items-center gap-12">
+          <h1 className="!text-[60px] md:!text-[120px] text-[#859069] leading-tight font-kanz flex items-center gap-12">
             <span><img src="/deco.png" alt="" /></span>
             تمارو دن
             <span><img src="/deco.png" alt="" /></span>
