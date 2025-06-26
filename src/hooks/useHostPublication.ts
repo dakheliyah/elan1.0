@@ -2,8 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Publication } from '@/pages/PublicationEditor';
 import { convertToPublication } from '@/utils/publicationConverter';
+import type { Database } from '@/integrations/supabase/types';
 
-const fetchHostPublication = async (eventId: string, hostLocationId: string): Promise<Publication | null> => {
+type DbPublication = Database['public']['Tables']['publications']['Row'];
+
+interface HostPublicationResult {
+  dbPublication: DbPublication;
+  publication: Publication;
+}
+
+const fetchHostPublication = async (eventId: string, hostLocationId: string): Promise<HostPublicationResult | null> => {
   if (!eventId || !hostLocationId) {
     return null;
   }
@@ -26,11 +34,15 @@ const fetchHostPublication = async (eventId: string, hostLocationId: string): Pr
     return null;
   }
 
-  return convertToPublication(data[0]);
+  const dbPublication = data[0] as DbPublication;
+  return {
+    dbPublication,
+    publication: convertToPublication(dbPublication)
+  };
 };
 
 export const useHostPublication = (eventId: string, hostLocationId: string | null) => {
-  return useQuery<Publication | null, Error>({
+  return useQuery<HostPublicationResult | null, Error>({
     queryKey: ['hostPublication', eventId, hostLocationId],
     queryFn: () => fetchHostPublication(eventId, hostLocationId!),
     enabled: !!eventId && !!hostLocationId,

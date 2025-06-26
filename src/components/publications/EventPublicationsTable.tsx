@@ -30,6 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PublicationLocationManager } from './PublicationLocationManager';
 import type { PublicationWithLocations } from '@/services/publicationsService';
 import type { Publication } from '@/pages/PublicationEditor';
+import { convertToPublication } from '@/utils/publicationConverter';
 
 interface EventPublicationsTableProps {
   publications: PublicationWithLocations[];
@@ -92,12 +93,16 @@ export const EventPublicationsTable: React.FC<EventPublicationsTableProps> = ({
   };
 
   const handlePreview = (publication: PublicationWithLocations) => {
-    // Convert database publication to Publication type for preview
-    const previewPublication: Publication = {
-      title: publication.title || 'Untitled Publication',
-      breadcrumb: `${publication.event_id} • ${publication.publication_date}`,
-      parentBlocks: (publication.content as any)?.parentBlocks || []
-    };
+    // Use the converter to properly handle the database format
+    const previewPublication = convertToPublication({
+      ...publication,
+      locations: {
+        name: 'Event Location',
+        events: {
+          name: publication.event_id
+        }
+      }
+    });
     
     onPreview(previewPublication);
   };

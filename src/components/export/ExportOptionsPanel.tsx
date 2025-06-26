@@ -22,12 +22,17 @@ import {
   Loader2
 } from 'lucide-react';
 import { ExportOptions, EmailTemplateOptions } from '@/services/publicationExport';
-import { Publication } from '@/pages/PublicationEditor';
+import type { Database } from '@/integrations/supabase/types';
+
+type Publication = Database['public']['Tables']['publications']['Row'];
 import { 
   useExportHTML, 
   useExportPDF, 
   useGenerateEmailTemplate 
 } from '@/hooks/usePublicationExport';
+import { useHostPublication } from '@/hooks/useHostPublication';
+import { useLocation } from '@/hooks/useLocations';
+import { convertToPublication } from '@/utils/publicationConverter';
 
 interface ExportOptionsPanelProps {
   publication: Publication;
@@ -38,6 +43,13 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
   publication, 
   publicationId 
 }) => {
+  // Fetch location data to get host location ID
+  const { data: location } = useLocation(publication.location_id || '');
+  const hostLocationId = location?.host_location_id || null;
+  const { data: hostPublication, isLoading: isLoadingHostPublication } = useHostPublication(
+    publication.event_id || '',
+    hostLocationId
+  );
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     template: 'professional',
     pageSize: 'A4',
@@ -62,15 +74,46 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
   const generateEmailMutation = useGenerateEmailTemplate();
 
   const handleExportHTML = () => {
-    exportHTMLMutation.mutate({ publicationId, options: exportOptions });
+    console.log('🚀 Starting HTML export with host publication:', {
+      publicationId: publication.id,
+      publicationTitle: publication.title,
+      hostPublicationId: hostPublication?.dbPublication?.id,
+      hostPublicationTitle: hostPublication?.publication?.title,
+      includeGlobalContent: exportOptions.includeGlobalContent
+    });
+    
+    const convertedPublication = convertToPublication(publication);
+    const convertedHostPublication = hostPublication?.publication;
+    
+    exportHTMLMutation.mutate({
+      publication: convertedPublication,
+      hostPublication: convertedHostPublication,
+      options: exportOptions
+    });
   };
 
   const handleExportPDF = () => {
-    exportPDFMutation.mutate({ publicationId, options: exportOptions });
+    console.log('🚀 Starting PDF export with host publication:', {
+      publicationId: publication.id,
+      publicationTitle: publication.title,
+      hostPublicationId: hostPublication?.dbPublication?.id,
+      hostPublicationTitle: hostPublication?.publication?.title,
+      includeGlobalContent: exportOptions.includeGlobalContent
+    });
+    
+    const convertedPublication = convertToPublication(publication);
+    const convertedHostPublication = hostPublication?.publication;
+    
+    exportPDFMutation.mutate({
+      publication: convertedPublication,
+      hostPublication: convertedHostPublication,
+      options: exportOptions
+    });
   };
 
   const handleGenerateEmail = () => {
-    generateEmailMutation.mutate({ publication, templateOptions: emailOptions });
+    const convertedPublication = convertToPublication(publication);
+    generateEmailMutation.mutate({ publication: convertedPublication, templateOptions: emailOptions });
   };
 
   const updateExportOption = <K extends keyof ExportOptions>(

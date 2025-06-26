@@ -17,16 +17,24 @@ export const useExportHTML = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ publicationId, options }: { publicationId: string; options?: ExtendedExportOptions }) => {
-      return await publicationExportService.exportAsHTML(publicationId, options);
+    mutationFn: async ({ 
+      publication, 
+      hostPublication, 
+      options 
+    }: { 
+      publication: Publication; 
+      hostPublication?: Publication | null;
+      options?: ExtendedExportOptions;
+    }) => {
+      return await publicationExportService.exportAsHTML(publication, hostPublication, options);
     },
-    onSuccess: (htmlContent, { publicationId }) => {
+    onSuccess: (htmlContent, { publication }) => {
       // Create downloadable file
       const blob = new Blob([htmlContent], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `publication-${publicationId}-email.html`;
+      link.download = `publication-${publication.title.replace(/\s+/g, '-').toLowerCase()}-email.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -52,15 +60,23 @@ export const useExportPDF = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ publicationId, options }: { publicationId: string; options?: ExtendedExportOptions }) => {
-      return await publicationExportService.exportAsPDF(publicationId, options);
+    mutationFn: async ({ 
+      publication, 
+      hostPublication, 
+      options 
+    }: { 
+      publication: Publication; 
+      hostPublication?: Publication | null;
+      options?: ExtendedExportOptions;
+    }) => {
+      return await publicationExportService.exportAsPDF(publication, hostPublication, options);
     },
-    onSuccess: (pdfBlob, { publicationId }) => {
+    onSuccess: (pdfBlob, { publication }) => {
       // Create downloadable file
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `publication-${publicationId}.pdf`;
+      link.download = `publication-${publication.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

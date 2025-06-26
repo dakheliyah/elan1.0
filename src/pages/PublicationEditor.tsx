@@ -600,6 +600,7 @@ const PublicationEditorPage = () => {
           onClose={() => setShowExportModal(false)}
           publication={publication}
           publicationId={publicationId}
+          hostPublication={hostPublication}
           locationLogo={location?.logo_url}
           locationName={location?.name}
         />

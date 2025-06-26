@@ -23,6 +23,8 @@ import { usePublicationsByLocation, usePublication } from '@/hooks/usePublicatio
 import { useToast } from '@/hooks/use-toast';
 import { ExportLocationSelector } from '@/components/export/ExportLocationSelector';
 import { useExportHTML, useExportPDF } from '@/hooks/usePublicationExport';
+import { useHostPublication } from '@/hooks/useHostPublication';
+import { convertToPublication } from '@/utils/publicationConverter';
 import {
   Dialog,
   DialogContent,
@@ -49,6 +51,12 @@ const ExportModule = () => {
 
   // Find host location for the selected event
   const hostLocation = locations?.find(loc => loc.is_host);
+  
+  // Fetch host publication if we have a host location and selected publication
+  const { data: hostPublication } = useHostPublication(
+    selectedEventId || '',
+    hostLocation?.id || null
+  );
 
   // Reset selected publication when location changes
   useEffect(() => {
@@ -94,13 +102,33 @@ const ExportModule = () => {
 
     try {
       if (format === 'html') {
+        console.log('🚀 [Export Module Debug] Exporting HTML with host publication:', {
+          publicationTitle: selectedPublication?.title || 'Unknown',
+          hostPublicationTitle: hostPublication?.title || 'None',
+          hostLocationId: hostLocation?.id
+        });
+        
+        const convertedPublication = convertToPublication(selectedPublication!);
+        const convertedHostPublication = hostPublication ? convertToPublication(hostPublication) : undefined;
+        
         await exportHTMLMutation.mutateAsync({ 
-          publicationId: selectedPublicationId,
+          publication: convertedPublication,
+          hostPublication: convertedHostPublication,
           options: exportOptions
         });
       } else {
+        console.log('🚀 [Export Module Debug] Exporting PDF with host publication:', {
+          publicationTitle: selectedPublication?.title || 'Unknown',
+          hostPublicationTitle: hostPublication?.title || 'None',
+          hostLocationId: hostLocation?.id
+        });
+        
+        const convertedPublication = convertToPublication(selectedPublication!);
+        const convertedHostPublication = hostPublication ? convertToPublication(hostPublication) : undefined;
+        
         await exportPDFMutation.mutateAsync({ 
-          publicationId: selectedPublicationId,
+          publication: convertedPublication,
+          hostPublication: convertedHostPublication,
           options: exportOptions
         });
       }

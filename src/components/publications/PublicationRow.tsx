@@ -3,7 +3,9 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Eye } from 'lucide-react';
-import { Publication } from '@/pages/PublicationEditor';
+import type { PublicationWithLocations } from '@/services/publicationsService';
+import type { Publication } from '@/pages/PublicationEditor';
+import { convertToPublication } from '@/utils/publicationConverter';
 
 interface PublicationRowProps {
   publication: any; // Database publication object
@@ -30,12 +32,16 @@ export const PublicationRow: React.FC<PublicationRowProps> = ({
   };
 
   const handlePreview = () => {
-    // Convert database publication to Publication type for preview
-    const previewPublication: Publication = {
-      title: publication.title || 'Untitled Publication',
-      breadcrumb: `${publication.locations?.events?.name || 'Event'} • ${publication.locations?.name || 'Location'}`,
-      parentBlocks: publication.content?.parentBlocks || []
-    };
+    // Use the converter to properly handle the database format
+    const previewPublication = convertToPublication({
+      ...publication,
+      locations: {
+        name: 'Event Location',
+        events: {
+          name: publication.event_id
+        }
+      }
+    });
     
     onPreview(previewPublication);
   };

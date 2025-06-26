@@ -17,6 +17,7 @@ export interface ExportModalProps {
   onClose: () => void;
   publication: Publication;
   publicationId: string;
+  hostPublication?: Publication | null;
   locationLogo?: string;
   locationName?: string;
 }
@@ -32,6 +33,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onClose,
   publication,
   publicationId,
+  hostPublication,
   locationLogo,
   locationName
 }) => {
@@ -113,6 +115,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <ExportActions
             publication={publication}
             publicationId={publicationId}
+            hostPublication={hostPublication}
             exportFormat={exportOptions}
             onClose={onClose}
           />

@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { convertToPublication } from '@/utils/publicationConverter';
 import {
   usePublicationsByEvent,
   usePublicationByEventAndDate,
@@ -175,10 +176,14 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
         includeGlobalContent: hostLocation && publication.location_id !== hostLocation.id
       };
 
+      // Convert the database publication to the proper format
+      const convertedPublication = convertToPublication(publication);
+
       console.log('📄 [Individual Export Debug] Exporting publication:', {
         id: publication.id,
         title: publication.title,
         locationName: publication.location?.name,
+        convertedParentBlocks: convertedPublication.parentBlocks?.length || 0,
         exportOptions
       });
 
@@ -186,10 +191,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
       let filename: string;
       
       if (exportFormat === 'html') {
-        content = await publicationExportService.exportAsHTML(publication.id, exportOptions);
+        content = await publicationExportService.exportAsHTML(convertedPublication, null, exportOptions);
         filename = `${publication.location?.name || 'Unknown'}-${publication.title}.html`;
       } else {
-        content = await publicationExportService.exportAsPDF(publication.id, exportOptions);
+        content = await publicationExportService.exportAsPDF(convertedPublication, null, exportOptions);
         filename = `${publication.location?.name || 'Unknown'}-${publication.title}.pdf`;
       }
 
@@ -288,7 +293,8 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
               exportOptions
             });
             
-            content = await publicationExportService.exportAsHTML(basePublication.id, exportOptions);
+            const convertedPublication = convertToPublication(basePublication);
+            content = await publicationExportService.exportAsHTML(convertedPublication, null, exportOptions);
             filename = `${locationGroup.locationName}-${basePublication.title}.html`;
           } else {
             const exportOptions = {
@@ -298,7 +304,8 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
               includeMetadata: true,
               includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id
             };
-            content = await publicationExportService.exportAsPDF(basePublication.id, exportOptions);
+            const convertedPublication = convertToPublication(basePublication);
+            content = await publicationExportService.exportAsPDF(convertedPublication, null, exportOptions);
             filename = `${locationGroup.locationName}-${basePublication.title}.pdf`;
           }
           

@@ -22,6 +22,7 @@ import {
 interface ExportActionsProps {
   publication: Publication;
   publicationId: string;
+  hostPublication?: Publication | null;
   exportFormat: ExportFormat;
   onClose: () => void;
 }
@@ -29,6 +30,7 @@ interface ExportActionsProps {
 export const ExportActions: React.FC<ExportActionsProps> = ({
   publication,
   publicationId,
+  hostPublication,
   exportFormat,
   onClose
 }) => {
@@ -42,7 +44,8 @@ export const ExportActions: React.FC<ExportActionsProps> = ({
   const handleDownload = async () => {
     if (exportFormat.type === 'html') {
       exportHTMLMutation.mutate({ 
-        publicationId, 
+        publication,
+        hostPublication,
         options: {
           template: exportFormat.template as any,
           imageQuality: 'high',
@@ -55,7 +58,8 @@ export const ExportActions: React.FC<ExportActionsProps> = ({
       });
     } else {
       exportPDFMutation.mutate({ 
-        publicationId, 
+        publication,
+        hostPublication,
         options: {
           template: 'professional',
           pageSize: exportFormat.options.pageSize || 'A4',
