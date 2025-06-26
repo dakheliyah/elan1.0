@@ -36,7 +36,8 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
         const items: MenuItemData[] = [];
         for (let i = 1; i < jsonData.length; i++) {
           const row = jsonData[i];
-          if (row && row.length >= 3 && row[0]) {
+          // Only require name (first column), nutrition and allergens are optional
+          if (row && row[0] && row[0].toString().trim()) {
             items.push({
               name: row[0]?.toString() || '',
               calories: row[1]?.toString() || '',
@@ -51,7 +52,7 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
         });
       } catch (error) {
         console.error('Error parsing Excel file:', error);
-        alert('Error parsing Excel file. Please ensure it has Name, Calories, and Allergens columns.');
+        alert('Error parsing Excel file. Please ensure it has at least a Name column.');
       }
     };
     reader.readAsArrayBuffer(file);
@@ -104,7 +105,7 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
           <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Menu Excel File</h3>
           <p className="text-sm text-gray-500 mb-4">
-            Upload an Excel file with columns: Name, Description, Price, Calories, Carbs, Protein, Fats, Allergens
+            Upload an Excel file with columns: Name (required), Nutrition (optional), Allergens (optional)
           </p>
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
             <Button onClick={() => fileInputRef.current?.click()}>
@@ -115,8 +116,8 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
               variant="outline" 
               onClick={() => {
                 const link = document.createElement('a');
-                link.href = '/menu-template.xls';
-                link.download = 'menu-template.xls';
+                link.href = '/Menu_Template_New.xls';
+                link.download = 'Menu_Template_New.xls';
                 link.click();
               }}
             >
@@ -170,7 +171,7 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
                       <h4 className="font-semibold text-lg text-gray-900 mb-2">{item.name}</h4>
                       <div className="space-y-1">
                         <p className="text-sm text-gray-600">
-                          <span className="font-medium">Calories:</span> {item.calories}
+                          <span className="font-medium">Nutrition:</span> {item.calories}
                         </p>
                         <p className="text-sm text-gray-600">
                           <span className="font-medium">Allergens:</span> {item.allergens}
@@ -231,7 +232,7 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="calories">Calories</Label>
+                  <Label htmlFor="calories">Nutrition</Label>
                   <Input
                     id="calories"
                     value={editingItem.calories}
