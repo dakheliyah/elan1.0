@@ -156,7 +156,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
             <img
               src={data.imageUrl}
               alt={data.alt || 'Uploaded image'}
-              className="w-full h-48 object-cover rounded-lg border border-gray-200"
+              className="w-full h-auto object-cover rounded-lg border border-gray-200"
             />
             <Button
               variant="destructive"

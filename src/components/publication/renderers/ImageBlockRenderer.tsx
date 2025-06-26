@@ -14,8 +14,8 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
   isLast = false
 }) => {
   const imageClasses = mode === 'export' 
-    ? 'w-full rounded-lg shadow-sm border border-gray-200 max-h-96 object-cover'
-    : 'w-full rounded-lg shadow-sm border border-gray-200 max-h-80 object-cover';
+    ? 'w-full rounded-lg shadow-sm border border-gray-200 max-h-auto object-cover'
+    : 'w-full rounded-lg shadow-sm border border-gray-200 max-h-auto object-cover';
 
   return (
     <div className={isLast ? "" : "mb-0"}>
@@ -34,7 +34,7 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
           )}
         </figure>
       ) : (
-        <div className="w-full h-48 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+        <div className="w-full h-auto bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
           <span className="text-gray-400 text-sm">No image selected</span>
         </div>
       )}
