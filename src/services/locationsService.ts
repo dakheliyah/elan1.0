@@ -2,10 +2,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/types/database.types';
 import { handleSupabaseError } from './serviceUtils';
+import { userLocationAccessService } from './userLocationAccessService';
 
 type Location = Database['public']['Tables']['locations']['Row'];
 type LocationInsert = Database['public']['Tables']['locations']['Insert'];
 type LocationUpdate = Database['public']['Tables']['locations']['Update'];
+type LocationAccessLevel = Database['public']['Enums']['location_access_level'];
 
 export const locationsService = {
   async getAll(): Promise<Location[]> {
@@ -101,14 +103,7 @@ export const locationsService = {
       const { data, error } = await supabase
         .from('locations')
         .select(`
-          id,
-          name,
-          description,
-          timezone,
-          is_host,
-          event_id,
-          created_at,
-          updated_at,
+          *,
           publications(count)
         `)
         .eq('event_id', eventId)
@@ -116,14 +111,105 @@ export const locationsService = {
 
       if (error) throw error;
       
-      return (data || []).map(location => ({
+      // Type the result to include publications array from the count query
+      type LocationWithPublications = Location & {
+        publications: { count: number }[];
+      };
+      
+      return (data as LocationWithPublications[] || []).map(location => ({
         ...location,
-        logo_url: '', // Default empty string since column doesn't exist yet
         publication_count: location.publications?.[0]?.count || 0,
         publications: undefined,
       })) as (Location & { publication_count: number })[];
     } catch (error) {
       handleSupabaseError(error, 'fetch locations with publication count');
+    }
+  },
+
+  // Get locations with publication count filtered by user access
+  async getWithPublicationCountByAccess(
+    eventId: string, 
+    userId: string, 
+    minAccessLevel: LocationAccessLevel = 'read'
+  ): Promise<(Location & { publication_count: number; access_level: LocationAccessLevel })[]> {
+    try {
+      const { data, error } = await supabase
+        .from('locations')
+        .select(`
+          *,
+          publications(count),
+          user_location_access!inner(access_level)
+        `)
+        .eq('event_id', eventId)
+        .eq('user_location_access.user_id', userId)
+        .or('user_location_access.expires_at.is.null,user_location_access.expires_at.gte.now()')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Define access level hierarchy
+      const accessLevels = {
+        read: 1,
+        write: 2,
+        admin: 3
+      };
+      
+      const minLevel = accessLevels[minAccessLevel];
+      
+      // Type the result to include publications and user_location_access arrays from the query
+      type LocationWithAccessAndPublications = Location & {
+        publications: { count: number }[];
+        user_location_access: { access_level: LocationAccessLevel }[];
+      };
+      
+      return (data as LocationWithAccessAndPublications[] || [])
+        .filter(location => {
+          const userAccess = location.user_location_access?.[0];
+          return userAccess && accessLevels[userAccess.access_level] >= minLevel;
+        })
+        .map(location => ({
+          ...location,
+          publication_count: location.publications?.[0]?.count || 0,
+          access_level: location.user_location_access?.[0]?.access_level || 'read',
+          publications: undefined,
+          user_location_access: undefined,
+        })) as (Location & { publication_count: number; access_level: LocationAccessLevel })[];
+    } catch (error) {
+      handleSupabaseError(error, 'fetch accessible locations with publication count');
+    }
+  },
+
+  // Check if user can access a specific location
+  async canUserAccessLocation(
+    locationId: string, 
+    userId: string, 
+    requiredLevel: LocationAccessLevel = 'read'
+  ): Promise<boolean> {
+    try {
+      return await userLocationAccessService.hasAccess(userId, locationId, requiredLevel);
+    } catch (error) {
+      console.error('Error checking location access:', error);
+      return false;
+    }
+  },
+
+  // Get location by ID with access check
+  async getByIdWithAccess(
+    id: string, 
+    userId: string, 
+    requiredLevel: LocationAccessLevel = 'read'
+  ): Promise<Location | null> {
+    try {
+      // First check if user has access
+      const hasAccess = await this.canUserAccessLocation(id, userId, requiredLevel);
+      if (!hasAccess) {
+        return null;
+      }
+
+      // If user has access, fetch the location
+      return await this.getById(id);
+    } catch (error) {
+      handleSupabaseError(error, 'fetch location with access check');
     }
   },
   // Upload logo

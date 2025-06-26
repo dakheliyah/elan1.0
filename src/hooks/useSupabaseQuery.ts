@@ -60,3 +60,17 @@ export {
 } from './useInvitations';
 
 export { useHostPublication } from './useHostPublication';
+
+export {
+  useUserLocationAccess,
+  useLocationAccess,
+  useCanAccessLocation,
+  useLocationAccessLevel,
+  useAccessibleLocations,
+  useLocationsWithPublicationCountByAccess,
+  useGrantLocationAccess,
+  useUpdateLocationAccess,
+  useRevokeLocationAccess,
+  useBulkGrantLocationAccess,
+  useLocationAccessStats
+} from './useLocationAccess';

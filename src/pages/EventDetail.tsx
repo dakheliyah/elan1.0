@@ -18,7 +18,9 @@ import {
   Loader2,
   Image,
   Calendar,
-  FileText
+  FileText,
+  Users,
+  Shield
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -32,14 +34,18 @@ import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import NewLocationModal, { LocationFormData } from '@/components/NewLocationModal';
 import EditLocationModal, { LocationEditData } from '@/components/EditLocationModal';
 import ShareModal from '@/components/ShareModal';
+import LocationAccessModal from '@/components/LocationAccessModal';
+import LocationAccessManager from '@/components/LocationAccessManager';
 import UserMenu from '@/components/UserMenu';
 import MediaLibrary from './MediaLibrary';
 import { EventPublicationManager } from '@/components/publications/EventPublicationManager';
 import {
   useEvent,
   useLocationsWithPublicationCount,
+  useLocationsWithPublicationCountByAccess,
   useDeleteLocation,
-  useLocation
+  useLocation,
+  useCanAccessLocation
 } from '@/hooks/useSupabaseQuery';
 import { useCreateLocationWithHost, useUpdateLocationWithHost } from '@/hooks/useHostLocation';
 import { useCurrentProfile } from '@/hooks/useProfiles';
@@ -53,10 +59,20 @@ const EventDetail = () => {
   const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+  const [isLocationAccessModalOpen, setIsLocationAccessModalOpen] = useState(false);
+  const [accessLocationId, setAccessLocationId] = useState<string | null>(null);
+  const [accessLocationName, setAccessLocationName] = useState<string>('');
+  const [isAccessManagerOpen, setIsAccessManagerOpen] = useState(false);
 
   // Fetch event and locations data from Supabase
   const { data: event, isLoading: eventLoading, error: eventError } = useEvent(eventId || '');
-  const { data: locations = [], isLoading: locationsLoading, error: locationsError } = useLocationsWithPublicationCount(eventId || '');
+  
+  // Use access-controlled location fetching for non-admin users
+  const { data: accessControlledLocations = [], isLoading: accessLocationsLoading, error: accessLocationsError } = useLocationsWithPublicationCountByAccess(eventId || '', 'read');
+  
+  // Fallback to all locations for admin users
+  const { data: allLocations = [], isLoading: allLocationsLoading, error: allLocationsError } = useLocationsWithPublicationCount(eventId || '');
+  
   const { data: editingLocation } = useLocation(editingLocationId || '');
   const { data: currentProfile } = useCurrentProfile();
   const createLocationMutation = useCreateLocationWithHost();
@@ -65,6 +81,11 @@ const EventDetail = () => {
 
   // Check if user is admin
   const isAdmin = currentProfile?.role === 'admin';
+  
+  // Use appropriate locations based on user role
+  const locations = isAdmin ? allLocations : accessControlledLocations;
+  const locationsLoading = isAdmin ? allLocationsLoading : accessLocationsLoading;
+  const locationsError = isAdmin ? allLocationsError : accessLocationsError;
 
   const handleBack = () => {
     navigate('/events');
@@ -88,6 +109,7 @@ const EventDetail = () => {
       event_id: eventId,
       is_host: locationData.is_host || false,
       logo_url: locationData.logo_url,
+      created_by: currentProfile?.id || '',
     });
 
     setIsLocationModalOpen(false);
@@ -132,6 +154,16 @@ const EventDetail = () => {
 
   const handleShare = () => {
     setIsShareModalOpen(true);
+  };
+
+  const handleManageAccess = (locationId: string, locationName: string) => {
+    setAccessLocationId(locationId);
+    setAccessLocationName(locationName);
+    setIsLocationAccessModalOpen(true);
+  };
+
+  const handleAccessManager = () => {
+    setIsAccessManagerOpen(true);
   };
 
   // Error states
@@ -254,14 +286,24 @@ const EventDetail = () => {
                       <UserMenu />
 
                       {isAdmin && (
-                        <Button
-                          variant="outline"
-                          onClick={handleShare}
-                          className="flex items-center gap-2"
-                        >
-                          <Share2 size={16} />
-                          Share
-                        </Button>
+                        <>
+                          <Button
+                            variant="outline"
+                            onClick={handleAccessManager}
+                            className="flex items-center gap-2"
+                          >
+                            <Users size={16} />
+                            Manage Access
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={handleShare}
+                            className="flex items-center gap-2"
+                          >
+                            <Share2 size={16} />
+                            Share
+                          </Button>
+                        </>
                       )}
 
                       {/* <DropdownMenu>
@@ -368,6 +410,18 @@ const EventDetail = () => {
                               </div>
                               {isAdmin && (
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleManageAccess(location.id, location.name);
+                                    }}
+                                    className="hover:bg-blue-50 hover:text-blue-600"
+                                    title="Manage Access"
+                                  >
+                                    <Shield size={14} />
+                                  </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -498,6 +552,22 @@ const EventDetail = () => {
                 timezone: loc.timezone,
                 isFeatured: loc.is_host || false
               }))}
+            />
+
+            <LocationAccessModal
+              isOpen={isLocationAccessModalOpen}
+              onClose={() => {
+                setIsLocationAccessModalOpen(false);
+                setAccessLocationId(null);
+                setAccessLocationName('');
+              }}
+              locationId={accessLocationId || ''}
+              locationName={accessLocationName}
+            />
+
+            <LocationAccessManager
+              isOpen={isAccessManagerOpen}
+              onClose={() => setIsAccessManagerOpen(false)}
             />
           </div>
         </SidebarInset>
