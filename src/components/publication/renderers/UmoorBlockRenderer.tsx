@@ -54,14 +54,14 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
       <div className="text-right">
         {/* Main Heading */}
         {umoorBlock.title && (
-          <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-2 font-kanz">
             {umoorBlock.title}
           </h2>
         )}
         
         {/* Subheading */}
         {umoorBlock.subheading && (
-          <h3 className="text-lg font-semibold text-gray-700 leading-tight mb-3">
+          <h3 className="text-lg font-semibold text-gray-700 leading-tight mb-3 font-kanz">
             {umoorBlock.subheading}
           </h3>
         )}
