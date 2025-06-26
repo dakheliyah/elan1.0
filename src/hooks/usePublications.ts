@@ -115,7 +115,7 @@ export const useUpdateLocationContent = () => {
       publicationId: string;
       locationId: string;
       content: string;
-      status?: 'draft' | 'published' | 'archived';
+      status?: 'draft' | 'mark_as_ready' | 'archived';
     }) => publicationsService.updateLocationContent(publicationId, locationId, content, status),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['publication', data.publication_id, 'locations'] });
@@ -131,7 +131,7 @@ export const useUpdateLocationStatus = () => {
     mutationFn: ({ publicationId, locationId, status }: {
       publicationId: string;
       locationId: string;
-      status: 'draft' | 'published' | 'archived';
+      status: 'draft' | 'mark_as_ready' | 'archived';
     }) => publicationsService.updateLocationStatus(publicationId, locationId, status),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['publication', data.publication_id, 'locations'] });
@@ -142,10 +142,10 @@ export const useUpdateLocationStatus = () => {
 
 
 
-export const usePublishedLocations = (publicationId: string) => {
+export const useMarkAsReadyLocations = (publicationId: string) => {
   return useQuery({
-    queryKey: ['publication', publicationId, 'published-locations'],
-    queryFn: () => publicationsService.getPublishedLocations(publicationId),
+    queryKey: ['publication', publicationId, 'mark-as-ready-locations'],
+    queryFn: () => publicationsService.getMarkAsReadyLocations(publicationId),
     enabled: !!publicationId,
   });
 };
@@ -157,7 +157,7 @@ export const usePublishAllLocations = () => {
     mutationFn: (publicationId: string) => publicationsService.publishAllLocations(publicationId),
     onSuccess: (_, publicationId) => {
       queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'locations'] });
-      queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'published-locations'] });
+      queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'mark-as-ready-locations'] });
     },
   });
 };
@@ -169,7 +169,7 @@ export const useArchiveAllLocations = () => {
     mutationFn: (publicationId: string) => publicationsService.archiveAllLocations(publicationId),
     onSuccess: (_, publicationId) => {
       queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'locations'] });
-      queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'published-locations'] });
+      queryClient.invalidateQueries({ queryKey: ['publication', publicationId, 'mark-as-ready-locations'] });
     },
   });
 };

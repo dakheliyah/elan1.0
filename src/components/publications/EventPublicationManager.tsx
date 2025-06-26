@@ -349,7 +349,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published':
+      case 'mark_as_ready':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'draft':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';

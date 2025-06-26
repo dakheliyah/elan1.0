@@ -21,7 +21,7 @@ const fetchHostPublication = async (eventId: string, hostLocationId: string): Pr
     .select('*')
     .eq('event_id', eventId)
     .eq('location_id', hostLocationId)
-    .eq('status', 'published')
+    .eq('status', 'mark_as_ready')
     .order('created_at', { ascending: false })
     .limit(1);
 

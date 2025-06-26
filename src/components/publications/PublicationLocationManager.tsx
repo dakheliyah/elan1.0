@@ -109,7 +109,7 @@ export const PublicationLocationManager: React.FC<PublicationLocationManagerProp
       await updateStatusMutation.mutateAsync({
         publicationId,
         locationId: selectedLocation.id,
-        status: newStatus as 'draft' | 'published' | 'archived'
+        status: newStatus as 'draft' | 'mark_as_ready' | 'archived'
       });
       
       toast({
@@ -130,7 +130,7 @@ export const PublicationLocationManager: React.FC<PublicationLocationManagerProp
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published':
+      case 'mark_as_ready':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'draft':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -143,7 +143,7 @@ export const PublicationLocationManager: React.FC<PublicationLocationManagerProp
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'published':
+      case 'mark_as_ready':
         return <CheckCircle className="h-4 w-4" />;
       case 'draft':
         return <Clock className="h-4 w-4" />;
@@ -298,10 +298,10 @@ export const PublicationLocationManager: React.FC<PublicationLocationManagerProp
                       Draft
                     </div>
                   </SelectItem>
-                  <SelectItem value="published">
+                  <SelectItem value="mark_as_ready">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4" />
-                      Published
+                      Ready
                     </div>
                   </SelectItem>
                   <SelectItem value="archived">

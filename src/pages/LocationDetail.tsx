@@ -143,7 +143,7 @@ const LocationDetail = () => {
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case 'published':
+      case 'mark_as_ready':
         return 'bg-green-100 text-green-800 hover:bg-green-100';
       case 'draft':
         return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100';
@@ -158,8 +158,8 @@ const LocationDetail = () => {
     switch (status) {
       case 'draft':
         return 'Draft';
-      case 'published':
-        return 'Published';
+      case 'mark_as_ready':
+        return 'Ready';
       case 'archived':
         return 'Archived';
       default:
@@ -265,7 +265,7 @@ const LocationDetail = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="mark_as_ready">Ready</SelectItem>
                       <SelectItem value="draft">Draft</SelectItem>
                       <SelectItem value="archived">Archived</SelectItem>
                     </SelectContent>

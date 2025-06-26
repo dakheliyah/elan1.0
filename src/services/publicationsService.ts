@@ -35,7 +35,7 @@ interface CreateEventPublicationData {
   event_id: string;
   publication_date: string;
   location_ids: string[];
-  status?: 'draft' | 'published' | 'archived';
+  status?: 'draft' | 'mark_as_ready' | 'archived';
 }
 
 interface PublicationWithLocation extends Publication {
@@ -180,7 +180,7 @@ export const publicationsService = {
     publicationId: string, 
     locationId: string, 
     content: string, 
-    status?: 'draft' | 'published' | 'archived'
+    status?: 'draft' | 'mark_as_ready' | 'archived'
   ): Promise<PublicationLocation> {
     try {
       const updateData: PublicationLocationUpdate = {
@@ -211,7 +211,7 @@ export const publicationsService = {
   async updateLocationStatus(
     publicationId: string, 
     locationId: string, 
-    status: 'draft' | 'published' | 'archived'
+    status: 'draft' | 'mark_as_ready' | 'archived'
   ): Promise<PublicationLocation> {
     try {
       const { data, error } = await supabase
@@ -330,7 +330,7 @@ export const publicationsService = {
     }
   },
 
-  async updateStatus(id: string, status: 'draft' | 'published' | 'archived'): Promise<Publication> {
+  async updateStatus(id: string, status: 'draft' | 'mark_as_ready' | 'archived'): Promise<Publication> {
     try {
       const { data, error } = await supabase
         .from('publications')
@@ -353,8 +353,8 @@ export const publicationsService = {
 
 
 
-  // New method: Get published locations for a publication
-  async getPublishedLocations(publicationId: string): Promise<PublicationLocation[]> {
+  // New method: Get mark_as_ready locations for a publication
+  async getMarkAsReadyLocations(publicationId: string): Promise<PublicationLocation[]> {
     try {
       const { data, error } = await supabase
         .from('publication_locations')
@@ -368,13 +368,13 @@ export const publicationsService = {
           )
         `)
         .eq('publication_id', publicationId)
-        .eq('status', 'published')
+        .eq('status', 'mark_as_ready')
         .order('locations(name)');
 
       if (error) throw error;
       return (data || []) as PublicationLocation[];
     } catch (error) {
-      handleSupabaseError(error, 'fetch published locations');
+      handleSupabaseError(error, 'fetch mark_as_ready locations');
     }
   },
 
@@ -384,7 +384,7 @@ export const publicationsService = {
       const { error } = await supabase
         .from('publication_locations')
         .update({ 
-          status: 'published',
+          status: 'mark_as_ready',
           updated_at: new Date().toISOString()
         })
         .eq('publication_id', publicationId);

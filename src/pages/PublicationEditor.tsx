@@ -218,13 +218,13 @@ const PublicationEditorPage = () => {
         updates: {
           title: publication.title,
           content: serializeContentToJson(publication.parentBlocks),
-          status: 'published'
+          status: 'mark_as_ready'
         }
       });
       
       toast({
-        title: "Publication Published",
-        description: "Your publication is now live.",
+        title: "Publication Marked as Ready",
+        description: "The publication has been marked as ready successfully.",
       });
 
       // Redirect back to location page after successful publish

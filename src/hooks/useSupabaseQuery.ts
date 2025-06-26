@@ -30,7 +30,7 @@ export {
   usePublicationLocations,
   useUpdateLocationContent,
   useUpdateLocationStatus,
-  usePublishedLocations,
+  useMarkAsReadyLocations,
   usePublishAllLocations,
   useArchiveAllLocations
 } from './usePublications';

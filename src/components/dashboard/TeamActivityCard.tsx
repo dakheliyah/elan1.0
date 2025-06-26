@@ -32,7 +32,7 @@ export function TeamActivityCard() {
 
   const getActivityText = (publication: any) => {
     const memberName = publication.profiles?.full_name || 'Team Member';
-    const action = publication.status === 'published' ? 'published' : 'updated';
+    const action = publication.status === 'mark_as_ready' ? 'marked as ready' : 'updated';
     const location = publication.locations?.name || 'Unknown Location';
     return `${memberName} ${action} "${publication.title}" in ${location}`;
   };

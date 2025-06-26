@@ -831,7 +831,7 @@ export type Database = {
     }
     Enums: {
       invitation_status: "pending" | "accepted" | "expired"
-      publication_status: "draft" | "published" | "archived"
+      publication_status: "draft" | "mark_as_ready" | "archived"
       user_role: "admin" | "editor" | "viewer"
     }
     CompositeTypes: {

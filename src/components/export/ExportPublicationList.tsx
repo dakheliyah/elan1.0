@@ -35,7 +35,7 @@ export const ExportPublicationList: React.FC<ExportPublicationListProps> = ({
               <h4 className="font-medium text-sm">{publication.title}</h4>
               <div className="flex items-center gap-2 mt-1">
                 <Badge 
-                  variant={publication.status === 'published' ? 'default' : 'secondary'}
+                  variant={publication.status === 'mark_as_ready' ? 'default' : 'secondary'}
                   className="text-xs"
                 >
                   {publication.status}
@@ -48,7 +48,7 @@ export const ExportPublicationList: React.FC<ExportPublicationListProps> = ({
             size="sm"
             className="w-full"
             onClick={() => onPublicationSelect(publication.id)}
-            disabled={publication.status !== 'published'}
+            disabled={publication.status !== 'mark_as_ready'}
           >
             <Download className="w-4 h-4 mr-2" />
             Export Publication

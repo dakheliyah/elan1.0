@@ -81,7 +81,7 @@ export const EventPublicationsTable: React.FC<EventPublicationsTableProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published':
+      case 'mark_as_ready':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'draft':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -138,8 +138,8 @@ export const EventPublicationsTable: React.FC<EventPublicationsTableProps> = ({
     return publication.publication_locations?.length || 0;
   };
 
-  const getPublishedLocationCount = (publication: PublicationWithLocations) => {
-    return publication.publication_locations?.filter(loc => loc.status === 'published').length || 0;
+  const getMarkAsReadyLocationCount = (publication: PublicationWithLocations) => {
+    return publication.publication_locations?.filter(loc => loc.status === 'mark_as_ready').length || 0;
   };
 
   if (publications.length === 0) {
@@ -201,7 +201,7 @@ export const EventPublicationsTable: React.FC<EventPublicationsTableProps> = ({
                   <div className="space-y-4">
                     {datePublications.map((publication) => {
                       const locationCount = getLocationCount(publication);
-                      const publishedCount = getPublishedLocationCount(publication);
+                      const markAsReadyCount = getMarkAsReadyLocationCount(publication);
                       
                       return (
                         <div
@@ -225,7 +225,7 @@ export const EventPublicationsTable: React.FC<EventPublicationsTableProps> = ({
                                   <MapPin className="h-4 w-4" />
                                   {locationCount} location{locationCount !== 1 ? 's' : ''}
                                   {locationCount > 0 && (
-                                    <span className="ml-1">({publishedCount} published)</span>
+                                    <span className="ml-1">({markAsReadyCount} ready)</span>
                                   )}
                                 </div>
                                 <span>Updated: {new Date(publication.updated_at).toLocaleDateString()}</span>
