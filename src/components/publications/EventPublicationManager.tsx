@@ -53,7 +53,7 @@ interface EventPublicationManagerProps {
 export const EventPublicationManager: React.FC<EventPublicationManagerProps> = ({ eventId }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   // State management
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -69,20 +69,20 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
   const { data: publications = [], isLoading: publicationsLoading } = usePublicationsByEvent(eventId);
   const { data: locations = [] } = useLocations(eventId);
   const { data: currentProfile } = useCurrentProfile();
-  
+
   // Find host location for the event
   const hostLocation = locations.find(loc => loc.is_host);
-  
+
   // Role checking
   const isAdmin = currentProfile?.role === 'admin';
-  
+
   // Mutations
   const createPublicationMutation = useCreateEventPublication();
   const deletePublicationMutation = useDeletePublication();
 
   // Get publications for selected date (now returns array of location-specific publications)
   const { data: publicationsForDate = [] } = usePublicationByEventAndDate(eventId, selectedDate);
-  
+
   // Group publications by title for display
   const groupedPublications = publicationsForDate.reduce((acc, pub) => {
     const key = pub.title;
@@ -117,7 +117,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
       };
 
       const createdPublications = await createPublicationMutation.mutateAsync(publicationData);
-      
+
       setShowCreateDialog(false);
       setNewPublicationTitle('');
 
@@ -127,11 +127,11 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
       if (targetPublication) {
         navigate(`/events/${eventId}/locations/${targetPublication.location_id}/publications/${targetPublication.id}/edit`);
       }
-      
+
       toast({
-         title: "Publications Created",
-         description: `Publication "${newPublicationTitle.trim()}" has been created for all locations on ${format(new Date(selectedDate), 'MMM dd, yyyy')}.`
-       });
+        title: "Publications Created",
+        description: `Publication "${newPublicationTitle.trim()}" has been created for all locations on ${format(new Date(selectedDate), 'MMM dd, yyyy')}.`
+      });
     } catch (error) {
       console.error(error)
       toast({
@@ -189,7 +189,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
 
       let content: string | Blob;
       let filename: string;
-      
+
       if (exportFormat === 'html') {
         content = await publicationExportService.exportAsHTML(convertedPublication, null, exportOptions);
         filename = `${publication.location?.name || 'Unknown'}-${publication.title}.html`;
@@ -199,8 +199,8 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
       }
 
       // Create download link
-      const blob = content instanceof Blob ? content : new Blob([content], { 
-        type: exportFormat === 'html' ? 'text/html' : 'application/pdf' 
+      const blob = content instanceof Blob ? content : new Blob([content], {
+        type: exportFormat === 'html' ? 'text/html' : 'application/pdf'
       });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -248,7 +248,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
 
       // Group publications by location to create one export per location
       const locationGroups = new Map<string, { locationId: string; locationName: string; publications: any[] }>();
-      
+
       publicationsForDate.forEach(publication => {
         const locationKey = publication.location_id;
         if (!locationGroups.has(locationKey)) {
@@ -272,10 +272,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
         try {
           // Use the first publication as the base, but set export options to include all content for this location
           const basePublication = locationGroup.publications[0];
-          
+
           let content: string | Blob;
           let filename: string;
-          
+
           if (exportFormat === 'html') {
             // Export with location-specific filtering that includes global blocks
             const exportOptions = {
@@ -285,14 +285,14 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
               includeMetadata: true,
               includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id
             };
-            
+
             console.log('🔧 [Bulk Export Debug] Creating comprehensive export for location:', {
               locationId: locationGroup.locationId,
               locationName: locationGroup.locationName,
               basePublicationId: basePublication.id,
               exportOptions
             });
-            
+
             const convertedPublication = convertToPublication(basePublication);
             content = await publicationExportService.exportAsHTML(convertedPublication, null, exportOptions);
             filename = `${locationGroup.locationName}-${basePublication.title}.html`;
@@ -308,10 +308,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
             content = await publicationExportService.exportAsPDF(convertedPublication, null, exportOptions);
             filename = `${locationGroup.locationName}-${basePublication.title}.pdf`;
           }
-          
+
           // Add to zip with location-specific folder structure
           zip.file(`${locationGroup.locationName}/${filename}`, content);
-          
+
           console.log('✅ [Bulk Export Debug] Successfully created export for location:', locationGroup.locationName);
         } catch (error) {
           console.error(`Failed to export for location ${locationGroup.locationName}:`, error);
@@ -458,7 +458,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Location-specific publications */}
                   <div className="space-y-3">
                     {group.publications.map((publication) => (
@@ -471,10 +471,10 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
                               <Badge variant="outline" className="ml-2 text-xs">Host</Badge>
                             )}
                             <div className="text-sm text-gray-600">
-                               <Badge className={getStatusColor(publication.status)}>
-                                 {publication.status}
-                               </Badge>
-                             </div>
+                              <Badge className={getStatusColor(publication.status)}>
+                                {publication.status}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">

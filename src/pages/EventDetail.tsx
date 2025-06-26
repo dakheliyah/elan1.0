@@ -288,15 +288,17 @@ const EventDetail = () => {
               {/* Main Content Tabs */}
               <Tabs defaultValue="locations" className="w-full">
                 <div className="flex justify-between items-center mb-6">
-                  <TabsList className="grid w-auto grid-cols-2">
+                  <TabsList className={`grid w-auto ${isAdmin ? 'grid-cols-2' : 'grid-cols-1'}`}>
                     <TabsTrigger value="locations" className="flex items-center gap-2">
                       <MapPin size={16} />
                       Locations
                     </TabsTrigger>
-                    <TabsTrigger value="publications" className="flex items-center gap-2">
-                      <FileText size={16} />
-                      Publications
-                    </TabsTrigger>
+                    {isAdmin && (
+                      <TabsTrigger value="publications" className="flex items-center gap-2">
+                        <FileText size={16} />
+                        Publications
+                      </TabsTrigger>
+                    )}
                   </TabsList>
 
                   <div className="flex items-center gap-3">
@@ -458,9 +460,11 @@ const EventDetail = () => {
                 </TabsContent>
 
                 {/* Publications Tab */}
-                <TabsContent value="publications" className="space-y-6">
-                  <EventPublicationManager eventId={eventId || ''} />
-                </TabsContent>
+                {isAdmin && (
+                  <TabsContent value="publications" className="space-y-6">
+                    <EventPublicationManager eventId={eventId || ''} />
+                  </TabsContent>
+                )}
               </Tabs>
             </div>
 
