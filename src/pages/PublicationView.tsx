@@ -89,7 +89,7 @@ const PublicationView = () => {
             mode="preview" 
             locationLogo={location?.logo_url}
             locationName={location?.name}
-            hostPublication={hostPublication}
+            hostPublication={hostPublication?.publication || null}
           />
         </div>
       </SidebarInset>

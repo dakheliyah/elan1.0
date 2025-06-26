@@ -104,7 +104,7 @@ const ExportModule = () => {
       if (format === 'html') {
         console.log('🚀 [Export Module Debug] Exporting HTML with host publication:', {
           publicationTitle: selectedPublication?.title || 'Unknown',
-          hostPublicationTitle: hostPublication?.title || 'None',
+          hostPublicationTitle: hostPublication?.publication?.title || 'None',
           hostLocationId: hostLocation?.id
         });
         
@@ -119,7 +119,7 @@ const ExportModule = () => {
       } else {
         console.log('🚀 [Export Module Debug] Exporting PDF with host publication:', {
           publicationTitle: selectedPublication?.title || 'Unknown',
-          hostPublicationTitle: hostPublication?.title || 'None',
+          hostPublicationTitle: hostPublication?.publication?.title || 'None',
           hostLocationId: hostLocation?.id
         });
         

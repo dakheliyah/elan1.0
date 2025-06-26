@@ -577,7 +577,7 @@ const PublicationEditorPage = () => {
           <div className="w-[40%] bg-gray-50">
             <PublicationPreview 
               publication={publication} 
-              hostPublication={hostPublication}
+              hostPublication={hostPublication?.publication || null}
               locationLogo={location?.logo_url}
               locationName={location?.name}
             />
@@ -600,7 +600,7 @@ const PublicationEditorPage = () => {
           onClose={() => setShowExportModal(false)}
           publication={publication}
           publicationId={publicationId}
-          hostPublication={hostPublication}
+          hostPublication={hostPublication?.publication || null}
           locationLogo={location?.logo_url}
           locationName={location?.name}
         />
