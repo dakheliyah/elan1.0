@@ -45,6 +45,7 @@ export interface MenuItemData {
 export interface MenuBlockData {
   items: MenuItemData[];
   fileName?: string;
+  header?: string;
 }
 
 export interface ContentBlock {

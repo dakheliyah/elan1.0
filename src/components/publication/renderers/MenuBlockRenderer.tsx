@@ -19,6 +19,13 @@ const MenuBlockRenderer: React.FC<MenuBlockRendererProps> = ({ data, isPreview =
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Header Section */}
+      {data.header && (
+        <div className="bg-primary text-white text-center py-4 px-6" style={{ fontFamily: 'kanz' }}>
+          <h2 className="text-xl font-semibold">{data.header}</h2>
+        </div>
+      )}
+      
       <div className="">
         {data.items.map((item, index) => (
           <div key={index} className="px-6 py-5 hover:bg-gray-50 transition-colors duration-150">

@@ -48,7 +48,8 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
 
         onChange({
           items,
-          fileName: file.name
+          fileName: file.name,
+          header: (data && typeof data === 'object' && 'header' in data && typeof data.header === 'string') ? data.header : undefined
         });
       } catch (error) {
         console.error('Error parsing Excel file:', error);
@@ -80,7 +81,7 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
       newItems.push(editingItem);
     }
 
-    onChange({ items: newItems });
+    onChange({ items: newItems, fileName: data?.fileName, header: data?.header });
     setIsEditing(false);
     setEditingItem(null);
     setEditingIndex(-1);
@@ -88,7 +89,7 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
 
   const handleDeleteItem = (index: number) => {
     const newItems = (data?.items || []).filter((_, i) => i !== index);
-    onChange({ items: newItems });
+    onChange({ items: newItems, fileName: data?.fileName, header: data?.header });
   };
 
   const handleCancelEdit = () => {
@@ -99,6 +100,20 @@ const MenuBlock: React.FC<MenuBlockProps> = ({ data, onChange }) => {
 
   return (
     <div className="space-y-4">
+      {/* Header Input Section */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Menu Header (Optional)
+        </label>
+        <input
+          type="text"
+          value={data?.header || ''}
+          onChange={(e) => onChange({ items: data?.items || [], fileName: data?.fileName, header: e.target.value })}
+          placeholder="Enter menu header text..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        />
+      </div>
+
       {/* Upload Section */}
       {(!data?.items || data.items.length === 0) && (
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
