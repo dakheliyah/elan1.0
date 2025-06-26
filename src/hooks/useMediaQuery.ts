@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { mediaFilesService, mediaUsageService, mediaOptimizationService } from '@/services/media';
 import type { MediaFileInsert, MediaFileUpdate, MediaUsageInsert, MediaOptimizationJobInsert } from '@/services/media';
+import { supabase } from '@/integrations/supabase/client';
 
 // Media Files hooks
 export const useMediaFiles = (eventId: string) => {
@@ -70,7 +71,7 @@ export const useUploadMediaFile = () => {
       const fileName = `${Date.now()}-${file.name}`;
       const url = await mediaFilesService.uploadFile(file, eventId, fileName);
       
-      const { data: user } = await import('@/integrations/supabase/client').then(m => m.supabase.auth.getUser());
+      const { data: user } = await supabase.auth.getUser();
       const storagePath = `${user.user?.id}/${eventId}/${fileName}`;
       
       return mediaFilesService.create({
@@ -133,7 +134,7 @@ export const useCreateOptimizationJob = () => {
 
   return useMutation({
     mutationFn: mediaOptimizationService.create,
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['optimizationJobs', data.event_id] });
     },
   });
@@ -145,7 +146,7 @@ export const useUpdateOptimizationJob = () => {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: any }) =>
       mediaOptimizationService.update(id, updates),
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['optimizationJobs', data.event_id] });
     },
   });
