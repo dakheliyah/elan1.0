@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ContentBlock } from '@/pages/PublicationEditor';
+import styles from './TextBlockRenderer.module.css';
 
 interface TextBlockRendererProps {
   block: ContentBlock;
@@ -26,7 +27,8 @@ export const TextBlockRenderer: React.FC<TextBlockRendererProps> = ({
       return (
         <div 
           dangerouslySetInnerHTML={{ __html: content }}
-          className="rich-text-content"
+          className={styles.richTextContent}
+          dir={isRTL ? 'rtl' : 'ltr'}
         />
       );
     } else {
