@@ -14,6 +14,7 @@ interface ImageBlockProps {
   data: {
     imageUrl: string;
     alt: string;
+    link?: string; // Optional link URL for the image
     mediaFileId?: string; // Track which media file is being used
   };
   onChange: (data: Partial<ImageBlockProps['data']>) => void;
@@ -132,7 +133,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
         variant: "destructive",
       });
       // Revert to no image on error
-      onChange({ imageUrl: '', alt: '', mediaFileId: undefined });
+      onChange({ imageUrl: '', alt: '', link: '', mediaFileId: undefined });
     } finally {
       setIsUploading(false);
     }
@@ -165,7 +166,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
   };
 
   const removeImage = () => {
-    onChange({ imageUrl: '', alt: '', mediaFileId: undefined });
+    onChange({ imageUrl: '', alt: '', link: '', mediaFileId: undefined });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -260,11 +261,21 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
       ) : (
         <div className="space-y-3">
           <div className="relative">
-            <img
-              src={data.imageUrl}
-              alt={data.alt || 'Uploaded image'}
-              className="w-full h-auto object-cover rounded-lg border border-gray-200"
-            />
+            {data.link ? (
+              <a href={data.link} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={data.imageUrl}
+                  alt={data.alt || 'Uploaded image'}
+                  className="w-full h-auto object-cover rounded-lg border border-gray-200 hover:opacity-90 transition-opacity cursor-pointer"
+                />
+              </a>
+            ) : (
+              <img
+                src={data.imageUrl}
+                alt={data.alt || 'Uploaded image'}
+                className="w-full h-auto object-cover rounded-lg border border-gray-200"
+              />
+            )}
             <Button
               variant="destructive"
               size="sm"
@@ -285,6 +296,20 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ data, onChange, eventId }) => {
               onChange={(e) => onChange({ alt: e.target.value })}
               placeholder="Describe the image..."
               className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="link" className="text-sm font-medium text-gray-700">
+              Link URL (Optional)
+            </Label>
+            <Input
+              id="link"
+              value={data.link || ''}
+              onChange={(e) => onChange({ link: e.target.value })}
+              placeholder="https://example.com"
+              className="mt-1"
+              type="url"
             />
           </div>
 

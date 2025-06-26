@@ -21,12 +21,28 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
     <div className={isLast ? "" : "mb-0"}>
       {block.data.imageUrl ? (
         <figure className="mx-0">
-          <img
-            src={block.data.imageUrl}
-            alt={block.data.alt || 'Publication image'}
-            className={imageClasses}
-            loading="lazy"
-          />
+          {block.data.link ? (
+            <a 
+              href={block.data.link} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <img
+                src={block.data.imageUrl}
+                alt={block.data.alt || 'Publication image'}
+                className={`${imageClasses} hover:opacity-90 transition-opacity cursor-pointer`}
+                loading="lazy"
+              />
+            </a>
+          ) : (
+            <img
+              src={block.data.imageUrl}
+              alt={block.data.alt || 'Publication image'}
+              className={imageClasses}
+              loading="lazy"
+            />
+          )}
           {block.data.alt && (
             <figcaption className="text-sm text-gray-600 mt-3 text-center italic font-medium">
               {block.data.alt}
