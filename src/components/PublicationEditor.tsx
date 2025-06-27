@@ -66,7 +66,7 @@ const PublicationEditor = () => {
         ? { content: '', language: language || 'eng' }
         : type === 'image'
         ? { imageUrl: '', alt: '' }
-        : { items: [], fileName: '' } as MenuBlockData
+        : { items: [], fileName: '', header: '' } as MenuBlockData
     };
 
     updateParentBlock(parentId, {
