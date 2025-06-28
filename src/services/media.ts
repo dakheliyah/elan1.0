@@ -124,17 +124,63 @@ export const mediaFilesService = {
     }
   },
 
-  // Upload file to storage
-  async uploadFile(file: File, eventId: string, fileName: string): Promise<string> {
+  // Upload file to storage with optional compression
+  async uploadFile(
+    file: File, 
+    eventId: string, 
+    fileName: string,
+    options: {
+      compress?: boolean;
+      maxWidth?: number;
+      quality?: number;
+    } = {}
+  ): Promise<{
+    url: string;
+    compressionData?: {
+      originalSize: number;
+      compressedSize: number;
+      compressionRatio: number;
+    };
+  }> {
     try {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('User not authenticated');
+
+      let fileToUpload = file;
+      let compressionData: {
+        originalSize: number;
+        compressedSize: number;
+        compressionRatio: number;
+      } | undefined;
+
+      // Compress image if requested and applicable
+      if (options.compress && imageCompressionService.shouldCompress(file, true)) {
+        try {
+          const compressionResult = await imageCompressionService.compressImage(file, {
+            maxWidth: options.maxWidth,
+            quality: options.quality
+          });
+          
+          fileToUpload = compressionResult.compressedFile;
+          compressionData = {
+            originalSize: compressionResult.originalSize,
+            compressedSize: compressionResult.compressedSize,
+            compressionRatio: compressionResult.compressionRatio
+          };
+          
+          // Update fileName to reflect WebP format
+          fileName = fileName.replace(/\.[^/.]+$/, '.webp');
+        } catch (compressionError) {
+          console.warn('Compression failed, uploading original file:', compressionError);
+          // Continue with original file if compression fails
+        }
+      }
 
       const filePath = `${user.user.id}/${eventId}/${fileName}`;
       
       const { data, error } = await supabase.storage
         .from('media-files')
-        .upload(filePath, file);
+        .upload(filePath, fileToUpload);
 
       if (error) throw error;
 
@@ -142,7 +188,10 @@ export const mediaFilesService = {
         .from('media-files')
         .getPublicUrl(filePath);
 
-      return urlData.publicUrl;
+      return {
+        url: urlData.publicUrl,
+        compressionData
+      };
     } catch (error) {
       handleSupabaseError(error, 'upload file');
     }
@@ -291,6 +340,147 @@ export const mediaOptimizationService = {
     } catch (error) {
       handleSupabaseError(error, 'update optimization job');
     }
+  },
+};
+
+// Image Compression Service
+export const imageCompressionService = {
+  // Compress image using Supabase Edge Function
+  async compressImage(
+    file: File,
+    options: {
+      maxWidth?: number;
+      quality?: number;
+    } = {}
+  ): Promise<{
+    compressedFile: File;
+    originalSize: number;
+    compressedSize: number;
+    compressionRatio: number;
+  }> {
+    try {
+      const { maxWidth = 1920, quality = 80 } = options;
+      
+      // Convert file to base64
+      const base64Data = await this.fileToBase64(file);
+      
+      // Call Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('compress-image', {
+        body: {
+          imageData: base64Data,
+          maxWidth,
+          quality,
+          filename: file.name
+        }
+      });
+      
+      if (error || !data.success) {
+        throw new Error(data?.error || 'Compression failed');
+      }
+      
+      // Convert compressed data back to File
+      const compressedFile = await this.base64ToFile(
+        data.compressedData,
+        file.name.replace(/\.[^/.]+$/, '.webp'), // Change extension to .webp
+        'image/webp'
+      );
+      
+      return {
+        compressedFile,
+        originalSize: data.originalSize,
+        compressedSize: data.compressedSize,
+        compressionRatio: data.compressionRatio
+      };
+    } catch (error) {
+      console.error('Image compression error:', error);
+      throw new MediaServiceError(
+        error.message || 'Failed to compress image',
+        'COMPRESSION_ERROR'
+      );
+    }
+  },
+
+  // Convert File to base64
+  async fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
+  // Convert base64 to File
+  async base64ToFile(base64Data: string, filename: string, mimeType: string): Promise<File> {
+    const response = await fetch(base64Data);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: mimeType });
+  },
+
+  // Check if file should be compressed
+  shouldCompress(file: File, autoCompress: boolean = false): boolean {
+    // Only compress images
+    if (!file.type.startsWith('image/')) return false;
+    
+    // Skip if already WebP
+    if (file.type === 'image/webp') return false;
+    
+    // Skip very small files (less than 100KB)
+    if (file.size < 100 * 1024) return false;
+    
+    return autoCompress;
+  },
+
+  // Client-side fallback compression using Canvas
+  async compressImageFallback(
+    file: File,
+    options: {
+      maxWidth?: number;
+      quality?: number;
+    } = {}
+  ): Promise<File> {
+    const { maxWidth = 1920, quality = 0.8 } = options;
+    
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File(
+                [blob],
+                file.name.replace(/\.[^/.]+$/, '.webp'),
+                { type: 'image/webp' }
+              );
+              resolve(compressedFile);
+            } else {
+              reject(new Error('Canvas compression failed'));
+            }
+          },
+          'image/webp',
+          quality
+        );
+      };
+      
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = URL.createObjectURL(file);
+    });
   },
 };
 

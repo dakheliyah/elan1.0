@@ -69,7 +69,7 @@ export const useUploadMediaFile = () => {
       mediaData: Omit<MediaFileInsert, 'url' | 'storage_path' | 'event_id'> 
     }) => {
       const fileName = `${Date.now()}-${file.name}`;
-      const url = await mediaFilesService.uploadFile(file, eventId, fileName);
+      const uploadResult = await mediaFilesService.uploadFile(file, eventId, fileName);
       
       const { data: user } = await supabase.auth.getUser();
       const storagePath = `${user.user?.id}/${eventId}/${fileName}`;
@@ -77,7 +77,7 @@ export const useUploadMediaFile = () => {
       return mediaFilesService.create({
         ...mediaData,
         event_id: eventId,
-        url,
+        url: uploadResult.url,
         storage_path: storagePath,
       });
     },

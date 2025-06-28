@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useMediaFilesWithUsageCount, useDeleteMediaFile } from '@/hooks/useMediaQuery';
-import { useCreateBackupJob } from '@/hooks/useMediaOptimization';
-import { mediaHelpers } from '@/services/media';
+import { useMediaFilesWithUsageCount, useDeleteMediaFile, useUpdateMediaFile } from '@/hooks/useMediaQuery';
+import { useCreateBackupJob, useCompressionSettings } from '@/hooks/useMediaOptimization';
+import { mediaHelpers, imageCompressionService } from '@/services/media';
 import { Trash2, Download, Zap, Archive, FolderOpen, CheckSquare, Square } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,11 +17,14 @@ interface BulkOperationsPanelProps {
 const BulkOperationsPanel: React.FC<BulkOperationsPanelProps> = ({ eventId }) => {
   const { data: mediaFiles, isLoading } = useMediaFilesWithUsageCount(eventId);
   const deleteMediaFile = useDeleteMediaFile();
+  const updateMediaFile = useUpdateMediaFile();
   const createBackup = useCreateBackupJob();
+  const { data: compressionSettings } = useCompressionSettings(eventId);
   const { toast } = useToast();
   
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isSelectingAll, setIsSelectingAll] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const handleSelectFile = (fileId: string, checked: boolean) => {
     const newSelected = new Set(selectedFiles);
@@ -92,6 +95,95 @@ const BulkOperationsPanel: React.FC<BulkOperationsPanelProps> = ({ eventId }) =>
     
     // TODO: Implement actual export functionality
     // This would typically create a ZIP file or initiate a download
+  };
+
+  const handleBulkCompress = async () => {
+    if (selectedFiles.size === 0) return;
+    
+    const filesToCompress = mediaFiles?.filter(file => 
+      selectedFiles.has(file.id) && 
+      file.file_type === 'image' && 
+      !file.is_optimized &&
+      imageCompressionService.shouldCompress(
+        { type: file.mime_type, size: file.size_bytes } as File,
+        compressionSettings?.auto_compress ?? true
+      )
+    ) || [];
+
+    if (filesToCompress.length === 0) {
+      toast({
+        title: "No Files to Compress",
+        description: "Selected files are either already optimized or not suitable for compression.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsCompressing(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      for (const file of filesToCompress) {
+        try {
+          // Fetch the file from storage
+          const response = await fetch(file.url);
+          const blob = await response.blob();
+          const fileObj = new File([blob], file.original_name, { type: file.mime_type });
+
+          // Compress the image
+          const quality = compressionSettings?.quality_images ?? 80;
+          const maxWidth = compressionSettings?.max_width ?? 1920;
+          
+          const result = await imageCompressionService.compressImage(fileObj, {
+            quality,
+            maxWidth
+          });
+
+          if (result.compressedFile) {
+            // Update the media file record
+            await updateMediaFile.mutateAsync({
+              id: file.id,
+              updates: {
+                size_bytes: result.compressedSize,
+                mime_type: result.compressedFile.type,
+                is_optimized: true,
+                compression_ratio: result.compressionRatio || 0
+              }
+            });
+            successCount++;
+          } else {
+            errorCount++;
+          }
+        } catch (error) {
+          console.error(`Failed to compress file ${file.id}:`, error);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast({
+          title: "Compression Complete",
+          description: `Successfully compressed ${successCount} files${errorCount > 0 ? `, ${errorCount} failed` : ''}.`,
+        });
+      } else {
+        toast({
+          title: "Compression Failed",
+          description: "No files could be compressed.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Bulk compression error:', error);
+      toast({
+        title: "Compression Error",
+        description: "An error occurred during bulk compression.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCompressing(false);
+      setSelectedFiles(new Set());
+    }
   };
 
   const selectedTotalSize = mediaFiles
@@ -166,6 +258,16 @@ const BulkOperationsPanel: React.FC<BulkOperationsPanelProps> = ({ eventId }) =>
                 </div>
               </div>
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkCompress}
+                  disabled={isCompressing}
+                  className="flex items-center gap-2"
+                >
+                  <Zap className="h-4 w-4" />
+                  {isCompressing ? 'Compressing...' : 'Compress'}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"

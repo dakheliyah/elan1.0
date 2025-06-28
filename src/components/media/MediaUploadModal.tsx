@@ -8,11 +8,15 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUploadMediaFile } from '@/hooks/useMediaQuery';
-import { mediaHelpers } from '@/services/media';
-import { Upload, X, File, CheckCircle, AlertCircle } from 'lucide-react';
+import { useCompressionSettings } from '@/hooks/useMediaOptimization';
+import { mediaHelpers, imageCompressionService } from '@/services/media';
+import { Upload, X, File, CheckCircle, AlertCircle, Settings } from 'lucide-react';
 
 interface MediaUploadModalProps {
   isOpen: boolean;
@@ -26,6 +30,11 @@ interface UploadFile {
   progress: number;
   status: 'pending' | 'uploading' | 'completed' | 'error';
   error?: string;
+  compressionData?: {
+    originalSize: number;
+    compressedSize: number;
+    compressionRatio: number;
+  };
 }
 
 const MediaUploadModal: React.FC<MediaUploadModalProps> = ({
@@ -37,8 +46,13 @@ const MediaUploadModal: React.FC<MediaUploadModalProps> = ({
   const { user } = useAuth();
   const [uploads, setUploads] = useState<UploadFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showCompressionSettings, setShowCompressionSettings] = useState(false);
+  const [compressionEnabled, setCompressionEnabled] = useState(true);
+  const [customQuality, setCustomQuality] = useState(80);
+  const [customMaxWidth, setCustomMaxWidth] = useState(800);
   
   const uploadMediaFile = useUploadMediaFile();
+  const { data: compressionSettings } = useCompressionSettings(eventId);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -121,7 +135,59 @@ const MediaUploadModal: React.FC<MediaUploadModalProps> = ({
 
     try {
       // Simulate progress updates
-      for (let progress = 0; progress <= 90; progress += 10) {
+      for (let progress = 0; progress <= 30; progress += 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setUploads(prev => prev.map(u => 
+          u.id === upload.id ? { ...u, progress } : u
+        ));
+      }
+
+      let fileToUpload = upload.file;
+      let compressionData: UploadFile['compressionData'] | undefined;
+      
+      // Check if compression should be applied
+      const shouldCompress = compressionEnabled && 
+        imageCompressionService.shouldCompress(
+          upload.file, 
+          compressionSettings?.auto_compress ?? true
+        );
+
+      if (shouldCompress) {
+        try {
+          // Update progress for compression
+          setUploads(prev => prev.map(u => 
+            u.id === upload.id ? { ...u, progress: 40 } : u
+          ));
+
+          const quality = compressionSettings?.quality_images ?? customQuality;
+          const maxWidth = compressionSettings?.max_width ?? customMaxWidth;
+          
+          const result = await imageCompressionService.compressImage(upload.file, {
+            quality,
+            maxWidth
+          });
+          
+          if (result.compressedFile) {
+            fileToUpload = result.compressedFile;
+            compressionData = {
+              originalSize: result.originalSize,
+              compressedSize: result.compressedSize,
+              compressionRatio: result.compressionRatio || 0
+            };
+            
+            // Update upload with compression data
+            setUploads(prev => prev.map(u => 
+              u.id === upload.id ? { ...u, compressionData } : u
+            ));
+          }
+        } catch (compressionError) {
+          console.warn('Compression failed, uploading original file:', compressionError);
+          // Continue with original file if compression fails
+        }
+      }
+
+      // Continue progress updates
+      for (let progress = 50; progress <= 90; progress += 10) {
         await new Promise(resolve => setTimeout(resolve, 100));
         setUploads(prev => prev.map(u => 
           u.id === upload.id ? { ...u, progress } : u
@@ -140,19 +206,19 @@ const MediaUploadModal: React.FC<MediaUploadModalProps> = ({
         original_name: upload.file.name,
         file_type: mediaHelpers.getFileType(upload.file.type),
         format: mediaHelpers.getFileFormat(upload.file.name, upload.file.type),
-        size_bytes: upload.file.size,
-        mime_type: upload.file.type,
+        size_bytes: fileToUpload.size,
+        mime_type: fileToUpload.type,
         thumbnail_url: thumbnailUrl,
         width: null,
         height: null,
         duration_seconds: null,
-        is_optimized: false,  
-        compression_ratio: null,
+        is_optimized: !!compressionData,
+        compression_ratio: compressionData?.compressionRatio || null,
       };
 
-      // Upload file
+      // Upload file (compressed or original)
       await uploadMediaFile.mutateAsync({
-        file: upload.file,
+        file: fileToUpload,
         eventId,
         mediaData
       });
@@ -162,9 +228,13 @@ const MediaUploadModal: React.FC<MediaUploadModalProps> = ({
         u.id === upload.id ? { ...u, status: 'completed' as const, progress: 100 } : u
       ));
 
+      const compressionMessage = compressionData 
+        ? ` (compressed from ${mediaHelpers.formatFileSize(compressionData.originalSize)} to ${mediaHelpers.formatFileSize(compressionData.compressedSize)})`
+        : '';
+
       toast({
         title: "Upload completed",
-        description: `${upload.file.name} has been uploaded successfully`,
+        description: `${upload.file.name} has been uploaded successfully${compressionMessage}`,
       });
 
     } catch (error) {
@@ -251,6 +321,77 @@ const MediaUploadModal: React.FC<MediaUploadModalProps> = ({
             </Button>
           </div>
 
+          {/* Compression Settings */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4 text-gray-500" />
+                <h4 className="font-medium text-gray-900">Image Compression</h4>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCompressionSettings(!showCompressionSettings)}
+              >
+                {showCompressionSettings ? 'Hide' : 'Show'} Settings
+              </Button>
+            </div>
+            
+            <div className="flex items-center space-x-2 mb-3">
+              <Checkbox
+                id="compression-enabled"
+                checked={compressionEnabled}
+                onCheckedChange={(checked) => setCompressionEnabled(!!checked)}
+              />
+              <Label htmlFor="compression-enabled" className="text-sm">
+                Automatically compress images to WebP format
+              </Label>
+            </div>
+            
+            {showCompressionSettings && compressionEnabled && (
+              <div className="space-y-3 pt-3 border-t border-gray-100">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="quality" className="text-sm font-medium">
+                      Quality ({customQuality}%)
+                    </Label>
+                    <Input
+                      id="quality"
+                      type="range"
+                      min="10"
+                      max="100"
+                      value={customQuality}
+                      onChange={(e) => setCustomQuality(Number(e.target.value))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="max-width" className="text-sm font-medium">
+                      Max Width (px)
+                    </Label>
+                    <Input
+                      id="max-width"
+                      type="number"
+                      min="100"
+                      max="4000"
+                      value={customMaxWidth}
+                      onChange={(e) => setCustomMaxWidth(Number(e.target.value))}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Images will be converted to WebP format and resized if wider than the max width.
+                  {compressionSettings && (
+                    <span className="block mt-1">
+                      Event default: Quality {compressionSettings.quality_images}%, Max Width {compressionSettings.max_width}px
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Upload List */}
           {uploads.length > 0 && (
             <div className="space-y-3">
@@ -283,7 +424,15 @@ const MediaUploadModal: React.FC<MediaUploadModalProps> = ({
                       )}
                       
                       {upload.status === 'completed' && (
-                        <p className="text-xs text-green-600">Upload completed</p>
+                        <div className="space-y-1">
+                          <p className="text-xs text-green-600">Upload completed</p>
+                          {upload.compressionData && (
+                            <p className="text-xs text-blue-600">
+                              Compressed: {mediaHelpers.formatFileSize(upload.compressionData.originalSize)} → {mediaHelpers.formatFileSize(upload.compressionData.compressedSize)} 
+                              ({Math.round(upload.compressionData.compressionRatio * 100)}% reduction)
+                            </p>
+                          )}
+                        </div>
                       )}
                       
                       {upload.status === 'error' && (

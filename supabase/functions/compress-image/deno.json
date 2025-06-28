@@ -1,0 +1,17 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+    "sharp": "https://esm.sh/sharp@0.32.6",
+    "https://esm.sh/@supabase/supabase-js@2": "https://esm.sh/@supabase/supabase-js@2"
+  },
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-env index.ts"
+  },
+  "compilerOptions": {
+    "lib": ["dom", "deno.ns", "deno.unstable"],
+    "types": ["./types.d.ts"],
+    "strict": false,
+    "skipLibCheck": true,
+    "allowJs": true
+  }
+}

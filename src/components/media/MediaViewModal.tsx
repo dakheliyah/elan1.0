@@ -21,7 +21,7 @@ interface MediaItem {
   uploadDate: string;
   usageCount: number;
   thumbnailUrl?: string;
-  url: string;
+  url: string | { url: string };
 }
 
 interface MediaViewModalProps {
@@ -39,6 +39,17 @@ const MediaViewModal: React.FC<MediaViewModalProps> = ({
 
   if (!media) return null;
 
+  // Helper function to extract clean URL from various formats
+  const getCleanUrl = (urlData: string | { url: string }): string => {
+    if (typeof urlData === 'string') {
+      return urlData.trim();
+    }
+    if (urlData && typeof urlData === 'object' && 'url' in urlData) {
+      return (urlData.url || '').trim();
+    }
+    return '';
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -48,7 +59,8 @@ const MediaViewModal: React.FC<MediaViewModalProps> = ({
   };
 
   const handleCopyUrl = () => {
-    navigator.clipboard.writeText(media.url);
+    const urlToUse = getCleanUrl(media.url);
+    navigator.clipboard.writeText(urlToUse);
     toast({
       title: "URL Copied",
       description: "Media URL has been copied to clipboard",
@@ -56,8 +68,9 @@ const MediaViewModal: React.FC<MediaViewModalProps> = ({
   };
 
   const handleDownload = () => {
+    const urlToUse = getCleanUrl(media.url);
     const link = document.createElement('a');
-    link.href = media.url;
+    link.href = urlToUse;
     link.download = media.name;
     document.body.appendChild(link);
     link.click();
@@ -103,7 +116,7 @@ const MediaViewModal: React.FC<MediaViewModalProps> = ({
                 />
               ) : media.type === 'video' && media.thumbnailUrl ? (
                 <video
-                  src={media.url}
+                  src={getCleanUrl(media.url)}
                   poster={media.thumbnailUrl}
                   controls
                   className="max-w-full max-h-full rounded-lg"
@@ -117,7 +130,7 @@ const MediaViewModal: React.FC<MediaViewModalProps> = ({
                   <Button
                     variant="outline"
                     className="mt-4"
-                    onClick={() => window.open(media.url, '_blank')}
+                    onClick={() => window.open(getCleanUrl(media.url), '_blank')}
                   >
                     <ExternalLink size={16} className="mr-2" />
                     Open in new tab
@@ -172,7 +185,7 @@ const MediaViewModal: React.FC<MediaViewModalProps> = ({
               <div className="flex items-center gap-2">
                 <input
                   type="text"
-                  value={media.url}
+                  value={getCleanUrl(media.url)}
                   readOnly
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
                 />
