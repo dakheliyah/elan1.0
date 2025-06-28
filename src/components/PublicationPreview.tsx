@@ -68,7 +68,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
     <style>
         @font-face {
             font-family: 'Kanz';
-            src: url('data:font/truetype;charset=utf-8;base64,') format('truetype');
+            src: url('https://cms.sautuliman.net/Kanz-al-Marjaan.ttf') format('truetype');
         }
         .font-kanz {
             font-family: 'Kanz', serif;
@@ -84,7 +84,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${publication.title || 'publication'}.html`;
+    link.download = `${locationName ? `${locationName} - ` : ''}${publication.title || 'publication'}.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
