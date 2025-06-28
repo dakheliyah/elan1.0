@@ -135,3 +135,51 @@ export const useUploadLogo = () => {
     },
   });
 };
+
+export const useUpdateUmoorOrder = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ id, orderPreference }: { id: string; orderPreference: number }) =>
+      umoorsService.updateOrder(id, orderPreference),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['umoors'] });
+      toast({
+        title: "Success",
+        description: "Umoor order updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update umoor order",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useUpdateBulkUmoorOrders = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (orders: { id: string; orderPreference: number }[]) =>
+      umoorsService.updateBulkOrders(orders),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['umoors'] });
+      toast({
+        title: "Success",
+        description: "Umoor orders updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update umoor orders",
+        variant: "destructive",
+      });
+    },
+  });
+};

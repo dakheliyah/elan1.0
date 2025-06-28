@@ -18,7 +18,7 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
 }) => {
   return (
     <>
-    <div className='bg-[url(/ydt_pattern.png)] h-12 bg-repeat-x w-full absolute top-0 left-0'></div>
+    <div className='bg-[url(https://elan-xi.vercel.app/ydt_pattern.png)] h-12 bg-repeat-x w-full absolute top-0 left-0'></div>
       {/* Decorative Header Separator */}
       {showDecorative && (
         <div className="text-center mb-10 pt-9">
@@ -48,9 +48,9 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
       {title && (
         <div className="text-center mb-12 pb-8 flex flex-col items-center">
           <h1 className="!text-[60px] md:!text-[120px] text-[#859069] leading-tight font-kanz flex items-center gap-12">
-            <span><img src="/deco.png" alt="" /></span>
+            <span><img src="https://elan-xi.vercel.app/deco.png" alt="" /></span>
             تمارو دن
-            <span><img src="/deco.png" alt="" /></span>
+            <span><img src="https://elan-xi.vercel.app/deco.png" alt="" /></span>
           </h1>
           <div className="text-xl text-[#859069]">
             {title}

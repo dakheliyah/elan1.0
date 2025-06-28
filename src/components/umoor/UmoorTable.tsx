@@ -25,10 +25,12 @@ import {
   Edit2, 
   Trash2, 
   ChevronDown,
-  Package
+  Package,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import { Umoor } from "@/services/umoors";
-import { useDeleteUmoor, useDeleteMultipleUmoors } from "@/hooks/useUmoors";
+import { useDeleteUmoor, useDeleteMultipleUmoors, useUpdateUmoorOrder } from "@/hooks/useUmoors";
 import { UmoorEditDialog } from "./UmoorEditDialog";
 
 interface UmoorTableProps {
@@ -42,6 +44,7 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
 
   const deleteUmoor = useDeleteUmoor();
   const deleteMultiple = useDeleteMultipleUmoors();
+  const updateOrder = useUpdateUmoorOrder();
 
   // Filter umoors based on search term
   const filteredUmoors = umoors.filter(umoor =>
@@ -86,6 +89,15 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
       await deleteUmoor.mutateAsync(umoorId);
     } catch (error) {
       console.error('Error deleting umoor:', error);
+    }
+  };
+
+  // Handle order change
+  const handleOrderChange = async (umoorId: string, newOrder: number) => {
+    try {
+      await updateOrder.mutateAsync({ id: umoorId, orderPreference: newOrder });
+    } catch (error) {
+      console.error('Error updating umoor order:', error);
     }
   };
 
@@ -155,6 +167,7 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Slug</TableHead>
+              <TableHead className="w-24">Order</TableHead>
               {/* <TableHead>Usage Count</TableHead> */}
               <TableHead className="w-16">Actions</TableHead>
             </TableRow>
@@ -195,6 +208,31 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
                   <Badge variant="secondary" className="font-mono text-xs">
                     {umoor.slug}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => handleOrderChange(umoor.id, (umoor.order_preference || 0) + 1)}
+                      disabled={updateOrder.isPending}
+                    >
+                      <ArrowUp className="h-3 w-3" />
+                    </Button>
+                    <span className="text-sm font-mono min-w-[2ch] text-center">
+                      {umoor.order_preference || 0}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => handleOrderChange(umoor.id, Math.max(0, (umoor.order_preference || 0) - 1))}
+                      disabled={updateOrder.isPending}
+                    >
+                      <ArrowDown className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </TableCell>
                 {/* <TableCell>
                   <Badge variant="outline">

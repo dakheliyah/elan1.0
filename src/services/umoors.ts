@@ -2,7 +2,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/types/database.types';
 
-// Type definitions
+// Service for managing Umoors with order preference support
+
+// Type definitions with order_preference support
 type Umoor = Database['public']['Tables']['umoors']['Row'];
 type UmoorInsert = Database['public']['Tables']['umoors']['Insert'];
 type UmoorUpdate = Database['public']['Tables']['umoors']['Update'];
@@ -39,16 +41,32 @@ const generateSlug = (name: string): string => {
 
 // Umoors Service
 export const umoorsService = {
-  // Get all umoors
+  // Get all umoors with proper ordering
+  // Priority: order_preference > 0 first (ascending), then order_preference = 0 by created_at (desc)
   async getAll(): Promise<Umoor[]> {
     try {
       const { data, error } = await supabase
         .from('umoors')
-        .select('*')
+        .select('id, name, description, slug, logo_url, order_preference, created_at, updated_at, created_by')
+        .order('order_preference', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Sort to ensure proper priority: order_preference > 0 first, then 0
+      const sorted = (data || []).sort((a, b) => {
+        // If both have order_preference > 0, sort by order_preference ascending
+        if (a.order_preference > 0 && b.order_preference > 0) {
+          return a.order_preference - b.order_preference;
+        }
+        // If one has order_preference > 0 and other is 0, prioritize the one > 0
+        if (a.order_preference > 0 && b.order_preference === 0) return -1;
+        if (a.order_preference === 0 && b.order_preference > 0) return 1;
+        // If both are 0, maintain created_at desc order
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      
+      return sorted;
     } catch (error) {
       handleSupabaseError(error, 'fetch umoors');
     }
@@ -182,6 +200,51 @@ export const umoorsService = {
       if (error) throw error;
     } catch (error) {
       handleSupabaseError(error, 'delete logo');
+    }
+  },
+
+  // Update umoor order preference
+  async updateOrder(id: string, orderPreference: number): Promise<Umoor> {
+    try {
+      const { data, error } = await supabase
+        .from('umoors')
+        .update({ 
+          order_preference: orderPreference,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'update umoor order');
+    }
+  },
+
+  // Bulk update umoor orders
+  async updateBulkOrders(orders: { id: string; orderPreference: number }[]): Promise<void> {
+    try {
+      const updates = orders.map(({ id, orderPreference }) => 
+        supabase
+          .from('umoors')
+          .update({ 
+            order_preference: orderPreference,
+            updated_at: new Date().toISOString() 
+          })
+          .eq('id', id)
+      );
+
+      const results = await Promise.all(updates);
+      
+      // Check for any errors
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        throw new Error(`Failed to update ${errors.length} umoor orders`);
+      }
+    } catch (error) {
+      handleSupabaseError(error, 'bulk update umoor orders');
     }
   },
 };

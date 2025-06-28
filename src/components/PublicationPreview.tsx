@@ -4,6 +4,7 @@ import { Publication, ParentBlockData } from '../pages/PublicationEditor';
 import { PublicationHeaderRenderer } from './publication/PublicationHeaderRenderer';
 import { PublicationSectionRenderer } from './publication/renderers/PublicationSectionRenderer';
 import { useCurrentProfile } from '../hooks/useProfiles';
+import { useUmoors } from '../hooks/useUmoors';
 import { Button } from './ui/button';
 import { Download } from 'lucide-react';
 
@@ -23,6 +24,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
   hostPublication
 }) => {
   const { data: currentProfile } = useCurrentProfile();
+  const { data: umoors = [] } = useUmoors();
   const previewContentRef = useRef<HTMLDivElement>(null);
 
   const combinedParentBlocks = useMemo(() => {
@@ -31,27 +33,49 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
       : publication.parentBlocks;
 
     // Group blocks by umoorId while maintaining order
-    const groupedBlocks: { umoorId: string; blocks: any[]; isGlobal: boolean }[] = [];
-    const umoorMap = new Map<string, { blocks: any[]; isGlobal: boolean }>();
+    const groupedBlocks: { umoorId: string; blocks: any[]; isGlobal: boolean; orderPreference: number }[] = [];
+    const umoorMap = new Map<string, { blocks: any[]; isGlobal: boolean; orderPreference: number }>();
 
     allBlocks.forEach(block => {
       if (!umoorMap.has(block.umoorId)) {
-        const groupData = { blocks: [], isGlobal: block.isGlobal || false };
+        // Find the umoor data to get order_preference
+        const umoorData = umoors.find(u => u.id === block.umoorId);
+        const orderPreference = umoorData?.order_preference || 0;
+        
+        const groupData = { 
+          blocks: [], 
+          isGlobal: block.isGlobal || false,
+          orderPreference
+        };
         umoorMap.set(block.umoorId, groupData);
         groupedBlocks.push({ umoorId: block.umoorId, ...groupData });
       }
       umoorMap.get(block.umoorId)!.blocks.push(block);
     });
 
-    // Sort groups: global umoors first, then local umoors
+    // Sort groups by order preference: 1,2,3... first (ascending), then 0s
+    // Also maintain global umoors first within each preference group
     groupedBlocks.sort((a, b) => {
+      // First, sort by order preference priority
+      if (a.orderPreference > 0 && b.orderPreference === 0) return -1;
+      if (a.orderPreference === 0 && b.orderPreference > 0) return 1;
+      
+      // If both have order_preference > 0, sort by order_preference ascending
+      if (a.orderPreference > 0 && b.orderPreference > 0) {
+        if (a.orderPreference !== b.orderPreference) {
+          return a.orderPreference - b.orderPreference;
+        }
+      }
+      
+      // Within same preference level, global umoors first
       if (a.isGlobal && !b.isGlobal) return -1;
       if (!a.isGlobal && b.isGlobal) return 1;
+      
       return 0;
     });
 
     return groupedBlocks;
-  }, [publication, hostPublication]);
+  }, [publication, hostPublication, umoors]);
 
   const exportAsHTML = () => {
     if (!previewContentRef.current) return;
