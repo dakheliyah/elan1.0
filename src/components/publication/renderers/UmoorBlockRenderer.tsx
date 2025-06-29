@@ -45,7 +45,7 @@ export const UmoorBlockRenderer: React.FC<UmoorBlockRendererProps> = ({
     <div className={`flex ${showLogo ? 'justify-between' : 'justify-end'} items-start mb-6`}>
       {/* Logo positioned in top left - only show if showLogo is true */}
       {showLogo && (
-        <div className="z-10">
+        <div className="z-10 w-1/5">
           {renderUmoorLogo()}
         </div>
       )}
