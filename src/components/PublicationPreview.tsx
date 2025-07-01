@@ -91,11 +91,11 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @font-face {
-            font-family: 'Kanz';
-            src: url('https://cms.sautuliman.net/Kanz-al-Marjaan.ttf') format('truetype');
+            font-family: 'Al-Kanz';
+            src: url('https://font.itsmedan.net/Kanz-al-Marjaan.ttf') format('truetype');
         }
         .font-kanz {
-            font-family: 'Kanz', serif;
+            font-family: 'Al-Kanz', serif;
         }
     </style>
 </head>
