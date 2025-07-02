@@ -8,7 +8,7 @@
 
 /* Custom font face for Kanz Al-Marjaan */
 @font-face {
-  font-family: 'Kanz Al-Marjaan';
+  font-family: 'Al-Kanz';
   src: url('/kanz-al-marjaan.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
@@ -123,17 +123,17 @@
   }
   
   .font-kanz {
-    font-family: 'Kanz Al-Marjaan', 'Noto Sans Arabic', 'Amiri', 'Traditional Arabic', Arial, sans-serif;
-    font-size: 24px;
+    font-family: 'Al-Kanz', 'Noto Sans Arabic', 'Amiri', 'Traditional Arabic', Arial, sans-serif;
+    font-size: 28px;
   }
   
   .rtl-text {
     direction: rtl;
     unicode-bidi: plaintext;
     text-align: right;
-    font-family: 'Kanz Al-Marjaan', 'Noto Sans Arabic', 'Amiri', 'Traditional Arabic', Arial, sans-serif;
+    font-family: 'Al-Kanz', 'Noto Sans Arabic', 'Amiri', 'Traditional Arabic', Arial, sans-serif;
     line-height: 1.8;
-    font-size: 24px;
+    font-size: 28px;
   }
   
   .ltr-text {

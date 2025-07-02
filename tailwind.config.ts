@@ -19,7 +19,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'kanz': ['Kanz Al-Marjaan', 'Noto Sans Arabic', 'Amiri', 'Traditional Arabic', 'Arial', 'sans-serif'],
+				'kanz': ['Al-Kanz', 'Noto Sans Arabic', 'Amiri', 'Traditional Arabic', 'Arial', 'sans-serif'],
 				'arabic': ['Noto Sans Arabic', 'Amiri', 'Traditional Arabic', 'Arial', 'sans-serif'],
 			},
 			colors: {

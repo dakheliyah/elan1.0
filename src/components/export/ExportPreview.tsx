@@ -145,7 +145,7 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat, loc
       .lud-text { 
         direction: rtl; 
         text-align: right; 
-        font-family: "Kanz Al-Marjaan", "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif; 
+        font-family: "Al-Kanz", "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif; 
         line-height: 1.8; 
         font-size: 24px; 
       }

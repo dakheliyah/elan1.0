@@ -50,7 +50,7 @@ export const TextBlockRenderer: React.FC<TextBlockRendererProps> = ({
         dir={isRTL ? 'rtl' : 'ltr'}
         style={{
           fontFamily: isRTL 
-            ? '"Kanz Al-Marjaan", "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif' 
+            ? '"Al-Kanz", "Noto Sans Arabic", "Amiri", "Traditional Arabic", Arial, sans-serif' 
             : 'inherit',
           lineHeight: isRTL ? '1.8' : '1.6',
           unicodeBidi: 'plaintext',
