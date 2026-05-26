@@ -2,6 +2,8 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePublication } from '@/hooks/usePublications';
 import { useLocation } from '@/hooks/useLocations';
+import { useEvent } from '@/hooks/useSupabaseQuery';
+import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
 import { useHostPublication } from '@/hooks/useHostPublication';
 import { convertToPublication } from '@/utils/publicationConverter';
 import PublicationPreview from '@/components/PublicationPreview';
@@ -15,7 +17,9 @@ const PublicationView = () => {
   const navigate = useNavigate();
   const { data: dbPublication, isLoading, error } = usePublication(publicationId!);
   const { data: location } = useLocation(locationId || '');
+  const { data: event } = useEvent(eventId || '');
   const { data: hostPublication } = useHostPublication(eventId!, location?.host_location_id);
+  const publicationBranding = mergePublicationBranding(event?.publication_branding);
 
   if (isLoading) {
     return (
@@ -90,6 +94,7 @@ const PublicationView = () => {
             locationLogo={location?.logo_url}
             locationName={location?.name}
             hostPublication={hostPublication?.publication || null}
+            publicationBranding={publicationBranding}
           />
         </div>
       </SidebarInset>

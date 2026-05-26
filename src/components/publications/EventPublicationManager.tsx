@@ -42,6 +42,7 @@ import {
   useDeletePublication
 } from '@/hooks/usePublications';
 import { useEvent } from '@/hooks/useSupabaseQuery';
+import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
 import { useCurrentProfile } from '@/hooks/useProfiles';
 import { useLocations } from '@/hooks/useLocations';
 import type { CreateEventPublicationData } from '@/services/publicationsService';
@@ -72,6 +73,7 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
 
   // Find host location for the event
   const hostLocation = locations.find(loc => loc.is_host);
+  const publicationBranding = mergePublicationBranding(event?.publication_branding);
 
   // Role checking
   const isAdmin = currentProfile?.role === 'admin';
@@ -173,7 +175,8 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
         hostLocationId: hostLocation?.id,
         template: 'professional' as const,
         includeMetadata: true,
-        includeGlobalContent: hostLocation && publication.location_id !== hostLocation.id
+        includeGlobalContent: hostLocation && publication.location_id !== hostLocation.id,
+        publicationBranding,
       };
 
       // Convert the database publication to the proper format
@@ -283,7 +286,8 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
               hostLocationId: hostLocation?.id,
               template: 'professional' as const,
               includeMetadata: true,
-              includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id
+              includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id,
+              publicationBranding,
             };
 
             console.log('🔧 [Bulk Export Debug] Creating comprehensive export for location:', {
@@ -302,7 +306,8 @@ export const EventPublicationManager: React.FC<EventPublicationManagerProps> = (
               hostLocationId: hostLocation?.id,
               template: 'professional' as const,
               includeMetadata: true,
-              includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id
+              includeGlobalContent: hostLocation && locationGroup.locationId !== hostLocation.id,
+              publicationBranding,
             };
             const convertedPublication = convertToPublication(basePublication);
             content = await publicationExportService.exportAsPDF(convertedPublication, null, exportOptions);

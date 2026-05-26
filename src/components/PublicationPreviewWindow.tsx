@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Publication } from '@/pages/PublicationEditor';
 import PublicationPreview from './PublicationPreview';
+import type { EventPublicationBranding } from '@/types/publicationBranding';
 
 interface PublicationPreviewWindowProps {
   publication: Publication;
@@ -9,6 +10,7 @@ interface PublicationPreviewWindowProps {
   onClose: () => void;
   locationLogo?: string;
   locationName?: string;
+  publicationBranding?: EventPublicationBranding;
 }
 
 export const PublicationPreviewWindow: React.FC<PublicationPreviewWindowProps> = ({
@@ -16,7 +18,8 @@ export const PublicationPreviewWindow: React.FC<PublicationPreviewWindowProps> =
   hostPublication,
   onClose,
   locationLogo,
-  locationName
+  locationName,
+  publicationBranding,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -50,6 +53,7 @@ export const PublicationPreviewWindow: React.FC<PublicationPreviewWindowProps> =
             hostPublication={hostPublication}
             locationLogo={locationLogo}
             locationName={locationName}
+            publicationBranding={publicationBranding}
           />
         </div>
       </div>

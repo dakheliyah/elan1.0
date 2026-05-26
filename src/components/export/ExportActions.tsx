@@ -13,6 +13,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Publication } from '@/pages/PublicationEditor';
 import { ExportFormat } from './ExportModal';
+import type { EventPublicationBranding } from '@/types/publicationBranding';
 import { 
   useExportHTML, 
   useExportPDF, 
@@ -24,6 +25,7 @@ interface ExportActionsProps {
   publicationId: string;
   hostPublication?: Publication | null;
   exportFormat: ExportFormat;
+  publicationBranding?: EventPublicationBranding;
   onClose: () => void;
 }
 
@@ -32,6 +34,7 @@ export const ExportActions: React.FC<ExportActionsProps> = ({
   publicationId,
   hostPublication,
   exportFormat,
+  publicationBranding,
   onClose
 }) => {
   const { toast } = useToast();
@@ -50,6 +53,7 @@ export const ExportActions: React.FC<ExportActionsProps> = ({
           template: exportFormat.template as any,
           imageQuality: 'high',
           includeMetadata: true,
+          publicationBranding,
           customBranding: exportFormat.template === 'branded' ? {
             primaryColor: '#4E6F1F',
       secondaryColor: '#ADBF97'
@@ -64,7 +68,8 @@ export const ExportActions: React.FC<ExportActionsProps> = ({
           template: 'professional',
           pageSize: exportFormat.options.pageSize || 'A4',
           imageQuality: exportFormat.options.quality || 'high',
-          includeMetadata: exportFormat.options.includeMetadata !== false
+          includeMetadata: exportFormat.options.includeMetadata !== false,
+          publicationBranding,
         }
       });
     }

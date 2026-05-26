@@ -64,6 +64,7 @@ export type Database = {
           end_date: string | null
           id: string
           name: string
+          publication_branding: Json | null
           start_date: string | null
           updated_at: string | null
         }
@@ -74,6 +75,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name: string
+          publication_branding?: Json | null
           start_date?: string | null
           updated_at?: string | null
         }
@@ -84,6 +86,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           name?: string
+          publication_branding?: Json | null
           start_date?: string | null
           updated_at?: string | null
         }

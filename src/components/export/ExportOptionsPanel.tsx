@@ -32,7 +32,9 @@ import {
 } from '@/hooks/usePublicationExport';
 import { useHostPublication } from '@/hooks/useHostPublication';
 import { useLocation } from '@/hooks/useLocations';
+import { useEvent } from '@/hooks/useSupabaseQuery';
 import { convertToPublication } from '@/utils/publicationConverter';
+import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
 
 interface ExportOptionsPanelProps {
   publication: Publication;
@@ -45,6 +47,8 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
 }) => {
   // Fetch location data to get host location ID
   const { data: location } = useLocation(publication.location_id || '');
+  const { data: event } = useEvent(publication.event_id || '');
+  const publicationBranding = mergePublicationBranding(event?.publication_branding);
   const hostLocationId = location?.host_location_id || null;
   const { data: hostPublication, isLoading: isLoadingHostPublication } = useHostPublication(
     publication.event_id || '',
@@ -88,7 +92,7 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
     exportHTMLMutation.mutate({
       publication: convertedPublication,
       hostPublication: convertedHostPublication,
-      options: exportOptions
+      options: { ...exportOptions, publicationBranding },
     });
   };
 
@@ -107,7 +111,7 @@ const ExportOptionsPanel: React.FC<ExportOptionsPanelProps> = ({
     exportPDFMutation.mutate({
       publication: convertedPublication,
       hostPublication: convertedHostPublication,
-      options: exportOptions
+      options: { ...exportOptions, publicationBranding },
     });
   };
 

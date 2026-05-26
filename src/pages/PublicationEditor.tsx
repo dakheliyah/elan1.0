@@ -35,6 +35,7 @@ import {
 } from '@/hooks/useSupabaseQuery';
 import { ExportModal } from '@/components/export/ExportModal';
 import { PublishDropdown } from '@/components/export/PublishDropdown';
+import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
 
 export interface MenuItemData {
   name: string;
@@ -114,6 +115,7 @@ const PublicationEditorPage = () => {
   const { data: publicationData, isLoading: publicationLoading } = usePublication(publicationId || '');
   const { data: hostPublication } = useHostPublication(eventId || '', location?.host_location_id || null);
   const updatePublicationMutation = useUpdatePublication();
+  const publicationBranding = mergePublicationBranding(event?.publication_branding);
 
   const [publication, setPublication] = useState<Publication>({
     title: '',
@@ -581,6 +583,7 @@ const PublicationEditorPage = () => {
               hostPublication={hostPublication?.publication || null}
               locationLogo={location?.logo_url}
               locationName={location?.name}
+              publicationBranding={publicationBranding}
             />
           </div>
         )}
@@ -604,6 +607,7 @@ const PublicationEditorPage = () => {
           hostPublication={hostPublication?.publication || null}
           locationLogo={location?.logo_url}
           locationName={location?.name}
+          publicationBranding={publicationBranding}
         />
       )}
     </div>

@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import EventManagement from "./pages/EventManagement";
 import EventDetail from "./pages/EventDetail";
+import EventPublicationBrandingPage from "./pages/EventPublicationBranding";
 import LocationDetail from "./pages/LocationDetail";
 import UmoorManagement from "./pages/UmoorManagement";
 import MediaLibrary from "./pages/MediaLibrary";
@@ -45,6 +46,7 @@ function App() {
               <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
                 <Route path="/events" element={<EventManagement />} />
                 <Route path="/events/:eventId" element={<EventDetail />} />
+                <Route path="/events/:eventId/publication-branding" element={<EventPublicationBrandingPage />} />
                 <Route path="/events/:eventId/locations/:locationId" element={<LocationDetail />} />
                 <Route path="/events/:eventId/locations/:locationId/publications/:publicationId/view" element={<PublicationView />} />
                 <Route path="/events/:eventId/locations/:locationId/publications/:publicationId/edit" element={<PublicationEditorPage />} />

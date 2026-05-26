@@ -31,10 +31,12 @@ export const useUpdateEvent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof eventsService.update>[1] }) =>
       eventsService.update(id, updates),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['event', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['events', 'locationCount'] });
     },
   });
 };

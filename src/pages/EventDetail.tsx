@@ -18,7 +18,8 @@ import {
   Loader2,
   Image,
   Calendar,
-  FileText
+  FileText,
+  LayoutTemplate
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -302,6 +303,16 @@ const EventDetail = () => {
                   </TabsList>
 
                   <div className="flex items-center gap-3">
+                    {isAdmin && (
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate(`/events/${eventId}/publication-branding`)}
+                        className="flex items-center gap-2"
+                      >
+                        <LayoutTemplate size={16} />
+                        Header & Footer
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       onClick={handleMediaLibrary}

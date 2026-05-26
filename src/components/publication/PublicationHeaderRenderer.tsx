@@ -7,6 +7,7 @@ interface PublicationHeaderRendererProps {
   showDecorative?: boolean;
   locationLogo?: string;
   locationName?: string;
+  headerLines?: { line1: string; line2: string };
 }
 
 export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps> = ({
@@ -14,7 +15,8 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
   breadcrumb,
   showDecorative = true,
   locationLogo,
-  locationName
+  locationName,
+  headerLines,
 }) => {
   return (
     <>
@@ -37,10 +39,12 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
               />
             </div>
           )}
-          <div className="text-xl font-light text-[#859069] tracking-widest mb-8">
-            Ashara Mubaraka 1447h <br />
-            Chennai (Madras)
-          </div>
+          {headerLines && (
+            <div className="text-xl font-light text-[#859069] tracking-widest mb-8">
+              {headerLines.line1} <br />
+              {headerLines.line2}
+            </div>
+          )}
         </div>
       )}
 

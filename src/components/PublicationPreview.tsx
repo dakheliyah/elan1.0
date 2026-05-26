@@ -2,7 +2,10 @@
 import React, { useMemo, useRef } from 'react';
 import { Publication, ParentBlockData } from '../pages/PublicationEditor';
 import { PublicationHeaderRenderer } from './publication/PublicationHeaderRenderer';
+import { PublicationFooterRenderer } from './publication/PublicationFooterRenderer';
 import { PublicationSectionRenderer } from './publication/renderers/PublicationSectionRenderer';
+import type { EventPublicationBranding } from '@/types/publicationBranding';
+import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
 import { useCurrentProfile } from '../hooks/useProfiles';
 import { useUmoors } from '../hooks/useUmoors';
 import { Button } from './ui/button';
@@ -14,6 +17,7 @@ interface PublicationPreviewProps {
   locationLogo?: string;
   locationName?: string;
   hostPublication?: Publication | null;
+  publicationBranding?: EventPublicationBranding;
 }
 
 const PublicationPreview: React.FC<PublicationPreviewProps> = ({
@@ -21,8 +25,10 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
   mode = 'preview',
   locationLogo,
   locationName,
-  hostPublication
+  hostPublication,
+  publicationBranding: publicationBrandingProp,
 }) => {
+  const branding = publicationBrandingProp ?? mergePublicationBranding(null);
   const { data: currentProfile } = useCurrentProfile();
   const { data: umoors = [] } = useUmoors();
   const previewContentRef = useRef<HTMLDivElement>(null);
@@ -124,6 +130,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
         showDecorative={true}
         locationLogo={locationLogo}
         locationName={locationName}
+        headerLines={branding.header}
       />
 
       {/* Publication Content */}
@@ -163,27 +170,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
         </div>
       )}
 
-      {/* Footer */}
-      <div className="mt-12 pt-8 border-t border-gray-200">
-        <div className="bg-[#DFCCAE] rounded-lg p-6 md:text-center text-left">
-          <div className="text-gray-800 text-sm leading-relaxed">
-            <p className="mb-2 font-semibold">
-              Ashara Mubaraka 1447H - ITS Helpline
-            </p>
-            <p className="mb-2">
-              Helpline ne aa number par contact Kari sakaai che{' '}
-              <a href='https://chat.itshelpline.com' target='_blank' className="text-[#286741] underline font-medium">WhatsApp</a>{' '}
-              <br />
-               ane Telephone helpline:{' '}
-              <a href='tel:918065915253' className="text-[#286741] underline font-medium">+918065915253</a>{' '}
-              from 3PM - 6PM (IST)
-            </p>
-            <p className="mb-2 italic">
-              Note: General suwalo na jawabo Whatsapp Menu ma AI Assistant si haasil kari sakaai che
-            </p>
-          </div>
-        </div>
-      </div>
+      <PublicationFooterRenderer footer={branding.footer} />
     </div>
   );
 

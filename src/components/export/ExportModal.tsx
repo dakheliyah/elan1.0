@@ -11,6 +11,7 @@ import { ExportFormatSelector } from './ExportFormatSelector';
 import { ExportPreview } from './ExportPreview';
 import { ExportActions } from './ExportActions';
 import { Publication } from '@/pages/PublicationEditor';
+import type { EventPublicationBranding } from '@/types/publicationBranding';
 
 export interface ExportModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export interface ExportModalProps {
   hostPublication?: Publication | null;
   locationLogo?: string;
   locationName?: string;
+  publicationBranding?: EventPublicationBranding;
 }
 
 export interface ExportFormat {
@@ -35,7 +37,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   publicationId,
   hostPublication,
   locationLogo,
-  locationName
+  locationName,
+  publicationBranding,
 }) => {
   const [selectedFormat, setSelectedFormat] = useState<'html' | 'pdf'>('html');
   const [exportOptions, setExportOptions] = useState<ExportFormat>({
@@ -106,6 +109,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               exportFormat={exportOptions}
               locationLogo={locationLogo}
               locationName={locationName}
+              publicationBranding={publicationBranding}
             />
           </div>
         </div>
@@ -117,6 +121,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             publicationId={publicationId}
             hostPublication={hostPublication}
             exportFormat={exportOptions}
+            publicationBranding={publicationBranding}
             onClose={onClose}
           />
         </div>

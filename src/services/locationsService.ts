@@ -54,9 +54,16 @@ export const locationsService = {
 
   async create(location: LocationInsert): Promise<Location> {
     try {
+      const { data: user } = await supabase.auth.getUser();
+
+      const locationData = {
+        ...location,
+        created_by: location.created_by ?? user.user?.id,
+      };
+
       const { data, error } = await supabase
         .from('locations')
-        .insert(location)
+        .insert(locationData)
         .select()
         .single();
 

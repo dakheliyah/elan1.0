@@ -14,18 +14,30 @@ import {
 } from 'lucide-react';
 import { Publication } from '@/pages/PublicationEditor';
 import { ExportFormat } from './ExportModal';
-import { PublicationHeaderRenderer } from '@/components/publication/PublicationHeaderRenderer';
-import { PublicationSectionRenderer } from '@/components/publication/renderers/PublicationSectionRenderer';
+import type { EventPublicationBranding } from '@/types/publicationBranding';
+import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
+import {
+  renderPublicationFooterHtml,
+  renderPublicationHeaderSubtitleHtml,
+} from '@/utils/renderPublicationBrandingHtml';
 
 interface ExportPreviewProps {
   publication: Publication;
   exportFormat: ExportFormat;
   locationLogo?: string;
   locationName?: string;
+  publicationBranding?: EventPublicationBranding;
 }
 
 // Enhanced template generator with new layout structure using renderers
-const generatePreviewHTML = (publication: Publication, format: ExportFormat, locationLogo?: string, locationName?: string): string => {
+const generatePreviewHTML = (
+  publication: Publication,
+  format: ExportFormat,
+  locationLogo?: string,
+  locationName?: string,
+  publicationBranding?: EventPublicationBranding
+): string => {
+  const branding = publicationBranding ?? mergePublicationBranding(null);
   const isHTML = format.type === 'html';
   const templateStyle = format.template;
 
@@ -361,6 +373,9 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat, loc
     <body>
       ${locationLogo ? `<div class="location-logo"><img src="${locationLogo}" alt="${locationName || 'Location'} Logo" /></div>` : ''}
       <div class="decorative-separator">* * *</div>
+      <div class="decorative-subtitle" style="text-align: center; font-size: 1.25rem; font-weight: 300; color: #859069; letter-spacing: 0.2em; margin: 24px 0;">
+        ${renderPublicationHeaderSubtitleHtml(branding.header)}
+      </div>
       
       <h1>${publication.title}</h1>
       <div class="publication-breadcrumb">${publication.breadcrumb}</div>
@@ -371,6 +386,7 @@ const generatePreviewHTML = (publication: Publication, format: ExportFormat, loc
       })}</div>
       
       ${publication.parentBlocks.length > 0 ? renderContent() : '<div style="text-align: center; color: #9ca3af; padding: 60px 0;">No content blocks added yet</div>'}
+      ${renderPublicationFooterHtml(branding.footer)}
     </body>
     </html>
   `;
@@ -380,7 +396,8 @@ export const ExportPreview: React.FC<ExportPreviewProps> = ({
   publication,
   exportFormat,
   locationLogo,
-  locationName
+  locationName,
+  publicationBranding,
 }) => {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [zoomLevel, setZoomLevel] = useState(125);
@@ -389,12 +406,18 @@ export const ExportPreview: React.FC<ExportPreviewProps> = ({
 
   useEffect(() => {
     generatePreview();
-  }, [exportFormat, publication]);
+  }, [exportFormat, publication, publicationBranding, locationLogo, locationName]);
 
   const generatePreview = async () => {
     setIsLoading(true);
     try {
-      const htmlContent = generatePreviewHTML(publication, exportFormat, locationLogo, locationName);
+      const htmlContent = generatePreviewHTML(
+        publication,
+        exportFormat,
+        locationLogo,
+        locationName,
+        publicationBranding
+      );
       setPreviewContent(htmlContent);
     } catch (error) {
       console.error('Preview generation failed:', error);

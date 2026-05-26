@@ -1,4 +1,10 @@
 import { ParentBlockData, Publication as BasePublication } from '@/pages/PublicationEditor';
+import type { EventPublicationBranding } from '@/types/publicationBranding';
+import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
+import {
+  renderPublicationFooterHtml,
+  renderPublicationHeaderSubtitleHtml,
+} from '@/utils/renderPublicationBrandingHtml';
 
 // Extended Publication interface for export functionality
 export interface Publication extends BasePublication {
@@ -25,6 +31,7 @@ export interface ExportOptions {
   locationId?: string;  
   includeGlobalContent?: boolean;
   hostLocationId?: string;
+  publicationBranding?: EventPublicationBranding;
 }
 
 export interface OptimizedImage {
@@ -918,10 +925,12 @@ class HTMLPublicationRenderer {
     });
     
     const styles = this.getTemplateStyles(template, options);
+    const branding = options.publicationBranding ?? mergePublicationBranding(null);
     const headerRenderer = new HTMLHeaderRenderer();
+    const footerRenderer = new HTMLFooterRenderer();
     const sectionRenderer = new HTMLSectionRenderer();
     
-    const headerHTML = headerRenderer.render(publication);
+    const headerHTML = headerRenderer.render(publication, branding);
     console.log('📋 [HTML Renderer] Header HTML length:', headerHTML.length);
     
     const sectionsHTML = publication.parentBlocks
@@ -939,6 +948,7 @@ class HTMLPublicationRenderer {
     
     console.log('📄 [HTML Renderer] Total sections HTML length:', sectionsHTML.length);
     
+    const helplineFooter = footerRenderer.render(branding);
     const metadata = includeMetadata ? this.generateMetadataHTML(publication) : '';
     
     return `
@@ -958,6 +968,7 @@ class HTMLPublicationRenderer {
           <main class="publication-content">
             ${sectionsHTML}
           </main>
+          ${helplineFooter}
           ${metadata}
         </div>
       </body>
@@ -1097,7 +1108,8 @@ class HTMLPublicationRenderer {
 }
 
 class HTMLHeaderRenderer {
-  render(publication: Publication): string {
+  render(publication: Publication, branding: EventPublicationBranding): string {
+    const subtitleHtml = renderPublicationHeaderSubtitleHtml(branding.header);
     return `
       <header class="publication-header">
         <div class="decorative-header">
@@ -1117,7 +1129,7 @@ class HTMLHeaderRenderer {
         <div class="publication-title-container">
           <h1 class="publication-title">تمارو دن</h1>
           <div class="publication-subtitle">
-            Ashara Mubaraka 1447H
+            ${subtitleHtml}
           </div>
           <div class="publication-info">
             ${publication.title} • ${new Date().toLocaleDateString('en-US', {
@@ -1129,6 +1141,12 @@ class HTMLHeaderRenderer {
         </div>
       </header>
     `;
+  }
+}
+
+class HTMLFooterRenderer {
+  render(branding: EventPublicationBranding): string {
+    return renderPublicationFooterHtml(branding.footer);
   }
 }
 
