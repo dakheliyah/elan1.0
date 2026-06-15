@@ -207,7 +207,7 @@ const PublicationEditor = () => {
 
               <div className="flex justify-center pt-4">
                 <Button 
-                  onClick={() => setShowUmoorSelector(true)}
+                  onClick={() => setUmoorSelectorTarget('add')}
                   variant="outline"
                   className="flex items-center gap-2"
                 >
