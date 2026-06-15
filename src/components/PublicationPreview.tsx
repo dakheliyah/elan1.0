@@ -10,6 +10,7 @@ import { useCurrentProfile } from '../hooks/useProfiles';
 import { useUmoors } from '../hooks/useUmoors';
 import { Button } from './ui/button';
 import { Download } from 'lucide-react';
+import { getPublicationRichTextExportStyles } from '@/utils/publicationRichTextExportStyles';
 
 interface PublicationPreviewProps {
   publication: Publication;
@@ -103,6 +104,7 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
         .font-kanz {
             font-family: 'Al-Kanz', serif;
         }
+        ${getPublicationRichTextExportStyles()}
     </style>
 </head>
 <body>

@@ -27,7 +27,7 @@ export const TextBlockRenderer: React.FC<TextBlockRendererProps> = ({
       return (
         <div 
           dangerouslySetInnerHTML={{ __html: content }}
-          className={styles.richTextContent}
+          className={`${styles.richTextContent} publication-rich-text`}
           dir={isRTL ? 'rtl' : 'ltr'}
         />
       );

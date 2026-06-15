@@ -41,6 +41,7 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [editingUmoor, setEditingUmoor] = useState<Umoor | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const deleteUmoor = useDeleteUmoor();
   const deleteMultiple = useDeleteMultipleUmoors();
@@ -247,7 +248,13 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setEditingUmoor(umoor)}>
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          setEditingUmoor(umoor);
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
                         <Edit2 className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
@@ -273,14 +280,11 @@ export const UmoorTable: React.FC<UmoorTableProps> = ({ umoors }) => {
         )}
       </div>
 
-      {/* Edit Dialog */}
-      {editingUmoor && (
-        <UmoorEditDialog
-          umoor={editingUmoor}
-          isOpen={!!editingUmoor}
-          onClose={() => setEditingUmoor(null)}
-        />
-      )}
+      <UmoorEditDialog
+        umoor={editingUmoor}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+      />
     </div>
   );
 };

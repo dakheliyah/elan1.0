@@ -12,7 +12,8 @@ import {
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ParentBlock from './blocks/ParentBlock';
 import PublicationPreview from './PublicationPreview';
-import UmoorSelector from './blocks/UmoorSelector';
+import UmoorSelector, { UmoorOption } from './blocks/UmoorSelector';
+import { getUmoorLogoDisplay } from '@/utils/umoorLogo';
 import { ContentBlock, ParentBlockData, Publication, MenuBlockData } from '../pages/PublicationEditor';
 
 const PublicationEditor = () => {
@@ -22,14 +23,18 @@ const PublicationEditor = () => {
     parentBlocks: []
   });
 
-  const [showUmoorSelector, setShowUmoorSelector] = useState(false);
+  const [umoorSelectorTarget, setUmoorSelectorTarget] = useState<'add' | string | null>(null);
 
-  const addParentBlock = (umoor: { id: string; name: string; logo_url: string | null; description: string | null }) => {
+  const buildUmoorBlockFields = (umoor: UmoorOption) => ({
+    umoorId: umoor.id,
+    umoorName: umoor.name,
+    umoorLogo: getUmoorLogoDisplay(umoor),
+  });
+
+  const addParentBlock = (umoor: UmoorOption) => {
     const newParentBlock: ParentBlockData = {
       id: Date.now().toString(),
-      umoorId: umoor.id,
-      umoorName: umoor.name,
-      umoorLogo: umoor.logo_url || '📋', // Use logo_url or fallback to emoji
+      ...buildUmoorBlockFields(umoor),
       title: '',
       children: []
     };
@@ -38,7 +43,20 @@ const PublicationEditor = () => {
       ...prev,
       parentBlocks: [...prev.parentBlocks, newParentBlock]
     }));
-    setShowUmoorSelector(false);
+    setUmoorSelectorTarget(null);
+  };
+
+  const changeParentBlockUmoor = (parentId: string, umoor: UmoorOption) => {
+    updateParentBlock(parentId, buildUmoorBlockFields(umoor));
+    setUmoorSelectorTarget(null);
+  };
+
+  const handleUmoorSelect = (umoor: UmoorOption) => {
+    if (umoorSelectorTarget && umoorSelectorTarget !== 'add') {
+      changeParentBlockUmoor(umoorSelectorTarget, umoor);
+      return;
+    }
+    addParentBlock(umoor);
   };
 
   const updateParentBlock = (parentId: string, updates: Partial<ParentBlockData>) => {
@@ -140,7 +158,7 @@ const PublicationEditor = () => {
                 <p className="mb-6">Start building your publication by selecting an Umoor department.</p>
               </div>
               <Button 
-                onClick={() => setShowUmoorSelector(true)}
+                onClick={() => setUmoorSelectorTarget('add')}
                 className="bg-primary hover:bg-primary/90"
               >
                 <Plus size={16} className="mr-2" />
@@ -172,6 +190,7 @@ const PublicationEditor = () => {
                                 dragHandleProps={provided.dragHandleProps}
                                 onUpdateParent={(updates) => updateParentBlock(parentBlock.id, updates)}
                                 onRemoveParent={() => removeParentBlock(parentBlock.id)}
+                                onChangeUmoor={() => setUmoorSelectorTarget(parentBlock.id)}
                                 onAddChild={(type, language) => addChildBlock(parentBlock.id, type, language)}
                                 onUpdateChild={(childId, data) => updateChildBlock(parentBlock.id, childId, data)}
                                 onRemoveChild={(childId) => removeChildBlock(parentBlock.id, childId)}
@@ -207,10 +226,20 @@ const PublicationEditor = () => {
       </div>
 
       {/* Umoor Selector Modal */}
-      {showUmoorSelector && (
+      {umoorSelectorTarget && (
         <UmoorSelector
-          onSelect={addParentBlock}
-          onClose={() => setShowUmoorSelector(false)}
+          onSelect={handleUmoorSelect}
+          onClose={() => setUmoorSelectorTarget(null)}
+          selectedUmoorId={
+            umoorSelectorTarget !== 'add'
+              ? publication.parentBlocks.find((block) => block.id === umoorSelectorTarget)?.umoorId
+              : undefined
+          }
+          title={
+            umoorSelectorTarget !== 'add'
+              ? 'Change Umoor Department'
+              : 'Select Umoor Department'
+          }
         />
       )}
     </div>

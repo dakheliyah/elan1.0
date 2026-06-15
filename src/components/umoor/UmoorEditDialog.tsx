@@ -17,7 +17,7 @@ import { useUpdateUmoor } from "@/hooks/useUmoors";
 import { Loader2 } from "lucide-react";
 
 interface UmoorEditDialogProps {
-  umoor: Umoor;
+  umoor: Umoor | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -28,14 +28,15 @@ export const UmoorEditDialog: React.FC<UmoorEditDialogProps> = ({
   onClose
 }) => {
   const [formData, setFormData] = useState({
-    name: umoor.name,
-    description: umoor.description || '',
-    logo_url: umoor.logo_url || '',
+    name: umoor?.name ?? '',
+    description: umoor?.description || '',
+    logo_url: umoor?.logo_url || '',
   });
 
   const updateUmoor = useUpdateUmoor();
 
   useEffect(() => {
+    if (!umoor) return;
     setFormData({
       name: umoor.name,
       description: umoor.description || '',
@@ -53,8 +54,8 @@ export const UmoorEditDialog: React.FC<UmoorEditDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name.trim()) {
+
+    if (!umoor || !formData.name.trim()) {
       return;
     }
 
@@ -81,7 +82,7 @@ export const UmoorEditDialog: React.FC<UmoorEditDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Umoor</DialogTitle>
@@ -90,6 +91,7 @@ export const UmoorEditDialog: React.FC<UmoorEditDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         
+        {umoor && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-name">Name</Label>
@@ -157,6 +159,7 @@ export const UmoorEditDialog: React.FC<UmoorEditDialogProps> = ({
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );

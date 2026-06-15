@@ -9,6 +9,7 @@ import { BulletList } from 'reactjs-tiptap-editor/bulletlist';
 import { OrderedList } from 'reactjs-tiptap-editor/orderedlist';
 import { Heading } from 'reactjs-tiptap-editor/heading';
 import { Link } from 'reactjs-tiptap-editor/link';
+import { Color } from 'reactjs-tiptap-editor/color';
 import { Label } from '@/components/ui/label';
 import styles from './RichTextEditor.module.css';
 
@@ -47,6 +48,19 @@ const RichTextBlock: React.FC<RichTextBlockProps> = ({ data, onChange, language 
     OrderedList,
     Heading,
     Link,
+    Color.configure({
+      colors: [
+        '#000000',
+        '#4E6F1F',
+        '#286741',
+        '#DC2626',
+        '#2563EB',
+        '#9333EA',
+        '#CA8A04',
+        '#EA580C',
+        '#6B7280',
+      ],
+    }),
   ];
 
   console.log('Extensions configured:', extensions);

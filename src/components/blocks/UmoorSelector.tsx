@@ -2,11 +2,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { X, Plus, Loader2 } from 'lucide-react';
+import { X, Plus, Loader2, Check } from 'lucide-react';
 import { useUmoors } from '@/hooks/useUmoors';
 import { useNavigate } from 'react-router-dom';
+import { getUmoorLogoDisplay, isEmojiLogo } from '@/utils/umoorLogo';
 
-interface UmoorOption {
+export interface UmoorOption {
   id: string;
   name: string;
   logo_url: string | null;
@@ -16,9 +17,16 @@ interface UmoorOption {
 interface UmoorSelectorProps {
   onSelect: (umoor: UmoorOption) => void;
   onClose: () => void;
+  selectedUmoorId?: string;
+  title?: string;
 }
 
-const UmoorSelector: React.FC<UmoorSelectorProps> = ({ onSelect, onClose }) => {
+const UmoorSelector: React.FC<UmoorSelectorProps> = ({
+  onSelect,
+  onClose,
+  selectedUmoorId,
+  title = 'Select Umoor Department',
+}) => {
   const { data: umoors, isLoading } = useUmoors();
   const navigate = useNavigate();
 
@@ -27,35 +35,11 @@ const UmoorSelector: React.FC<UmoorSelectorProps> = ({ onSelect, onClose }) => {
     navigate('/umoor');
   };
 
-  const getUmoorLogo = (umoor: any) => {
-    if (umoor.logo_url) {
-      return umoor.logo_url;
-    }
-    
-    // Fallback emoji based on umoor name
-    const emojiMap: { [key: string]: string } = {
-      'waaz': '📿',
-      'majlis': '🌙',
-      'food': '🍽️',
-      'accommodation': '🏠',
-      'transport': '🚌',
-      'health': '⚕️',
-      'registration': '📝',
-      'general': 'ℹ️'
-    };
-    
-    const key = Object.keys(emojiMap).find(k => 
-      umoor.name.toLowerCase().includes(k) || umoor.slug?.includes(k)
-    );
-    
-    return key ? emojiMap[key] : '📋';
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-3xl max-h-[80vh] overflow-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Select Umoor Department</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -86,9 +70,10 @@ const UmoorSelector: React.FC<UmoorSelectorProps> = ({ onSelect, onClose }) => {
 
               {/* Umoor Cards */}
               {umoors?.map((umoor) => {
-                const logoSrc = getUmoorLogo(umoor);
-                const isEmoji = logoSrc.length <= 2; // Simple emoji detection
-                
+                const logoSrc = getUmoorLogoDisplay(umoor);
+                const isEmoji = isEmojiLogo(logoSrc);
+                const isSelected = selectedUmoorId === umoor.id;
+
                 return (
                   <Button
                     key={umoor.id}
@@ -99,8 +84,17 @@ const UmoorSelector: React.FC<UmoorSelectorProps> = ({ onSelect, onClose }) => {
                       logo_url: umoor.logo_url,
                       description: umoor.description
                     })}
-                    className="h-24 w-full p-3 flex flex-col items-center justify-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                    className={`relative h-24 w-full p-3 flex flex-col items-center justify-center gap-2 transition-colors ${
+                      isSelected
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/30 hover:bg-primary/10'
+                        : 'hover:bg-blue-50 hover:border-blue-200'
+                    }`}
                   >
+                    {isSelected && (
+                      <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
+                        <Check size={12} strokeWidth={3} />
+                      </span>
+                    )}
                     <div className="w-12 h-12 flex items-center justify-center">
                       {isEmoji ? (
                         <span className="text-2xl">{logoSrc}</span>

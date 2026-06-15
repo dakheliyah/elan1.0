@@ -53,7 +53,7 @@ export const PublicationHeaderRenderer: React.FC<PublicationHeaderRendererProps>
         <div className="text-center mb-12 pb-8 flex flex-col items-center">
           <h1 className="!text-[60px] md:!text-[120px] text-[#859069] leading-tight font-kanz flex items-center gap-12">
             <span><img src="https://elan-xi.vercel.app/deco.png" alt="" /></span>
-            تمارو دن
+            اْثث نو دن
             <span><img src="https://elan-xi.vercel.app/deco.png" alt="" /></span>
           </h1>
           <div className="text-xl text-[#859069]">

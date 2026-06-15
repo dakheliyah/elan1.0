@@ -15,7 +15,8 @@ import {
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ParentBlock from '@/components/blocks/ParentBlock';
 import PublicationPreview from '@/components/PublicationPreview';
-import UmoorSelector from '@/components/blocks/UmoorSelector';
+import UmoorSelector, { UmoorOption } from '@/components/blocks/UmoorSelector';
+import { getUmoorLogoDisplay } from '@/utils/umoorLogo';
 import ExportOptionsPanel from '@/components/export/ExportOptionsPanel';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -123,7 +124,7 @@ const PublicationEditorPage = () => {
     parentBlocks: []
   });
 
-  const [showUmoorSelector, setShowUmoorSelector] = useState(false);
+  const [umoorSelectorTarget, setUmoorSelectorTarget] = useState<'add' | string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -279,12 +280,16 @@ const PublicationEditorPage = () => {
     setShowExportModal(true);
   };
 
-  const addParentBlock = (umoor: { id: string; name: string; logo_url: string | null; description: string | null }) => {
+  const buildUmoorBlockFields = (umoor: UmoorOption) => ({
+    umoorId: umoor.id,
+    umoorName: umoor.name,
+    umoorLogo: getUmoorLogoDisplay(umoor),
+  });
+
+  const addParentBlock = (umoor: UmoorOption) => {
     const newParentBlock: ParentBlockData = {
       id: Date.now().toString(),
-      umoorId: umoor.id,
-      umoorName: umoor.name,
-      umoorLogo: umoor.logo_url || '📋', // Use uploaded logo or fallback to emoji
+      ...buildUmoorBlockFields(umoor),
       title: '',
       subheading: '',
       description: '',
@@ -297,7 +302,20 @@ const PublicationEditorPage = () => {
       ...prev,
       parentBlocks: [...prev.parentBlocks, newParentBlock]
     }));
-    setShowUmoorSelector(false);
+    setUmoorSelectorTarget(null);
+  };
+
+  const changeParentBlockUmoor = (parentId: string, umoor: UmoorOption) => {
+    updateParentBlock(parentId, buildUmoorBlockFields(umoor));
+    setUmoorSelectorTarget(null);
+  };
+
+  const handleUmoorSelect = (umoor: UmoorOption) => {
+    if (umoorSelectorTarget && umoorSelectorTarget !== 'add') {
+      changeParentBlockUmoor(umoorSelectorTarget, umoor);
+      return;
+    }
+    addParentBlock(umoor);
   };
 
   const updateParentBlock = (parentId: string, updates: Partial<ParentBlockData>) => {
@@ -510,7 +528,7 @@ const PublicationEditorPage = () => {
                   <p className="mb-6">Start building your publication by selecting an Umoor department.</p>
                 </div>
                 <Button 
-                  onClick={() => setShowUmoorSelector(true)}
+                  onClick={() => setUmoorSelectorTarget('add')}
                   className="bg-primary hover:bg-primary/90"
                   disabled={isSaving || isPublishing}
                 >
@@ -543,6 +561,7 @@ const PublicationEditorPage = () => {
                                   dragHandleProps={provided.dragHandleProps}
                                   onUpdateParent={(updates) => updateParentBlock(parentBlock.id, updates)}
                                   onRemoveParent={() => removeParentBlock(parentBlock.id)}
+                                  onChangeUmoor={() => setUmoorSelectorTarget(parentBlock.id)}
                                   onAddChild={(type, language) => addChildBlock(parentBlock.id, type, language)}
                                   onUpdateChild={(childId, data) => updateChildBlock(parentBlock.id, childId, data)}
                                   onRemoveChild={(childId) => removeChildBlock(parentBlock.id, childId)}
@@ -561,7 +580,7 @@ const PublicationEditorPage = () => {
 
                 <div className="flex justify-center pt-4">
                   <Button 
-                    onClick={() => setShowUmoorSelector(true)}
+                    onClick={() => setUmoorSelectorTarget('add')}
                     variant="outline"
                     className="flex items-center gap-2"
                     disabled={isSaving || isPublishing}
@@ -590,10 +609,20 @@ const PublicationEditorPage = () => {
       </div>
 
       {/* Umoor Selector Modal */}
-      {showUmoorSelector && (
+      {umoorSelectorTarget && (
         <UmoorSelector
-          onSelect={addParentBlock}
-          onClose={() => setShowUmoorSelector(false)}
+          onSelect={handleUmoorSelect}
+          onClose={() => setUmoorSelectorTarget(null)}
+          selectedUmoorId={
+            umoorSelectorTarget !== 'add'
+              ? publication.parentBlocks.find((block) => block.id === umoorSelectorTarget)?.umoorId
+              : undefined
+          }
+          title={
+            umoorSelectorTarget !== 'add'
+              ? 'Change Umoor Department'
+              : 'Select Umoor Department'
+          }
         />
       )}
 

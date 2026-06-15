@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,8 @@ import {
   Globe,
   Languages,
   ChevronDown,
-  Menu
+  Menu,
+  ArrowLeftRight,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,12 +26,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import ChildContentBlock from './ChildContentBlock';
 import { ParentBlockData, ContentBlock } from '../../pages/PublicationEditor';
+import { isEmojiLogo } from '@/utils/umoorLogo';
 
 interface ParentBlockProps {
   parentBlock: ParentBlockData;
   dragHandleProps?: any;
   onUpdateParent: (updates: Partial<ParentBlockData>) => void;
   onRemoveParent: () => void;
+  onChangeUmoor: () => void;
   onAddChild: (type: 'text' | 'image' | 'menu', language?: 'eng' | 'lud') => void;
   onUpdateChild: (childId: string, data: any) => void;
   onRemoveChild: (childId: string) => void;
@@ -43,20 +46,39 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
   dragHandleProps,
   onUpdateParent,
   onRemoveParent,
+  onChangeUmoor,
   onAddChild,
   onUpdateChild,
   onRemoveChild,
   eventId,
   isHost = false,
 }) => {
-  // Debug logging
-  console.log('ParentBlock rendering with data:', {
-    title: parentBlock.title,
-    subheading: parentBlock.subheading,
-    description: parentBlock.description,
-    umoorName: parentBlock.umoorName,
-    umoorLogo: parentBlock.umoorLogo
-  });
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  useEffect(() => {
+    setLogoFailed(false);
+  }, [parentBlock.umoorLogo, parentBlock.umoorId]);
+
+  const renderUmoorLogo = () => {
+    const logo = parentBlock.umoorLogo || '📋';
+
+    if (isEmojiLogo(logo) || logoFailed) {
+      return (
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-3xl">
+          {isEmojiLogo(logo) ? logo : '📋'}
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={logo}
+        alt={parentBlock.umoorName}
+        className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
+        onError={() => setLogoFailed(true)}
+      />
+    );
+  };
 
   return (
     <Card className="w-full">
@@ -69,7 +91,22 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
                 <GripVertical size={16} className="text-gray-400" />
               </div>
               <div className="flex items-center gap-2 mt-2">
-                <img src={parentBlock.umoorLogo} width={80} alt="" />
+                <div className="flex flex-col items-center gap-1.5">
+                  {renderUmoorLogo()}
+                  <span className="max-w-[88px] truncate text-center text-xs font-medium text-gray-600">
+                    {parentBlock.umoorName}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onChangeUmoor}
+                    className="h-7 px-2 text-xs text-gray-500 hover:text-gray-900"
+                  >
+                    <ArrowLeftRight size={12} className="mr-1" />
+                    Change
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -77,10 +114,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
               {/* Main Heading */}
               <Input
                 value={parentBlock.title || ''}
-                onChange={(e) => {
-                  console.log('Title changed to:', e.target.value);
-                  onUpdateParent({ title: e.target.value });
-                }}
+                onChange={(e) => onUpdateParent({ title: e.target.value })}
                 placeholder="Enter section heading..."
                 className="border-none shadow-none p-0 !text-2xl font-bold focus-visible:ring-0 placeholder-gray-400"
               />
@@ -88,10 +122,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
               {/* Subheading */}
               <Input
                 value={parentBlock.subheading || ''}
-                onChange={(e) => {
-                  console.log('Subheading changed to:', e.target.value);
-                  onUpdateParent({ subheading: e.target.value });
-                }}
+                onChange={(e) => onUpdateParent({ subheading: e.target.value })}
                 placeholder="Enter subheading (optional)..."
                 className="border-none shadow-none p-0 mt-0 text-lg font-semibold text-gray-700 focus-visible:ring-0 placeholder-gray-400"
               />
@@ -176,10 +207,7 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
             </div>
             <Switch
               checked={parentBlock.isGlobal || false}
-              onCheckedChange={(checked) => {
-                console.log('Global toggle changed to:', checked);
-                onUpdateParent({ isGlobal: checked });
-              }}
+              onCheckedChange={(checked) => onUpdateParent({ isGlobal: checked })}
             />
           </div>
         )}

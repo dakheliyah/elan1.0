@@ -5,6 +5,7 @@ import {
   renderPublicationFooterHtml,
   renderPublicationHeaderSubtitleHtml,
 } from '@/utils/renderPublicationBrandingHtml';
+import { getPublicationRichTextExportStyles } from '@/utils/publicationRichTextExportStyles';
 
 // Extended Publication interface for export functionality
 export interface Publication extends BasePublication {
@@ -296,8 +297,13 @@ export class PublicationExportService {
 
   private formatTextForEmail(content: string): string {
     if (!content) return '';
-    
-    // Basic HTML formatting for email compatibility
+
+    const isHtmlContent = content.includes('<') && content.includes('>');
+    if (isHtmlContent) {
+      return content;
+    }
+
+    // Basic HTML formatting for plain-text email compatibility
     return content
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br>')
@@ -485,8 +491,23 @@ export class PublicationExportService {
         padding-left: 20px;
       }
       
+      .email-text-content ul {
+        list-style-type: disc;
+      }
+      
+      .email-text-content ol {
+        list-style-type: decimal;
+      }
+      
       .email-text-content li {
+        display: list-item;
         margin-bottom: 5px;
+      }
+      
+      .email-text-content.rtl ul,
+      .email-text-content.rtl ol {
+        padding-right: 20px;
+        padding-left: 0;
       }
       
       .email-image {
@@ -1037,10 +1058,7 @@ class HTMLPublicationRenderer {
       .content-block {
         margin-bottom: 20px;
       }
-      .text-block {
-        font-size: 1em;
-        line-height: 1.7;
-      }
+      ${getPublicationRichTextExportStyles()}
       .image-block {
         text-align: center;
         margin: 20px 0;
@@ -1127,7 +1145,7 @@ class HTMLHeaderRenderer {
         </div>
 
         <div class="publication-title-container">
-          <h1 class="publication-title">تمارو دن</h1>
+          <h1 class="publication-title">اْثث نو دن</h1>
           <div class="publication-subtitle">
             ${subtitleHtml}
           </div>
@@ -1207,7 +1225,9 @@ class HTMLContentRenderer {
 
   private renderTextBlock(block: any): string {
     const content = block.data?.content || block.content || block.text || '';
-    return `<div class="content-block text-block">${content}</div>`;
+    const isRTL = block.language === 'lud';
+    const dirAttr = isRTL ? ' dir="rtl"' : ' dir="ltr"';
+    return `<div class="content-block publication-rich-text"${dirAttr}>${content}</div>`;
   }
 
   private renderImageBlock(block: any): string {
