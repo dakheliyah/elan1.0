@@ -28,7 +28,7 @@ const ChildContentBlock: React.FC<ChildContentBlockProps> = ({
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
             {block.type === 'text' ? `Text (${block.language === 'lud' ? 'Lisan ud-Dawat' : 'English'})` : 
-             block.type === 'image' ? 'Image' : 'Menu'}
+             block.type === 'image' ? 'Image' : `Menu (${block.language === 'lud' ? 'Lisan ud-Dawat' : 'English'})`}
           </Badge>
         </div>
         <Button

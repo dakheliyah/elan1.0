@@ -1,6 +1,6 @@
 
 import React, { useMemo, useRef } from 'react';
-import { Publication, ParentBlockData } from '../pages/PublicationEditor';
+import { Publication } from '../pages/PublicationEditor';
 import { PublicationHeaderRenderer } from './publication/PublicationHeaderRenderer';
 import { PublicationFooterRenderer } from './publication/PublicationFooterRenderer';
 import { PublicationSectionRenderer } from './publication/renderers/PublicationSectionRenderer';
@@ -11,6 +11,8 @@ import { useUmoors } from '../hooks/useUmoors';
 import { Button } from './ui/button';
 import { Download } from 'lucide-react';
 import { getPublicationRichTextExportStyles } from '@/utils/publicationRichTextExportStyles';
+import { USE_UMOOR_ORDER_PREFERENCE } from '@/constants/publicationFeatures';
+import { getCombinedParentBlocks } from '@/utils/combinePublicationBlocks';
 
 interface PublicationPreviewProps {
   publication: Publication;
@@ -34,55 +36,10 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
   const { data: umoors = [] } = useUmoors();
   const previewContentRef = useRef<HTMLDivElement>(null);
 
-  const combinedParentBlocks = useMemo(() => {
-    const allBlocks = hostPublication && hostPublication.parentBlocks
-      ? [...hostPublication.parentBlocks.filter(block => block.isGlobal), ...publication.parentBlocks]
-      : publication.parentBlocks;
-
-    // Group blocks by umoorId while maintaining order
-    const groupedBlocks: { umoorId: string; blocks: any[]; isGlobal: boolean; orderPreference: number }[] = [];
-    const umoorMap = new Map<string, { blocks: any[]; isGlobal: boolean; orderPreference: number }>();
-
-    allBlocks.forEach(block => {
-      if (!umoorMap.has(block.umoorId)) {
-        // Find the umoor data to get order_preference
-        const umoorData = umoors.find(u => u.id === block.umoorId);
-        const orderPreference = umoorData?.order_preference || 0;
-        
-        const groupData = { 
-          blocks: [], 
-          isGlobal: block.isGlobal || false,
-          orderPreference
-        };
-        umoorMap.set(block.umoorId, groupData);
-        groupedBlocks.push({ umoorId: block.umoorId, ...groupData });
-      }
-      umoorMap.get(block.umoorId)!.blocks.push(block);
-    });
-
-    // Sort groups by order preference: 1,2,3... first (ascending), then 0s
-    // Also maintain global umoors first within each preference group
-    groupedBlocks.sort((a, b) => {
-      // First, sort by order preference priority
-      if (a.orderPreference > 0 && b.orderPreference === 0) return -1;
-      if (a.orderPreference === 0 && b.orderPreference > 0) return 1;
-      
-      // If both have order_preference > 0, sort by order_preference ascending
-      if (a.orderPreference > 0 && b.orderPreference > 0) {
-        if (a.orderPreference !== b.orderPreference) {
-          return a.orderPreference - b.orderPreference;
-        }
-      }
-      
-      // Within same preference level, global umoors first
-      if (a.isGlobal && !b.isGlobal) return -1;
-      if (!a.isGlobal && b.isGlobal) return 1;
-      
-      return 0;
-    });
-
-    return groupedBlocks;
-  }, [publication, hostPublication, umoors]);
+  const combinedParentBlocks = useMemo(
+    () => getCombinedParentBlocks(publication, hostPublication, umoors),
+    [publication, hostPublication, umoors]
+  );
 
   const exportAsHTML = () => {
     if (!previewContentRef.current) return;
@@ -143,32 +100,21 @@ const PublicationPreview: React.FC<PublicationPreviewProps> = ({
         </div>
       ) : (
         <div className="space-y-8">
-          {combinedParentBlocks.map((umoorGroup, groupIndex) => (
-            <div key={umoorGroup.umoorId}>
-              {/* Render all blocks in this umoor group */}
-              <div className="space-y-8">
-                {umoorGroup.blocks.map((parentBlock, blockIndex) => {
-                  // Show logo only for the first block in each umoor group
-                  const shouldShowLogo = blockIndex === 0;
+          {combinedParentBlocks.map((parentBlock, index) => {
+            const shouldShowLogo = USE_UMOOR_ORDER_PREFERENCE
+              ? combinedParentBlocks.findIndex((block) => block.umoorId === parentBlock.umoorId) === index
+              : true;
 
-                  return (
-                    <PublicationSectionRenderer
-                      key={parentBlock.id}
-                      parentBlock={parentBlock}
-                      mode={mode}
-                      isLast={groupIndex === combinedParentBlocks.length - 1 && blockIndex === umoorGroup.blocks.length - 1}
-                      showUmoorLogo={shouldShowLogo}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Add dotted line separator between umoor groups (except after the last group) */}
-              {/* {groupIndex < combinedParentBlocks.length - 1 && (
-                 <div className="my-8 border-t border-dotted border-gray-300"></div>
-               )} */}
-            </div>
-          ))}
+            return (
+              <PublicationSectionRenderer
+                key={parentBlock.id}
+                parentBlock={parentBlock}
+                mode={mode}
+                isLast={index === combinedParentBlocks.length - 1}
+                showUmoorLogo={shouldShowLogo}
+              />
+            );
+          })}
         </div>
       )}
 

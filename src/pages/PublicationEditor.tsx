@@ -338,10 +338,12 @@ const PublicationEditorPage = () => {
     const newChild: ContentBlock = {
       id: Date.now().toString(),
       type,
-      language: type === 'text' ? language : undefined,
+      language: type === 'text' || type === 'menu' ? language : undefined,
       data: type === 'text' 
         ? { content: '', language: language || 'eng' }
-        : { imageUrl: '', alt: '' }
+        : type === 'image'
+        ? { imageUrl: '', alt: '' }
+        : { items: [], fileName: '', header: '' } as MenuBlockData
     };
 
     updateParentBlock(parentId, {

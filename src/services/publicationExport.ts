@@ -1,6 +1,7 @@
-import { ParentBlockData, Publication as BasePublication } from '@/pages/PublicationEditor';
+import { Publication as BasePublication, ParentBlockData } from '@/pages/PublicationEditor';
 import type { EventPublicationBranding } from '@/types/publicationBranding';
 import { mergePublicationBranding } from '@/utils/mergePublicationBranding';
+import { getCombinedParentBlocks } from '@/utils/combinePublicationBlocks';
 import {
   renderPublicationFooterHtml,
   renderPublicationHeaderSubtitleHtml,
@@ -219,64 +220,11 @@ export class PublicationExportService {
 
   // Combine publication and host publication data using the same logic as LivePreview
   private combinePublicationData(publication: Publication, hostPublication?: Publication | null): Publication {
-    if (!hostPublication) {
-      return {
-        ...publication,
-        parentBlocks: publication.parentBlocks || []
-      };
-    }
-
-    // Use the same combinedParentBlocks logic as LivePreview
-    const hostBlocks = hostPublication.parentBlocks || [];
-    const pubBlocks = publication.parentBlocks || [];
-    const allBlocks = hostBlocks.length > 0
-      ? [...hostBlocks.filter(block => block.isGlobal), ...pubBlocks]
-      : pubBlocks;
-
-    // Group blocks by umoorId and prioritize global blocks over local ones
-    const umoorMap = new Map<string, any>();
-    const processedUmoors = new Set<string>();
-    const finalBlocks: any[] = [];
-
-    // First pass: collect all blocks by umoorId, prioritizing global blocks
-    (allBlocks || []).forEach(block => {
-      const umoorId = block.umoorId;
-      if (!umoorMap.has(umoorId)) {
-        umoorMap.set(umoorId, { global: null, local: null });
-      }
-      
-      const umoorData = umoorMap.get(umoorId);
-      if (block.isGlobal) {
-        umoorData.global = block;
-      } else {
-        umoorData.local = block;
-      }
-    });
-
-    // Second pass: select blocks with global priority
-    umoorMap.forEach((umoorData, umoorId) => {
-      // If both global and local exist for same umoor, prioritize global
-      const selectedBlock = umoorData.global || umoorData.local;
-      if (selectedBlock) {
-        finalBlocks.push(selectedBlock);
-        console.log(`🎯 [Export Debug] Selected block for umoor ${umoorId}:`, {
-          umoorName: selectedBlock.umoorName,
-          isGlobal: selectedBlock.isGlobal,
-          priority: umoorData.global ? 'global (prioritized)' : 'local (only option)'
-        });
-      }
-    });
-
-    // Sort final blocks: global umoors first, then local umoors
-    const combinedBlocks = finalBlocks.sort((a, b) => {
-      if (a.isGlobal && !b.isGlobal) return -1;
-      if (!a.isGlobal && b.isGlobal) return 1;
-      return 0;
-    });
+    const combinedBlocks = getCombinedParentBlocks(publication, hostPublication);
 
     return {
       ...publication,
-      parentBlocks: combinedBlocks
+      parentBlocks: combinedBlocks,
     };
   }
 

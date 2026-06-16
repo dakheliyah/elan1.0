@@ -184,15 +184,25 @@ const ParentBlock: React.FC<ParentBlockProps> = ({
             Add Image
           </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onAddChild('menu')}
-            className="flex items-center gap-2"
-          >
-            <Menu size={14} />
-            Add Menu
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Menu size={14} />
+                Add Menu
+                <ChevronDown size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => onAddChild('menu', 'eng')}>
+                <Globe size={14} className="mr-2" />
+                English Menu
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAddChild('menu', 'lud')}>
+                <Languages size={14} className="mr-2" />
+                Lisan ud-Dawat Menu
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Global Toggle - Only show for host locations */}

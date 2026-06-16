@@ -79,7 +79,7 @@ const PublicationEditor = () => {
     const newChild: ContentBlock = {
       id: Date.now().toString(),
       type,
-      language: type === 'text' ? language : undefined,
+      language: type === 'text' || type === 'menu' ? language : undefined,
       data: type === 'text' 
         ? { content: '', language: language || 'eng' }
         : type === 'image'

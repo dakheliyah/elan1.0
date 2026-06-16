@@ -22,7 +22,13 @@ export const ContentBlockRenderer: React.FC<ContentBlockRendererProps> = ({
     case 'image':
       return <ImageBlockRenderer block={block} mode={mode} isLast={isLast} />;
     case 'menu':
-      return <MenuBlockRenderer data={block.data} isPreview={mode === 'preview'} />;
+      return (
+        <MenuBlockRenderer
+          data={block.data}
+          language={block.language}
+          isPreview={mode === 'preview'}
+        />
+      );
     default:
       return null;
   }
